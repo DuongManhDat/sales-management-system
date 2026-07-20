@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS units (
 
 CREATE TABLE IF NOT EXISTS categories (
     id      INTEGER PRIMARY KEY,
-    name    TEXT NOT NULL UNIQUE
+    name    TEXT NOT NULL UNIQUE,
+    status  TEXT NOT NULL DEFAULT 'ACTIVE'   -- ACTIVE | INACTIVE (soft-delete, đồng nhất với units)
 ) STRICT;
 
 -- ============ HÀNG HÓA ============
@@ -134,6 +135,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     product_id  INTEGER NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
     qty         REAL    NOT NULL,
     sale_price  INTEGER NOT NULL,               -- đồng (giá bán tại thời điểm)
+    cost_price  INTEGER NOT NULL DEFAULT 0,     -- đồng (giá vốn tại thời điểm bán — dùng tính lợi nhuận Dashboard)
     amount      INTEGER NOT NULL,               -- = qty * sale_price (đồng)
     CHECK (qty > 0)
 ) STRICT;
@@ -236,10 +238,28 @@ FROM invoices
 WHERE invoice_date >= date('now','-7 days') AND status='COMPLETED'
 GROUP BY thu;
 
--- Top sản phẩm bán chạy
-SELECT p.name, SUM(ii.qty) AS so_luong
-FROM invoice_items ii JOIN products p ON p.id = ii.product_id
-GROUP BY p.id ORDER BY so_luong DESC LIMIT 10;
+-- Top sản phẩm bán chạy (trong ngày :date, theo doanh thu)
+SELECT p.name, p.unit_id, SUM(ii.qty) AS so_luong, SUM(ii.amount) AS doanh_thu
+FROM invoice_items ii
+     JOIN invoices i  ON i.id  = ii.invoice_id
+     JOIN products p  ON p.id  = ii.product_id
+WHERE date(i.invoice_date) = :date AND i.status = 'COMPLETED'
+GROUP BY ii.product_id
+ORDER BY so_luong DESC
+LIMIT 5;
+
+-- Lợi nhuận gộp trong ngày :date
+-- (yêu cầu invoice_items.cost_price đã được ghi khi tạo hóa đơn)
+SELECT SUM(ii.amount - ii.cost_price * ii.qty) AS loi_nhuan_gop
+FROM invoice_items ii
+     JOIN invoices i ON i.id = ii.invoice_id
+WHERE date(i.invoice_date) = :date AND i.status = 'COMPLETED';
+
+-- Hàng sắp hết tồn kho (ngưỡng :threshold = 5 | 10 | 20)
+SELECT p.code, p.name, u.name AS don_vi, p.stock_qty
+FROM products p JOIN units u ON u.id = p.unit_id
+WHERE p.stock_qty <= :threshold AND p.status = 'ACTIVE'
+ORDER BY p.stock_qty ASC;
 ```
 
 > ⚠️ Tránh `SELECT *` trong code thật — liệt kê rõ cột (anti-pattern của skill).
@@ -263,4 +283,28 @@ GROUP BY p.id ORDER BY so_luong DESC LIMIT 10;
 - **Atomic theo nghiệp vụ:** ghi `invoices`+`invoice_items`+trừ `products.stock_qty`+`stock_movements` trong **1 transaction** (xem [architecture.md ADR-002](./architecture.md)).
 - **Bán âm kho:** schema **không** chặn `stock_qty < 0` (theo quyết định nghiệp vụ); chỉ cảnh báo ở tầng Service.
 - **Versioning:** `settings.schema_version` để sau này migrate khi đổi schema (GĐ2).
+- **`invoice_items.cost_price`:** phải được lấy từ `products.cost_price` tại **thời điểm tạo hóa đơn** và lưu vào `invoice_items`; không tính ngược từ `products` sau khi giá vốn đã thay đổi.
+
+---
+
+## 9. Schema Migrations
+
+| Version | Ngày | Thay đổi | Lý do |
+|---------|------|----------|---------|
+| v1.0 | 2026-06-27 | Schema khởi tạo (tất cả bảng) | MVP ban đầu |
+| v1.1 | 2026-07-11 | Thêm `invoice_items.cost_price INTEGER NOT NULL DEFAULT 0` | Yêu cầu tính lợi nhuận gộp cho Dashboard (xem [Dashboard spec §4.1](./specs/phase-1-mvp/dashboard/spec.md)) |
+
+### Migration script v1.0 → v1.1
+
+```sql
+-- Chạy một lần khi nâng phiên bản schema từ v1.0 lên v1.1
+-- Kiểm tra version trước khi chạy: SELECT value FROM settings WHERE key='schema_version';
+
+ALTER TABLE invoice_items ADD COLUMN cost_price INTEGER NOT NULL DEFAULT 0;
+-- Ghi chú: dữ liệu hóa đơn cũ sẽ có cost_price = 0
+-- → lợi nhuận gộp của các đơn cũ sẽ bằng doanh thu (chấp nhận được ở MVP)
+
+UPDATE settings SET value = '2' WHERE key = 'schema_version';
 ```
+
+> ⚠️ `SchemaInitializer` phải kiểm tra `schema_version` khi khởi động và tự động chạy migration script nếu phiên bản DB thấp hơn phiên bản app.
