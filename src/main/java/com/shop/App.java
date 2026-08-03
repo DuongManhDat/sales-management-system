@@ -1,7 +1,8 @@
 package com.shop;
 
-import com.shop.infra.db.SchemaInitializer;
-import com.shop.infra.db.DBConnection;
+import com.shop.util.DBConnection;
+import com.shop.util.GlobalExceptionHandler;
+import com.shop.util.SceneManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,27 +18,23 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         logger.info("Starting Sales Management System...");
         
-        // Initialize database schema
-        SchemaInitializer.initialize();
+        // Set the primary stage for SceneManager
+        SceneManager.setPrimaryStage(primaryStage);
         
         // Load main window
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
-        primaryStage.setTitle("Hệ thống quản lý bán hàng");
-        primaryStage.setScene(new Scene(root, 1024, 768));
-        primaryStage.show();
+        SceneManager.switchScene("/fxml/main.fxml", "Hệ thống quản lý bán hàng");
     }
     
     @Override
     public void stop() throws Exception {
         logger.info("Shutting down application...");
-        DBConnection.closeConnection();
+        DBConnection.close();
         super.stop();
     }
 
     public static void main(String[] args) {
         // Set default uncaught exception handler
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> 
-            logger.error("Uncaught exception in thread " + t.getName(), e));
+        Thread.setDefaultUncaughtExceptionHandler(new GlobalExceptionHandler());
             
         launch(args);
     }
