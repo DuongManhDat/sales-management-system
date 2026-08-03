@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" prefHeight="768.0" prefWidth="1024.0">
+    <center>
+        <Label text="Chào mừng đến với Hệ thống Quản lý Bán hàng" BorderPane.alignment="CENTER">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+    </center>
+</BorderPane>
