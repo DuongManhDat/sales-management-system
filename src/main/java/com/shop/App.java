@@ -1,5 +1,6 @@
 package com.shop;
 
+import com.shop.infra.db.SchemaInitializer;
 import com.shop.util.DBConnection;
 import com.shop.util.GlobalExceptionHandler;
 import com.shop.util.SceneManager;
@@ -18,6 +19,9 @@ public class App extends Application {
     public void start(Stage primaryStage) throws Exception {
         logger.info("Starting Sales Management System...");
         
+        // Khởi tạo DB Schema
+        SchemaInitializer.initialize();
+
         // Set the primary stage for SceneManager
         SceneManager.setPrimaryStage(primaryStage);
         
