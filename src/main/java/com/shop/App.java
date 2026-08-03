@@ -25,8 +25,12 @@ public class App extends Application {
         // Set the primary stage for SceneManager
         SceneManager.setPrimaryStage(primaryStage);
         
-        // Load main window
-        SceneManager.switchScene("/fxml/main.fxml", "Hệ thống quản lý bán hàng");
+        com.shop.dao.AppUserDao dao = new com.shop.dao.AppUserDao();
+        if (dao.findFirst().isPresent()) {
+            SceneManager.switchScene("/fxml/login-view.fxml", "Đăng nhập hệ thống");
+        } else {
+            SceneManager.switchScene("/fxml/setup-view.fxml", "Thiết lập mật khẩu chủ cửa hàng");
+        }
     }
     
     @Override

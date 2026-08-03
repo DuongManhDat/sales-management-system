@@ -69,8 +69,10 @@ CREATE TABLE IF NOT EXISTS stock_movements (
 );
 
 CREATE TABLE IF NOT EXISTS app_user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    password_hash TEXT NOT NULL
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    username      TEXT NOT NULL DEFAULT 'owner',
+    password_hash TEXT NOT NULL,
+    created_at    TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS settings (

@@ -31,7 +31,10 @@ public class DBConnection {
             }
 
             String dbPath = dataDir.getAbsolutePath() + "/shop.db";
-            String url = "jdbc:sqlite:" + dbPath;
+            String url = System.getProperty("db.url");
+            if (url == null) {
+                url = "jdbc:sqlite:" + dbPath;
+            }
 
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(url);
@@ -44,7 +47,7 @@ public class DBConnection {
             config.addDataSourceProperty("busy_timeout", "3000"); // Đợi tối đa 3 giây nếu DB bị lock
 
             dataSource = new HikariDataSource(config);
-            log.info("Đã khởi tạo Database Connection Pool tới: {}", dbPath);
+            log.info("Đã khởi tạo Database Connection Pool tới: {}", url);
         } catch (Exception e) {
             log.error("Lỗi khởi tạo DBConnection", e);
             throw new RuntimeException("Không thể khởi tạo Database Pool", e);
