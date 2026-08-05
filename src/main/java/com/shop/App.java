@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import atlantafx.base.theme.PrimerLight;
 
 public class App extends Application {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
@@ -21,6 +22,9 @@ public class App extends Application {
         
         // Khởi tạo DB Schema
         SchemaInitializer.initialize();
+
+        // Khởi tạo theme AtlantaFX (ví dụ: PrimerLight)
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
 
         // Set the primary stage for SceneManager
         SceneManager.setPrimaryStage(primaryStage);
