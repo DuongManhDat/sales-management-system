@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.LoginController">
+    <padding>
+        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
+    </padding>
+
+    <Label text="Đăng nhập hệ thống">
+        <font>
+            <Font name="System Bold" size="24.0"/>
+        </font>
+    </Label>
+
+    <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu chủ cửa hàng" onAction="#onLoginButtonClick"/>
+    
+    <Label fx:id="errorLabel" textFill="red" visible="false" wrapText="true"/>
+    
+    <Button fx:id="loginButton" text="Đăng nhập" onAction="#onLoginButtonClick" defaultButton="true"/>
+    
+    <ProgressIndicator fx:id="progressIndicator" visible="false"/>
+</VBox>

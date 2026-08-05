@@ -1,0 +1,21 @@
+# Target & Build files
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS & Log files
+.DS_Store
+Thumbs.db
+*.log
+
+# Local agent & config files
+.agents/
+GEMINI.md
+
