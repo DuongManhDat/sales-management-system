@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" prefHeight="768.0" prefWidth="1024.0">
+<?import javafx.scene.layout.HBox?>
+<BorderPane fx:id="mainPane" prefHeight="768.0" prefWidth="1024.0" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.MainController">
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="app-header">
+            <Button onAction="#toggleSidebar" styleClass="flat, title-4" text="☰" />
+            <Label styleClass="title-4" text="Hệ thống Quản lý Bán hàng" />
+        </HBox>
+    </top>
+    <left>
+        <VBox fx:id="sidebar" prefWidth="220.0" spacing="4.0" styleClass="sidebar" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="12.0" right="12.0" top="20.0" />
+            </padding>
+            <Button maxWidth="Infinity" onAction="#showDashboard" styleClass="sidebar-btn" text="⊞   Dashboard" />
+            <Button maxWidth="Infinity" onAction="#showProducts" styleClass="sidebar-btn" text="📦   Hàng hóa" />
+            <Button maxWidth="Infinity" onAction="#showCustomers" styleClass="sidebar-btn" text="👥   Khách hàng" />
+            <Button maxWidth="Infinity" onAction="#showPurchases" styleClass="sidebar-btn" text="🛒   Mua hàng" />
+            <Button maxWidth="Infinity" onAction="#showSales" styleClass="sidebar-btn" text="🛍️   Bán hàng" />
+            <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text="⚙️   Thiết lập" />
+        </VBox>
+    </left>
     <center>
         <Label text="Chào mừng đến với Hệ thống Quản lý Bán hàng" BorderPane.alignment="CENTER">
             <font>
