@@ -67,7 +67,13 @@ public class MainController {
 
     @FXML
     private void showCustomers() {
-        showPlaceholder("Khách hàng");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/customer-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load customer list view", e);
+        }
     }
 
     @FXML
