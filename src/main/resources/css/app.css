@@ -123,3 +123,64 @@
     -fx-border-color: transparent transparent #F7F6F3 transparent;
     -fx-border-width: 1;
 }
+
+/* --- Added from Mua Hang UI Plan --- */
+.root {
+    -fx-background-color: #FBFBFA;
+    -fx-font-family: 'Segoe UI', 'San Francisco', sans-serif;
+    -fx-text-fill: #111111;
+}
+
+.button-primary {
+    -fx-background-color: #111111;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+.button-primary:hover {
+    -fx-background-color: #333333;
+}
+
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #EAEAEA;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px;
+}
+.text-field:focused {
+    -fx-border-color: #111111;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.table-view .column-header-background {
+    -fx-background-color: #F7F6F3;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #EAEAEA;
+}
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 12px;
+}
+.table-row-cell {
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #EAEAEA;
+    -fx-background-color: #FFFFFF;
+}
+.table-row-cell:selected {
+    -fx-background-color: #F7F6F3;
+    -fx-text-fill: #111111;
+}
+
+.bento-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #EAEAEA;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 24px;
+}
