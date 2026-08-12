@@ -85,7 +85,6 @@ public class CustomerDetailController {
             switch (currentCustomer.getGender()) {
                 case MALE: genderStr = "Nam"; break;
                 case FEMALE: genderStr = "Nữ"; break;
-                case OTHER: genderStr = "Khác"; break;
             }
         }
         lblGender.setText(genderStr);

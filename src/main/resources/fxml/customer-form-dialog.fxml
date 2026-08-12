@@ -38,7 +38,6 @@
                 <FXCollections fx:factory="observableArrayList">
                     <Gender fx:value="MALE"/>
                     <Gender fx:value="FEMALE"/>
-                    <Gender fx:value="OTHER"/>
                 </FXCollections>
             </items>
         </ComboBox>

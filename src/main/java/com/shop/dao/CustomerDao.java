@@ -78,7 +78,7 @@ public class CustomerDao {
     }
 
     public void update(Customer customer) throws SQLException {
-        String query = "UPDATE customers SET name = ?, phone = ?, email = ?, date_of_birth = ?, gender = ?, address = ?, note = ? WHERE id = ?";
+        String query = "UPDATE customers SET name = ?, phone = ?, email = ?, date_of_birth = ?, gender = ?, address = ?, note = ?, is_active = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, customer.getName());
@@ -88,7 +88,8 @@ public class CustomerDao {
             pstmt.setString(5, customer.getGender() != null ? customer.getGender().name() : null);
             pstmt.setString(6, customer.getAddress());
             pstmt.setString(7, customer.getNote());
-            pstmt.setInt(8, customer.getId());
+            pstmt.setInt(8, customer.isActive() ? 1 : 0);
+            pstmt.setInt(9, customer.getId());
             pstmt.executeUpdate();
         }
     }
