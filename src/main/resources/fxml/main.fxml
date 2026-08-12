@@ -8,10 +8,16 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.layout.HBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
 <BorderPane fx:id="mainPane" prefHeight="768.0" prefWidth="1024.0" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.MainController">
     <top>
         <HBox alignment="CENTER_LEFT" spacing="15.0" styleClass="app-header">
-            <Button onAction="#toggleSidebar" styleClass="flat, title-4" text="☰" />
+            <Button onAction="#toggleSidebar" styleClass="flat, title-4">
+                <graphic>
+                    <FontIcon iconLiteral="fth-menu" />
+                </graphic>
+            </Button>
             <Label styleClass="title-4" text="Hệ thống Quản lý Bán hàng" />
         </HBox>
     </top>
@@ -20,12 +26,36 @@
             <padding>
                 <Insets bottom="20.0" left="12.0" right="12.0" top="20.0" />
             </padding>
-            <Button maxWidth="Infinity" onAction="#showDashboard" styleClass="sidebar-btn" text="⊞   Dashboard" />
-            <Button maxWidth="Infinity" onAction="#showProducts" styleClass="sidebar-btn" text="📦   Hàng hóa" />
-            <Button maxWidth="Infinity" onAction="#showCustomers" styleClass="sidebar-btn" text="👥   Khách hàng" />
-            <Button maxWidth="Infinity" onAction="#showPurchases" styleClass="sidebar-btn" text="🛒   Mua hàng" />
-            <Button maxWidth="Infinity" onAction="#showSales" styleClass="sidebar-btn" text="🛍️   Bán hàng" />
-            <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text="⚙️   Thiết lập" />
+            <Button maxWidth="Infinity" onAction="#showDashboard" styleClass="sidebar-btn" text=" Dashboard">
+                <graphic>
+                    <FontIcon iconLiteral="fth-grid" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showProducts" styleClass="sidebar-btn" text=" Hàng hóa">
+                <graphic>
+                    <FontIcon iconLiteral="fth-box" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showCustomers" styleClass="sidebar-btn" text=" Khách hàng">
+                <graphic>
+                    <FontIcon iconLiteral="fth-users" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showPurchases" styleClass="sidebar-btn" text=" Mua hàng">
+                <graphic>
+                    <FontIcon iconLiteral="fth-shopping-cart" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showSales" styleClass="sidebar-btn" text=" Bán hàng">
+                <graphic>
+                    <FontIcon iconLiteral="fth-shopping-bag" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text=" Thiết lập">
+                <graphic>
+                    <FontIcon iconLiteral="fth-settings" />
+                </graphic>
+            </Button>
         </VBox>
     </left>
     <center>
