@@ -20,6 +20,9 @@
     </HBox>
 
     <TableView fx:id="unitTable" VBox.vgrow="ALWAYS">
+        <placeholder>
+            <Label text="Không có dữ liệu"/>
+        </placeholder>
         <columns>
             <TableColumn fx:id="nameColumn" text="Tên đơn vị" prefWidth="200" />
             <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100" />

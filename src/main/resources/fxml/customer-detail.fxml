@@ -76,6 +76,9 @@
                 <Label text="Lịch sử hóa đơn" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
                 
                 <TableView fx:id="invoiceTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+                    <placeholder>
+                        <Label text="Không có dữ liệu"/>
+                    </placeholder>
                     <columns>
                         <TableColumn fx:id="colInvoiceCode" text="Mã HĐ" prefWidth="120"/>
                         <TableColumn fx:id="colInvoiceDate" text="Ngày tạo" prefWidth="150"/>

@@ -27,6 +27,9 @@
         <ComboBox fx:id="customerComboBox" promptText="Chọn khách hàng..." maxWidth="Infinity" styleClass="flat-combo" />
         
         <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+            <placeholder>
+                <Label text="Không có dữ liệu"/>
+            </placeholder>
             <columns>
                 <TableColumn fx:id="colProductName" text="Sản phẩm" prefWidth="150" />
                 <TableColumn fx:id="colQty" text="SL" prefWidth="50" />
