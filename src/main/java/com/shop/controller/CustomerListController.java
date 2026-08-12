@@ -131,7 +131,33 @@ public class CustomerListController {
     }
 
     private void handleDetail(Customer customer) {
-        System.out.println("Detail for: " + customer.getName());
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/customer-detail.fxml"));
+            javafx.scene.Parent view = loader.load();
+            
+            CustomerDetailController controller = loader.getController();
+            
+            // The root of customer-list is a VBox. Its parent is the BorderPane (mainPane).
+            javafx.scene.layout.BorderPane mainPane = (javafx.scene.layout.BorderPane) searchField.getScene().getRoot();
+            javafx.scene.Node previousView = mainPane.getCenter();
+            
+            controller.initData(customer, () -> {
+                // handleBack
+                mainPane.setCenter(previousView);
+                loadData(); // reload just in case
+            }, () -> {
+                // handleEdit
+                handleEdit(customer);
+                controller.initData(customer, () -> {
+                    mainPane.setCenter(previousView);
+                    loadData();
+                }, () -> handleEdit(customer)); // re-init to refresh data after edit
+            });
+            
+            mainPane.setCenter(view);
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleEdit(Customer customer) {

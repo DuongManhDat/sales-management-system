@@ -60,6 +60,21 @@ public class InvoiceDao {
         return invoices;
     }
 
+    public List<Invoice> findByCustomerId(int customerId) throws SQLException {
+        List<Invoice> invoices = new ArrayList<>();
+        String query = "SELECT * FROM invoices WHERE customer_id = ? ORDER BY id DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    invoices.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+        return invoices;
+    }
+
     public void updatePaymentStatus(Connection conn, int invoiceId, long newPaid, long newDebt, String newStatus) throws SQLException {
         String query = "UPDATE invoices SET paid = ?, debt = ?, status = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
