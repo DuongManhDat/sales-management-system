@@ -25,13 +25,21 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE TABLE IF NOT EXISTS customers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    phone TEXT,
-    address TEXT,
-    status INTEGER DEFAULT 1
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    code          TEXT    NOT NULL UNIQUE,
+    name          TEXT    NOT NULL,
+    phone         TEXT    NOT NULL UNIQUE,
+    email         TEXT,
+    date_of_birth TEXT,
+    gender        TEXT,
+    address       TEXT,
+    note          TEXT,
+    is_active     INTEGER NOT NULL DEFAULT 1,
+    created_at    TEXT    NOT NULL
 );
-
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_code  ON customers(code);
+CREATE INDEX        IF NOT EXISTS idx_customers_name  ON customers(name);
 CREATE TABLE IF NOT EXISTS invoices (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     code          TEXT    NOT NULL UNIQUE,
