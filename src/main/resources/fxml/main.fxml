@@ -51,6 +51,11 @@
                     <FontIcon iconLiteral="fth-shopping-bag" />
                 </graphic>
             </Button>
+            <Button maxWidth="Infinity" onAction="#showInvoices" styleClass="sidebar-btn" text=" Hóa đơn">
+                <graphic>
+                    <FontIcon iconLiteral="fth-file-text" />
+                </graphic>
+            </Button>
             <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text=" Thiết lập">
                 <graphic>
                     <FontIcon iconLiteral="fth-settings" />
