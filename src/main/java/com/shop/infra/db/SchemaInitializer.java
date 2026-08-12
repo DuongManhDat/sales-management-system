@@ -35,6 +35,21 @@ public class SchemaInitializer {
             }
             logger.info("Database schema initialized successfully.");
             
+            // Execute V2 schema
+            InputStream isV2 = SchemaInitializer.class.getResourceAsStream("/db/migration/V2__MuaHang_Schema.sql");
+            if (isV2 != null) {
+                String sqlV2 = new BufferedReader(new InputStreamReader(isV2))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+                String[] statementsV2 = sqlV2.split(";");
+                for (String s : statementsV2) {
+                    if (!s.trim().isEmpty()) {
+                        stmt.execute(s);
+                    }
+                }
+                logger.info("V2 Mua Hang Schema initialized successfully.");
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to initialize database schema", e);
         }
