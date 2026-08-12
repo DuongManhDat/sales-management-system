@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<?import com.shop.model.Gender?>
+
+<VBox spacing="20" style="-fx-background-color: #FFFFFF; -fx-padding: 32;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerFormController">
+    
+    <Label fx:id="lblTitle" text="Thêm khách hàng mới" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+
+    <GridPane hgap="16" vgap="16">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+        
+        <Label text="Họ tên (*):" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <TextField fx:id="txtName" promptText="Nguyễn Văn A" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="flat-input"/>
+        
+        <Label text="Điện thoại (*):" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <VBox spacing="4" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <TextField fx:id="txtPhone" promptText="0987654321" styleClass="flat-input"/>
+            <Label fx:id="lblPhoneError" text="Số điện thoại phải 10 chữ số" visible="false" managed="false" style="-fx-text-fill: #DC2626; -fx-font-size: 11px;"/>
+        </VBox>
+
+        <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <TextField fx:id="txtEmail" promptText="email@example.com" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="flat-input"/>
+        
+        <Label text="Ngày sinh:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <DatePicker fx:id="dpDateOfBirth" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="flat-input"/>
+        
+        <Label text="Giới tính:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <ComboBox fx:id="comboGender" GridPane.rowIndex="4" GridPane.columnIndex="1" styleClass="flat-input">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <Gender fx:value="MALE"/>
+                    <Gender fx:value="FEMALE"/>
+                    <Gender fx:value="OTHER"/>
+                </FXCollections>
+            </items>
+        </ComboBox>
+        
+        <Label text="Địa chỉ:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <TextField fx:id="txtAddress" promptText="Số nhà, đường, quận/huyện..." GridPane.rowIndex="5" GridPane.columnIndex="1" styleClass="flat-input"/>
+        
+        <Label text="Ghi chú:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <TextArea fx:id="txtNote" prefRowCount="3" promptText="Ghi chú thêm..." GridPane.rowIndex="6" GridPane.columnIndex="1" styleClass="flat-input"/>
+        
+        <Label text="Trạng thái:" GridPane.rowIndex="7" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+        <CheckBox fx:id="chkActive" text="Hoạt động" selected="true" GridPane.rowIndex="7" GridPane.columnIndex="1" style="-fx-text-fill: #111111;"/>
+    </GridPane>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT" style="-fx-padding: 16 0 0 0;">
+        <Button text="Hủy" styleClass="btn-secondary" onAction="#handleCancel"/>
+        <Button fx:id="btnSave" text="Lưu" styleClass="btn-primary" onAction="#handleSave"/>
+    </HBox>
+</VBox>

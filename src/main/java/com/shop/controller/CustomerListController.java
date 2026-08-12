@@ -117,8 +117,7 @@ public class CustomerListController {
 
     @FXML
     private void handleAdd() {
-        // Open Form Dialog
-        System.out.println("Add Customer clicked");
+        openFormDialog(null);
     }
 
     @FXML
@@ -136,6 +135,24 @@ public class CustomerListController {
     }
 
     private void handleEdit(Customer customer) {
-        System.out.println("Edit for: " + customer.getName());
+        openFormDialog(customer);
+    }
+
+    private void openFormDialog(Customer customer) {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/customer-form-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            
+            CustomerFormController controller = loader.getController();
+            controller.initData(customer, customerService, this::loadData);
+            
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            stage.setTitle(customer == null ? "Thêm khách hàng" : "Sửa khách hàng");
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }
