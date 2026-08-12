@@ -78,7 +78,12 @@ public class CustomerDetailController {
         lblCode.setText(currentCustomer.getCode());
         lblPhone.setText(currentCustomer.getPhone());
         lblEmail.setText(currentCustomer.getEmail() != null ? currentCustomer.getEmail() : "-");
-        lblDateOfBirth.setText(currentCustomer.getDateOfBirth() != null ? currentCustomer.getDateOfBirth().toString() : "-");
+        if (currentCustomer.getDateOfBirth() != null) {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            lblDateOfBirth.setText(currentCustomer.getDateOfBirth().format(formatter));
+        } else {
+            lblDateOfBirth.setText("-");
+        }
         
         String genderStr = "-";
         if (currentCustomer.getGender() != null) {

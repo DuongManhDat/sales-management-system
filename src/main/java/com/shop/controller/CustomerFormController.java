@@ -39,6 +39,27 @@ public class CustomerFormController {
         txtPhone.textProperty().bindBidirectional(viewModel.phoneProperty());
         txtEmail.textProperty().bindBidirectional(viewModel.emailProperty());
         dpDateOfBirth.valueProperty().bindBidirectional(viewModel.dateOfBirthProperty());
+        dpDateOfBirth.setConverter(new javafx.util.StringConverter<java.time.LocalDate>() {
+            private final java.time.format.DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            @Override
+            public String toString(java.time.LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                }
+                return "";
+            }
+            @Override
+            public java.time.LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    try {
+                        return java.time.LocalDate.parse(string, dateFormatter);
+                    } catch (Exception e) {
+                        return null;
+                    }
+                }
+                return null;
+            }
+        });
         comboGender.valueProperty().bindBidirectional(viewModel.genderProperty());
         txtAddress.textProperty().bindBidirectional(viewModel.addressProperty());
         txtNote.textProperty().bindBidirectional(viewModel.noteProperty());
