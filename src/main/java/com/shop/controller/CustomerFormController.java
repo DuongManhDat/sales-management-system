@@ -68,8 +68,16 @@ public class CustomerFormController {
             closeStage();
         });
         saveTask.setOnFailed(e -> {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Lỗi khi lưu khách hàng: " + saveTask.getException().getMessage());
-            alert.show();
+            Throwable ex = saveTask.getException();
+            String msg = ex.getMessage();
+            if (msg != null && msg.contains("UNIQUE constraint failed: customers.phone")) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Số điện thoại này đã được đăng ký cho khách hàng khác. Vui lòng kiểm tra lại.");
+                alert.setHeaderText("Số điện thoại trùng lặp");
+                alert.show();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Lỗi khi lưu khách hàng: " + msg);
+                alert.show();
+            }
         });
         
         new Thread(saveTask).start();
