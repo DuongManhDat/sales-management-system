@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS units (
 
 CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    status INTEGER DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS products (
@@ -24,24 +25,33 @@ CREATE TABLE IF NOT EXISTS products (
 );
 
 CREATE TABLE IF NOT EXISTS customers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    phone TEXT,
-    address TEXT,
-    status INTEGER DEFAULT 1
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    code          TEXT    NOT NULL UNIQUE,
+    name          TEXT    NOT NULL,
+    phone         TEXT    NOT NULL UNIQUE,
+    email         TEXT,
+    date_of_birth TEXT,
+    gender        TEXT,
+    address       TEXT,
+    note          TEXT,
+    is_active     INTEGER NOT NULL DEFAULT 1,
+    created_at    TEXT    NOT NULL
 );
-
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_code  ON customers(code);
+CREATE INDEX        IF NOT EXISTS idx_customers_name  ON customers(name);
 CREATE TABLE IF NOT EXISTS invoices (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    code TEXT NOT NULL UNIQUE,
-    customer_id INTEGER,
-    invoice_date TEXT NOT NULL,
-    subtotal INTEGER DEFAULT 0,
-    discount INTEGER DEFAULT 0,
-    total INTEGER DEFAULT 0,
-    paid INTEGER DEFAULT 0,
-    status INTEGER DEFAULT 1,
-    FOREIGN KEY(customer_id) REFERENCES customers(id)
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    code          TEXT    NOT NULL UNIQUE,
+    customer_id   INTEGER NOT NULL REFERENCES customers(id),
+    invoice_date  TEXT    NOT NULL,
+    subtotal      INTEGER NOT NULL,
+    discount_pct  REAL    NOT NULL DEFAULT 0,
+    discount_amt  INTEGER NOT NULL DEFAULT 0,
+    total         INTEGER NOT NULL,
+    paid          INTEGER NOT NULL DEFAULT 0,
+    debt          INTEGER NOT NULL DEFAULT 0,
+    status        TEXT    NOT NULL DEFAULT 'PAID'
 );
 
 CREATE TABLE IF NOT EXISTS invoice_items (
@@ -56,16 +66,23 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 );
 
 CREATE TABLE IF NOT EXISTS stock_movements (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    product_id INTEGER NOT NULL,
-    type TEXT NOT NULL,
-    qty_change INTEGER NOT NULL,
-    stock_after INTEGER NOT NULL,
-    ref_type TEXT,
-    ref_id TEXT,
-    created_at TEXT NOT NULL,
-    note TEXT,
-    FOREIGN KEY(product_id) REFERENCES products(id)
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id    INTEGER NOT NULL REFERENCES products(id),
+    type          TEXT    NOT NULL,
+    qty_change    INTEGER NOT NULL,
+    stock_after   INTEGER NOT NULL,
+    ref_type      TEXT    NOT NULL,
+    ref_id        INTEGER NOT NULL,
+    created_at    TEXT    NOT NULL,
+    note          TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_id    INTEGER NOT NULL REFERENCES invoices(id),
+    amount        INTEGER NOT NULL,
+    payment_date  TEXT    NOT NULL,
+    note          TEXT
 );
 
 CREATE TABLE IF NOT EXISTS app_user (

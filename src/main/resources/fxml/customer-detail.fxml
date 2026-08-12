@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="24" style="-fx-background-color: #F7F6F3; -fx-padding: 32;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerDetailController">
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <Button text="← Quay lại" styleClass="btn-secondary" onAction="#handleBack"/>
+        <Label fx:id="lblCustomerName" text="Tên khách hàng" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Sửa" styleClass="btn-secondary" onAction="#handleEdit"/>
+    </HBox>
+
+    <HBox spacing="24" VBox.vgrow="ALWAYS">
+        <!-- Left: Customer Info -->
+        <VBox spacing="16" prefWidth="300" style="-fx-background-color: #FFFFFF; -fx-padding: 24; -fx-border-color: #EAEAEA; -fx-border-width: 1; -fx-background-radius: 4; -fx-border-radius: 4;">
+            <Label text="Thông tin khách hàng" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+            
+            <GridPane hgap="8" vgap="16">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="80" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+                
+                <Label text="Mã KH:" GridPane.rowIndex="0" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblCode" text="KH000001" GridPane.rowIndex="0" GridPane.columnIndex="1" style="-fx-font-weight: bold;"/>
+                
+                <Label text="Điện thoại:" GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblPhone" text="0987654321" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                
+                <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblEmail" text="-" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                
+                <Label text="Ngày sinh:" GridPane.rowIndex="3" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblDateOfBirth" text="-" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                
+                <Label text="Giới tính:" GridPane.rowIndex="4" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblGender" text="-" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                
+                <Label text="Địa chỉ:" GridPane.rowIndex="5" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblAddress" text="-" GridPane.rowIndex="5" GridPane.columnIndex="1" wrapText="true"/>
+                
+                <Label text="Trạng thái:" GridPane.rowIndex="6" GridPane.columnIndex="0" style="-fx-text-fill: #555555;"/>
+                <Label fx:id="lblStatus" text="Hoạt động" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator style="-fx-padding: 8 0 8 0;"/>
+            
+            <Label text="Ghi chú:" style="-fx-text-fill: #555555;"/>
+            <Label fx:id="lblNote" text="-" wrapText="true" style="-fx-text-fill: #111111;"/>
+        </VBox>
+
+        <!-- Right: Stats & Invoices -->
+        <VBox spacing="24" HBox.hgrow="ALWAYS">
+            
+            <!-- Stats Cards -->
+            <HBox spacing="16">
+                <!-- Total Sales -->
+                <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 24; -fx-border-color: #EAEAEA; -fx-border-width: 1; -fx-background-radius: 4; -fx-border-radius: 4;">
+                    <Label text="Tổng bán" style="-fx-text-fill: #555555;"/>
+                    <Label fx:id="lblTotalSales" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+                </VBox>
+                <!-- Debt -->
+                <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 24; -fx-border-color: #EAEAEA; -fx-border-width: 1; -fx-background-radius: 4; -fx-border-radius: 4;">
+                    <Label text="Công nợ" style="-fx-text-fill: #555555;"/>
+                    <Label fx:id="lblTotalDebt" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #DC2626;"/>
+                </VBox>
+            </HBox>
+
+            <!-- Invoice History -->
+            <VBox spacing="16" VBox.vgrow="ALWAYS" style="-fx-background-color: #FFFFFF; -fx-padding: 24; -fx-border-color: #EAEAEA; -fx-border-width: 1; -fx-background-radius: 4; -fx-border-radius: 4;">
+                <Label text="Lịch sử hóa đơn" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+                
+                <TableView fx:id="invoiceTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+                    <columns>
+                        <TableColumn fx:id="colInvoiceCode" text="Mã HĐ" prefWidth="120"/>
+                        <TableColumn fx:id="colInvoiceDate" text="Ngày tạo" prefWidth="150"/>
+                        <TableColumn fx:id="colTotal" text="Tổng tiền" prefWidth="120"/>
+                        <TableColumn fx:id="colPaid" text="Đã trả" prefWidth="120"/>
+                        <TableColumn fx:id="colDebt" text="Còn nợ" prefWidth="120"/>
+                        <TableColumn fx:id="colInvoiceStatus" text="Trạng thái" prefWidth="120"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

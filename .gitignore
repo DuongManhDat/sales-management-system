@@ -18,4 +18,6 @@ Thumbs.db
 # Local agent & config files
 .agents/
 GEMINI.md
-
+skills-lock.json
+skills.json
+.gitignore
