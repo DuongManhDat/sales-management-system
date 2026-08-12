@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<HBox spacing="10" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PosController" styleClass="pos-root">
+    
+    <!-- Left Panel: Product Search & List -->
+    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="pos-panel">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Tìm kiếm sản phẩm:" styleClass="title-4"/>
+            <TextField fx:id="searchProductField" promptText="Mã hoặc tên sản phẩm..." HBox.hgrow="ALWAYS" styleClass="search-field" />
+        </HBox>
+        
+        <ListView fx:id="productListView" VBox.vgrow="ALWAYS" styleClass="flat-list" />
+    </VBox>
+
+    <!-- Right Panel: Cart & Checkout -->
+    <VBox spacing="10" prefWidth="400" styleClass="pos-panel">
+        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        
+        <Label text="Khách hàng:" styleClass="title-4" />
+        <ComboBox fx:id="customerComboBox" promptText="Chọn khách hàng..." maxWidth="Infinity" styleClass="flat-combo" />
+        
+        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+            <columns>
+                <TableColumn fx:id="colProductName" text="Sản phẩm" prefWidth="150" />
+                <TableColumn fx:id="colQty" text="SL" prefWidth="50" />
+                <TableColumn fx:id="colPrice" text="Đơn giá" prefWidth="80" />
+                <TableColumn fx:id="colAmount" text="Thành tiền" prefWidth="100" />
+            </columns>
+        </TableView>
+
+        <GridPane hgap="10" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="40"/>
+                <ColumnConstraints percentWidth="60" halignment="RIGHT"/>
+            </columnConstraints>
+            
+            <Label text="Tổng tiền hàng:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-muted"/>
+            <Label fx:id="lblSubtotal" text="0" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="text-bold"/>
+
+            <Label text="Khách cần trả:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="title-3"/>
+            <Label fx:id="lblTotal" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="title-3, text-primary"/>
+
+            <Label text="Khách thanh toán:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+            <TextField fx:id="txtCustomerPaid" text="0" GridPane.rowIndex="2" GridPane.columnIndex="1" alignment="CENTER_RIGHT" styleClass="flat-input"/>
+
+            <Label text="Tiền thừa/Nợ:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+            <Label fx:id="lblChange" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="text-bold"/>
+        </GridPane>
+
+        <Button text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" styleClass="btn-checkout" prefHeight="50">
+            <graphic>
+                <FontIcon iconLiteral="fth-check-circle" />
+            </graphic>
+        </Button>
+    </VBox>
+</HBox>

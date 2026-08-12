@@ -77,7 +77,24 @@ public class MainController {
 
     @FXML
     private void showSales() {
-        showPlaceholder("Bán hàng");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/pos-view.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load pos view", e);
+        }
+    }
+
+    @FXML
+    private void showInvoices() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/invoice-list-view.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load invoice list view", e);
+        }
     }
 
     @FXML
