@@ -16,7 +16,7 @@
 
     <HBox spacing="10" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="Tìm nhóm hàng..." HBox.hgrow="ALWAYS" />
-        <Button text="+ Thêm nhóm hàng" onAction="#handleAddCategory" />
+        <Button text="+ Thêm nhóm hàng" onAction="#handleAddCategory" styleClass="accent" />
     </HBox>
 
     <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS">

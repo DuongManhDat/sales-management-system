@@ -10,6 +10,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.Optional;
 
@@ -50,11 +51,14 @@ public class CategoryTabController {
 
     private void setupActionColumn() {
         actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button editBtn = new Button("✏️ Sửa");
-            private final Button deleteBtn = new Button("🗑️ Xóa");
+            private final Button editBtn = new Button(" Sửa", new FontIcon("fth-edit-2"));
+            private final Button deleteBtn = new Button(" Xóa", new FontIcon("fth-trash-2"));
             private final HBox pane = new HBox(5, editBtn, deleteBtn);
 
             {
+                editBtn.getStyleClass().addAll("button", "flat", "accent");
+                deleteBtn.getStyleClass().addAll("button", "flat", "danger");
+
                 editBtn.setOnAction(event -> {
                     Category category = getTableView().getItems().get(getIndex());
                     handleEditCategory(category);

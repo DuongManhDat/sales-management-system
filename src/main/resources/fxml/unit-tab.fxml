@@ -16,7 +16,7 @@
 
     <HBox spacing="10" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="Tìm đơn vị..." HBox.hgrow="ALWAYS" />
-        <Button text="+ Thêm đơn vị" onAction="#handleAddUnit" />
+        <Button text="+ Thêm đơn vị" onAction="#handleAddUnit" styleClass="accent" />
     </HBox>
 
     <TableView fx:id="unitTable" VBox.vgrow="ALWAYS">
