@@ -20,6 +20,9 @@
     </HBox>
     
     <TableView fx:id="invoiceTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+        <placeholder>
+            <Label text="Không có dữ liệu"/>
+        </placeholder>
         <columns>
             <TableColumn fx:id="colCode" text="Mã HĐ" prefWidth="120" />
             <TableColumn fx:id="colDate" text="Ngày" prefWidth="150" />
