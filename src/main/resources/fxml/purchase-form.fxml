@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="24" style="-fx-background-color: #FBFBFA;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PurchaseFormController">
+    <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Button text="← Quay lại" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: #787774; -fx-cursor: hand;"/>
+        <Label text="TẠO PHIẾU NHẬP MỚI" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <GridPane hgap="24" vgap="16" styleClass="bento-card">
+        <Label text="Mã phiếu:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-text-fill: #787774;" />
+        <TextField fx:id="txtCode" disable="true" text="PN_AUTO" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Ngày nhập:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-text-fill: #787774;" />
+        <DatePicker fx:id="datePicker" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+        <Label text="Nhà cung cấp:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-text-fill: #787774;" />
+        <ComboBox fx:id="cbSupplier" promptText="Chọn NCC..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        
+        <Label text="Ghi chú:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-text-fill: #787774;" />
+        <TextField fx:id="txtNote" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.columnSpan="3" />
+    </GridPane>
+
+    <VBox spacing="12" styleClass="bento-card" VBox.vgrow="ALWAYS">
+        <Label text="DANH SÁCH HÀNG NHẬP" style="-fx-font-weight: bold;" />
+        <TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn text="Sản phẩm" prefWidth="300" />
+                <TableColumn text="Số lượng" prefWidth="100" />
+                <TableColumn text="Giá nhập (đ)" prefWidth="150" />
+                <TableColumn text="Thành tiền" prefWidth="150" />
+                <TableColumn text="" prefWidth="50" />
+            </columns>
+        </TableView>
+        <Button text="+ Thêm dòng sản phẩm" onAction="#handleAddLine" style="-fx-background-color: #F7F6F3; -fx-text-fill: #111111; -fx-border-color: #EAEAEA; -fx-border-radius: 4px;" />
+    </VBox>
+
+    <HBox alignment="CENTER_RIGHT" spacing="16" styleClass="bento-card">
+        <VBox alignment="CENTER_RIGHT" spacing="8">
+            <HBox spacing="16" alignment="CENTER_RIGHT"><Label text="TỔNG NHẬP:" style="-fx-text-fill: #787774;"/><Label fx:id="lblTotal" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 16px;"/></HBox>
+            <HBox spacing="16" alignment="CENTER_RIGHT"><Label text="Tiền đã trả NCC:" style="-fx-text-fill: #787774;"/><TextField fx:id="txtPaid" prefWidth="150" alignment="CENTER_RIGHT"/></HBox>
+            <HBox spacing="16" alignment="CENTER_RIGHT"><Label text="Còn nợ NCC:" style="-fx-text-fill: #787774;"/><Label fx:id="lblDebt" text="0 đ" style="-fx-font-weight: bold;"/></HBox>
+            <HBox spacing="16" alignment="CENTER_RIGHT" style="-fx-padding: 16 0 0 0;">
+                <Button text="Hủy" onAction="#handleBack" style="-fx-background-color: transparent; -fx-border-color: #EAEAEA; -fx-padding: 8 24; -fx-border-radius: 4px;" />
+                <Button text="Lưu phiếu nhập" onAction="#handleSave" styleClass="button-primary" style="-fx-padding: 8 32;" />
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>

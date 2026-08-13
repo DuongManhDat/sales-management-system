@@ -78,7 +78,13 @@ public class MainController {
 
     @FXML
     private void showPurchases() {
-        showPlaceholder("Mua hàng");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/purchase-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load purchase list view", e);
+        }
     }
 
     @FXML

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="20" styleClass="bento-card" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PurchaseListController">
+    <padding>
+        <Insets top="24" right="32" bottom="24" left="32"/>
+    </padding>
+
+    <!-- Toolbar -->
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label text="MUA HÀNG" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <TextField fx:id="searchField" promptText="Tìm mã phiếu / NCC..." prefWidth="250" />
+        <ComboBox fx:id="statusFilter" prefWidth="150" promptText="Trạng thái" />
+        <Button text="+ Tạo phiếu nhập" styleClass="button-primary" onAction="#handleCreatePurchase" />
+    </HBox>
+
+    <!-- Table -->
+    <TableView fx:id="purchaseTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colCode" text="Mã phiếu" prefWidth="120" />
+            <TableColumn fx:id="colDate" text="Ngày nhập" prefWidth="120" />
+            <TableColumn fx:id="colSupplier" text="Nhà cung cấp" prefWidth="250" />
+            <TableColumn fx:id="colTotal" text="Tổng nhập" prefWidth="150" />
+            <TableColumn fx:id="colDebt" text="Còn nợ" prefWidth="150" />
+            <TableColumn fx:id="colAction" text="Thao tác" prefWidth="100" />
+        </columns>
+    </TableView>
+</VBox>
