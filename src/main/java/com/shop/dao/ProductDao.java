@@ -58,6 +58,7 @@ public class ProductDao {
         p.setUnitId(rs.getInt("unit_id"));
         p.setCategoryId(rs.getInt("category_id"));
 
+        p.setCostPrice(rs.getLong("cost_price"));
         p.setSalePrice(rs.getLong("sale_price"));
         p.setStockQty(rs.getInt("stock_qty"));
         p.setStatus(rs.getInt("status"));

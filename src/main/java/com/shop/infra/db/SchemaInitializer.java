@@ -50,6 +50,26 @@ public class SchemaInitializer {
                 logger.info("V2 Mua Hang Schema initialized successfully.");
             }
             
+            // Execute V3 schema
+            InputStream isV3 = SchemaInitializer.class.getResourceAsStream("/db/migration/V3__Dashboard_Schema.sql");
+            if (isV3 != null) {
+                String sqlV3 = new BufferedReader(new InputStreamReader(isV3))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+                String[] statementsV3 = sqlV3.split(";");
+                for (String s : statementsV3) {
+                    if (!s.trim().isEmpty()) {
+                        try {
+                            stmt.execute(s);
+                        } catch (Exception ex) {
+                            // Bỏ qua lỗi duplicate column name nếu đã chạy rồi
+                            logger.warn("Migration V3 warning: " + ex.getMessage());
+                        }
+                    }
+                }
+                logger.info("V3 Dashboard Schema initialized successfully.");
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to initialize database schema", e);
         }

@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     product_id INTEGER NOT NULL,
     qty INTEGER NOT NULL,
     sale_price INTEGER NOT NULL,
+    cost_price INTEGER NOT NULL DEFAULT 0,
     amount INTEGER NOT NULL,
     FOREIGN KEY(invoice_id) REFERENCES invoices(id),
     FOREIGN KEY(product_id) REFERENCES products(id)

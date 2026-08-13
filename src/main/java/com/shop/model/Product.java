@@ -7,6 +7,7 @@ public class Product {
     private Integer unitId;
     private Integer categoryId;
 
+    private long costPrice;
     private long salePrice;
     private int stockQty;
     private int status;
@@ -27,6 +28,9 @@ public class Product {
     public void setCategoryId(Integer categoryId) { this.categoryId = categoryId; }
     
 
+    
+    public long getCostPrice() { return costPrice; }
+    public void setCostPrice(long costPrice) { this.costPrice = costPrice; }
     
     public long getSalePrice() { return salePrice; }
     public void setSalePrice(long salePrice) { this.salePrice = salePrice; }
