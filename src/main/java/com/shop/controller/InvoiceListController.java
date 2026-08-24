@@ -32,7 +32,7 @@ public class InvoiceListController {
 
     @FXML
     public void initialize() {
-        statusFilter.setItems(FXCollections.observableArrayList("ALL", "PAID", "DEBT"));
+        statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Đã thanh toán", "Còn nợ"));
         statusFilter.getSelectionModel().selectFirst();
         
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
@@ -51,12 +51,19 @@ public class InvoiceListController {
     @FXML
     private void loadInvoices() {
         try {
-            String filter = statusFilter.getValue();
+            String filterUI = statusFilter.getValue();
+            String dbFilter = "ALL";
+            if ("Đã thanh toán".equals(filterUI)) {
+                dbFilter = "PAID";
+            } else if ("Còn nợ".equals(filterUI)) {
+                dbFilter = "DEBT";
+            }
+            
             List<Invoice> invoices;
-            if ("ALL".equals(filter)) {
+            if ("ALL".equals(dbFilter)) {
                 invoices = invoiceDao.findAll();
             } else {
-                invoices = invoiceDao.findByStatus(filter);
+                invoices = invoiceDao.findByStatus(dbFilter);
             }
             invoiceTable.setItems(FXCollections.observableArrayList(invoices));
         } catch (SQLException e) {
