@@ -56,6 +56,16 @@
                     <FontIcon iconLiteral="fth-file-text" />
                 </graphic>
             </Button>
+            <Button maxWidth="Infinity" onAction="#showOrders" styleClass="sidebar-btn" text=" Đặt hàng">
+                <graphic>
+                    <FontIcon iconLiteral="fth-clipboard" />
+                </graphic>
+            </Button>
+            <Button maxWidth="Infinity" onAction="#showReturns" styleClass="sidebar-btn" text=" Trả hàng">
+                <graphic>
+                    <FontIcon iconLiteral="fth-rotate-ccw" />
+                </graphic>
+            </Button>
             <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text=" Thiết lập">
                 <graphic>
                     <FontIcon iconLiteral="fth-settings" />

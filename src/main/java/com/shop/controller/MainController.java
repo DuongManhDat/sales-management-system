@@ -122,6 +122,28 @@ public class MainController {
     }
 
     @FXML
+    private void showOrders() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/order-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load order list view", e);
+        }
+    }
+
+    @FXML
+    private void showReturns() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/return-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load return list view", e);
+        }
+    }
+
+    @FXML
     private void showSettings() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/settings-view.fxml"));

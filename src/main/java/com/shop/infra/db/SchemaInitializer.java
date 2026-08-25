@@ -88,6 +88,25 @@ public class SchemaInitializer {
                 logger.info("V4 Quan Ly Hang Hoa Schema initialized successfully.");
             }
             
+            // Execute V5 schema
+            InputStream isV5 = SchemaInitializer.class.getResourceAsStream("/db/migration/V5__BanHang_Phase2_Schema.sql");
+            if (isV5 != null) {
+                String sqlV5 = new BufferedReader(new InputStreamReader(isV5))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+                String[] statementsV5 = sqlV5.split(";");
+                for (String s : statementsV5) {
+                    if (!s.trim().isEmpty()) {
+                        try {
+                            stmt.execute(s);
+                        } catch (Exception ex) {
+                            logger.warn("Migration V5 warning: " + ex.getMessage());
+                        }
+                    }
+                }
+                logger.info("V5 Ban Hang Phase 2 Schema initialized successfully.");
+            }
+            
         } catch (Exception e) {
             logger.error("Failed to initialize database schema", e);
         }
