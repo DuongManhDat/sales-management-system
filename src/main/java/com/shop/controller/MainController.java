@@ -68,7 +68,13 @@ public class MainController {
 
     @FXML
     private void showProducts() {
-        showPlaceholder("Hàng hóa");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/product-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load product list view", e);
+        }
     }
 
     @FXML

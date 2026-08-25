@@ -11,11 +11,11 @@ public class StockMovementDao {
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, movement.getProductId());
             pstmt.setString(2, movement.getType());
-            pstmt.setInt(3, movement.getQtyChange());
-            pstmt.setInt(4, movement.getStockAfter());
+            pstmt.setDouble(3, movement.getQtyChange());
+            pstmt.setDouble(4, movement.getStockAfter());
             pstmt.setString(5, movement.getRefType());
             pstmt.setInt(6, movement.getRefId());
-            pstmt.setString(7, movement.getCreatedAt());
+            pstmt.setString(7, movement.getCreatedAt() != null ? movement.getCreatedAt() : java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             pstmt.setString(8, movement.getNote());
             pstmt.executeUpdate();
         }

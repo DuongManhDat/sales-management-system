@@ -38,7 +38,7 @@ public class SalesService {
                 // Set cost price
                 com.shop.model.Product p = productDao.getById(conn, item.getProductId());
                 if (p != null) {
-                    item.setCostPrice(p.getCostPrice());
+                    item.setCostPrice(0); // MVP: cost price removed from products table
                 } else {
                     item.setCostPrice(0);
                 }

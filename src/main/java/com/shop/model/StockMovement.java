@@ -4,8 +4,8 @@ public class StockMovement {
     private int id;
     private int productId;
     private String type;
-    private int qtyChange;
-    private int stockAfter;
+    private double qtyChange;
+    private double stockAfter;
     private String refType;
     private int refId;
     private String createdAt;
@@ -20,11 +20,11 @@ public class StockMovement {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public int getQtyChange() { return qtyChange; }
-    public void setQtyChange(int qtyChange) { this.qtyChange = qtyChange; }
+    public double getQtyChange() { return qtyChange; }
+    public void setQtyChange(double qtyChange) { this.qtyChange = qtyChange; }
 
-    public int getStockAfter() { return stockAfter; }
-    public void setStockAfter(int stockAfter) { this.stockAfter = stockAfter; }
+    public double getStockAfter() { return stockAfter; }
+    public void setStockAfter(double stockAfter) { this.stockAfter = stockAfter; }
 
     public String getRefType() { return refType; }
     public void setRefType(String refType) { this.refType = refType; }

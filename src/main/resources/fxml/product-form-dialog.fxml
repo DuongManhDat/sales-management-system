@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ProductFormController" prefWidth="500">
+
+    <Label fx:id="lblTitle" text="Thêm/Sửa Hàng Hóa" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="16" vgap="16">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label text="Mã hàng:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="txtCode" disable="true" promptText="Tự động tạo nếu để trống" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Tên hàng:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="txtName" promptText="Nhập tên hàng hóa" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Đơn vị:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="comboUnit" prefWidth="MAX_VALUE" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Danh mục:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <ComboBox fx:id="comboCategory" prefWidth="MAX_VALUE" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Giá bán:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField fx:id="txtPrice" promptText="Nhập giá bán" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Ghi chú:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <TextArea fx:id="txtNote" prefRowCount="3" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    </GridPane>
+
+    <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 16 0 0 0;">
+        <Button text="Hủy" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="Lưu" onAction="#handleSave" styleClass="btn-primary"/>
+    </HBox>
+</VBox>
