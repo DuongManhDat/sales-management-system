@@ -57,10 +57,17 @@
             <Label fx:id="lblChange" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="text-bold"/>
         </GridPane>
 
-        <Button text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" styleClass="btn-checkout" prefHeight="50">
-            <graphic>
-                <FontIcon iconLiteral="fth-check-circle" />
-            </graphic>
-        </Button>
+        <HBox spacing="10">
+            <Button text="TẠO ĐẶT HÀNG" onAction="#handleCreateOrder" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-outline-primary" prefHeight="50">
+                <graphic>
+                    <FontIcon iconLiteral="fth-clipboard" />
+                </graphic>
+            </Button>
+            <Button text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-checkout" prefHeight="50">
+                <graphic>
+                    <FontIcon iconLiteral="fth-check-circle" />
+                </graphic>
+            </Button>
+        </HBox>
     </VBox>
 </HBox>

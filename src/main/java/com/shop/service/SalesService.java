@@ -1,12 +1,7 @@
 package com.shop.service;
 
-import com.shop.dao.InvoiceDao;
-import com.shop.dao.InvoiceItemDao;
-import com.shop.dao.ProductDao;
-import com.shop.dao.StockMovementDao;
-import com.shop.model.Invoice;
-import com.shop.model.InvoiceItem;
-import com.shop.model.StockMovement;
+import com.shop.dao.*;
+import com.shop.model.*;
 import com.shop.util.DBConnection;
 
 import java.sql.Connection;
@@ -20,6 +15,8 @@ public class SalesService {
     private InvoiceItemDao invoiceItemDao = new InvoiceItemDao();
     private ProductDao productDao = new ProductDao();
     private StockMovementDao stockMovementDao = new StockMovementDao();
+    private ReturnInvoiceDao returnInvoiceDao = new ReturnInvoiceDao();
+    private ReturnInvoiceItemDao returnInvoiceItemDao = new ReturnInvoiceItemDao();
 
     public void createInvoice(Invoice invoice, List<InvoiceItem> items) throws SQLException {
         Connection conn = null;
@@ -64,6 +61,88 @@ public class SalesService {
             if (conn != null) {
                 conn.rollback();
             }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
+    public void createOrder(Invoice invoice, List<InvoiceItem> items) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+            
+            invoice.setStatus("PENDING");
+            invoiceDao.insert(conn, invoice);
+
+            for (InvoiceItem item : items) {
+                item.setInvoiceId(invoice.getId());
+                item.setCostPrice(0);
+            }
+            invoiceItemDao.insertAll(conn, items);
+            
+            // Do not decrease stock or log movement for PENDING orders in this MVP
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
+    public void processReturn(ReturnInvoice returnInvoice, List<ReturnInvoiceItem> items) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            if (returnInvoice.getReturnDate() == null) {
+                returnInvoice.setReturnDate(currentTime);
+            }
+            returnInvoice.setStatus("COMPLETED");
+            returnInvoiceDao.insert(conn, returnInvoice);
+
+            for (ReturnInvoiceItem item : items) {
+                item.setReturnInvoiceId(returnInvoice.getId());
+                returnInvoiceItemDao.insert(conn, item);
+
+                // Increase stock
+                productDao.increaseStock(conn, item.getProductId(), item.getReturnQty());
+
+                // Log movement
+                StockMovement movement = new StockMovement();
+                movement.setProductId(item.getProductId());
+                movement.setType("RETURN");
+                movement.setQtyChange(item.getReturnQty());
+                movement.setStockAfter(0); // Minimal impl
+                movement.setRefType("RETURN");
+                movement.setRefId(returnInvoice.getId());
+                movement.setCreatedAt(currentTime);
+                stockMovementDao.insert(conn, movement);
+            }
+            
+            // Cập nhật công nợ hóa đơn gốc (giảm nợ nếu có)
+            long refundAmount = returnInvoice.getTotalRefund() - returnInvoice.getReturnFee();
+            if (refundAmount > 0) {
+                String query = "UPDATE invoices SET debt = MAX(0, debt - ?) WHERE id = ?";
+                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(query)) {
+                    pstmt.setLong(1, refundAmount);
+                    pstmt.setInt(2, returnInvoice.getInvoiceId());
+                    pstmt.executeUpdate();
+                }
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) conn.rollback();
             throw e;
         } finally {
             if (conn != null) {

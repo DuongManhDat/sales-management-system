@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox spacing="10" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnFormController" styleClass="pos-root">
+    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+    
+    <Label text="Tạo Phiếu Trả Hàng" styleClass="title-3"/>
+    
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Mã Hóa Đơn (ID):" />
+        <TextField fx:id="txtInvoiceId" promptText="Nhập ID hóa đơn..." styleClass="flat-input"/>
+        <Button text="Tải Dữ Liệu" onAction="#loadInvoiceData" styleClass="btn-outline-primary"/>
+    </HBox>
+    
+    <GridPane hgap="10" vgap="5">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100"/>
+            <ColumnConstraints minWidth="200"/>
+        </columnConstraints>
+        <Label text="Khách hàng:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-muted"/>
+        <Label fx:id="lblCustomer" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        
+        <Label text="Tổng tiền gốc:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-muted"/>
+        <Label fx:id="lblOriginalTotal" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+    
+    <Label text="Chi tiết sản phẩm:" styleClass="title-4"/>
+    <TableView fx:id="itemTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+        <placeholder>
+            <Label text="Không có dữ liệu"/>
+        </placeholder>
+        <columns>
+            <TableColumn fx:id="colProductId" text="ID Sản Phẩm" prefWidth="120" />
+            <TableColumn fx:id="colQty" text="SL Đã Mua" prefWidth="100" />
+            <TableColumn fx:id="colPrice" text="Đơn giá" prefWidth="120" />
+        </columns>
+    </TableView>
+
+    <!-- UI nhập liệu đơn giản -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Sản phẩm chọn trả:" />
+        <Label fx:id="lblSelectedProduct" text="-" styleClass="text-bold"/>
+        <Label text="SL trả:" />
+        <TextField fx:id="txtReturnQty" prefWidth="80" styleClass="flat-input"/>
+        <Button text="Xác nhận số lượng" onAction="#confirmReturnQty" styleClass="btn-outline-primary"/>
+    </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Label text="Phí trả hàng:" />
+        <TextField fx:id="txtReturnFee" text="0" alignment="CENTER_RIGHT" prefWidth="150" styleClass="flat-input"/>
+        <Label text="Tổng Hoàn Trả:" styleClass="title-4"/>
+        <Label fx:id="lblTotalRefund" text="0" styleClass="title-3, text-primary"/>
+    </HBox>
+    
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button text="HỦY" onAction="#cancel" styleClass="btn-outline-danger" prefHeight="40" prefWidth="100"/>
+        <Button text="XÁC NHẬN TRẢ HÀNG" onAction="#submitReturn" styleClass="btn-checkout" prefHeight="40" prefWidth="200">
+            <graphic>
+                <FontIcon iconLiteral="fth-check-circle" />
+            </graphic>
+        </Button>
+    </HBox>
+</VBox>

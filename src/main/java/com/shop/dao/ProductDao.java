@@ -94,6 +94,15 @@ public class ProductDao {
         }
     }
 
+    public void increaseStock(Connection conn, int productId, double qty) throws SQLException {
+        String query = "UPDATE products SET stock_qty = stock_qty + ? WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setDouble(1, qty);
+            pstmt.setInt(2, productId);
+            pstmt.executeUpdate();
+        }
+    }
+
     public Product getById(Connection conn, int productId) throws SQLException {
         String query = "SELECT p.*, u.name as unit_name, c.name as category_name " +
                        "FROM products p " +

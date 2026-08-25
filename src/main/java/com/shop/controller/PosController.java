@@ -124,16 +124,58 @@ public class PosController {
 
     @FXML
     private void handleCheckout() {
+        processTransaction(true);
+    }
+
+    @FXML
+    private void handleCreateOrder() {
+        processTransaction(false);
+    }
+
+    private void processTransaction(boolean isCompleted) {
         if (viewModel.getInvoiceItems().isEmpty()) {
-            showAlert("Error", "Cart is empty!");
+            showAlert("Error", "Giỏ hàng đang trống!");
             return;
         }
-        // Here we would call SalesService.createInvoice()
-        // ... (skipped full implementation for brevity, MVP focus)
-        showAlert("Success", "Thanh toán thành công!");
-        viewModel.getInvoiceItems().clear();
-        viewModel.customerPaidProperty().set(0);
-        txtCustomerPaid.setText("0");
+
+        com.shop.model.Invoice invoice = new com.shop.model.Invoice();
+        Customer customer = customerComboBox.getValue();
+        if (customer != null) {
+            invoice.setCustomerId(customer.getId());
+        }
+        invoice.setSubtotal(viewModel.subtotalProperty().get());
+        invoice.setDiscountAmt(0); // For now, 0 discount
+        invoice.setDiscountPct(0);
+        invoice.setTotal(viewModel.totalProperty().get());
+        
+        long paid = viewModel.customerPaidProperty().get();
+        if (isCompleted && paid < invoice.getTotal()) {
+            // Check if customer is selected for debt
+            if (customer == null) {
+                showAlert("Error", "Vui lòng chọn khách hàng để ghi nợ!");
+                return;
+            }
+        }
+        invoice.setPaid(paid);
+        invoice.setDebt(Math.max(0, invoice.getTotal() - paid));
+
+        com.shop.service.SalesService salesService = new com.shop.service.SalesService();
+        try {
+            if (isCompleted) {
+                salesService.createInvoice(invoice, viewModel.getInvoiceItems());
+                showAlert("Success", "Thanh toán thành công!");
+            } else {
+                salesService.createOrder(invoice, viewModel.getInvoiceItems());
+                showAlert("Success", "Tạo đơn đặt hàng thành công!");
+            }
+            viewModel.getInvoiceItems().clear();
+            viewModel.customerPaidProperty().set(0);
+            txtCustomerPaid.setText("0");
+            customerComboBox.setValue(null);
+        } catch (Exception e) {
+            log.error("Lỗi khi xử lý giao dịch", e);
+            showAlert("Error", "Có lỗi xảy ra: " + e.getMessage());
+        }
     }
 
     private void showAlert(String title, String content) {
