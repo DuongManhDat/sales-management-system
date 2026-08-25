@@ -35,6 +35,14 @@ public class SalesService {
             for (InvoiceItem item : items) {
                 item.setInvoiceId(invoice.getId());
                 
+                // Set cost price
+                com.shop.model.Product p = productDao.getById(conn, item.getProductId());
+                if (p != null) {
+                    item.setCostPrice(p.getCostPrice());
+                } else {
+                    item.setCostPrice(0);
+                }
+                
                 // Update stock
                 productDao.decreaseStock(conn, item.getProductId(), item.getQty());
                 

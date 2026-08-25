@@ -5,6 +5,7 @@ public class InvoiceItem {
     private int invoiceId;
     private int productId;
     private int qty;
+    private long costPrice;
     private long salePrice;
     private long amount;
 
@@ -19,6 +20,9 @@ public class InvoiceItem {
 
     public int getQty() { return qty; }
     public void setQty(int qty) { this.qty = qty; }
+
+    public long getCostPrice() { return costPrice; }
+    public void setCostPrice(long costPrice) { this.costPrice = costPrice; }
 
     public long getSalePrice() { return salePrice; }
     public void setSalePrice(long salePrice) { this.salePrice = salePrice; }

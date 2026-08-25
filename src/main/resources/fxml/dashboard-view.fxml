@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.shop.controller.DashboardController"
+           stylesheets="@../css/app.css"
+           style="-fx-background-color: #f9f9fb;">
+
+    <VBox spacing="20" style="-fx-padding: 20;">
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Label text="Dashboard" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <DatePicker fx:id="datePicker" style="-fx-font-size: 14px; -fx-background-radius: 4; -fx-border-radius: 4;"/>
+            <Button fx:id="refreshButton" text="Làm mới" onAction="#handleRefresh"
+                    style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8 16; -fx-background-radius: 4; -fx-cursor: hand; -fx-border-color: transparent;"/>
+        </HBox>
+
+        <!-- KPI Cards -->
+        <GridPane hgap="20" vgap="20">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+            </columnConstraints>
+
+            <!-- Doanh thu -->
+            <VBox GridPane.columnIndex="0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Doanh thu" style="-fx-text-fill: #6b7280; -fx-font-size: 14px;"/>
+                <Label fx:id="lblTotalRevenue" text="0 đ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            </VBox>
+
+            <!-- Lợi nhuận -->
+            <VBox GridPane.columnIndex="1" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Lợi nhuận gộp" style="-fx-text-fill: #6b7280; -fx-font-size: 14px;"/>
+                <Label fx:id="lblGrossProfit" text="0 đ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            </VBox>
+
+            <!-- Số đơn -->
+            <VBox GridPane.columnIndex="2" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Số đơn hàng" style="-fx-text-fill: #6b7280; -fx-font-size: 14px;"/>
+                <Label fx:id="lblTotalOrders" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            </VBox>
+
+            <!-- Sắp hết -->
+            <VBox GridPane.columnIndex="3" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Sản phẩm sắp hết" style="-fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <Label fx:id="lblLowStockCount" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+            </VBox>
+        </GridPane>
+
+        <!-- Charts -->
+        <HBox spacing="20" VBox.vgrow="ALWAYS">
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Doanh thu theo giờ" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-padding: 0 0 10 0;"/>
+                <BarChart fx:id="chartRevenueByHour" VBox.vgrow="ALWAYS" legendVisible="false" animated="false">
+                    <xAxis>
+                        <CategoryAxis label="Giờ"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Doanh thu (đ)"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+            
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Doanh thu 7 ngày qua" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-padding: 0 0 10 0;"/>
+                <BarChart fx:id="chartRevenueByDay" VBox.vgrow="ALWAYS" legendVisible="false" animated="false">
+                    <xAxis>
+                        <CategoryAxis label="Thứ"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Doanh thu (đ)"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+        </HBox>
+
+        <!-- Tables -->
+        <HBox spacing="20" VBox.vgrow="ALWAYS">
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <Label text="Top 5 Sản phẩm bán chạy" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-padding: 0 0 10 0;"/>
+                <TableView fx:id="tblTopProducts" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: #e5e7eb;">
+                    <columns>
+                        <TableColumn text="Tên SP" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="productName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="ĐVT" prefWidth="60">
+                            <cellValueFactory><PropertyValueFactory property="unit"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="SL" prefWidth="60">
+                            <cellValueFactory><PropertyValueFactory property="qty"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Doanh thu" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="revenue"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
+                <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 0 0 10 0;">
+                    <Label text="Hàng sắp hết tồn kho" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="Ngưỡng:"/>
+                    <ComboBox fx:id="cboLowStockThreshold" prefWidth="80" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 0;"/>
+                </HBox>
+                <TableView fx:id="tblLowStock" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: #e5e7eb;">
+                    <columns>
+                        <TableColumn text="Mã" prefWidth="80">
+                            <cellValueFactory><PropertyValueFactory property="code"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Tên SP" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="productName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="ĐVT" prefWidth="60">
+                            <cellValueFactory><PropertyValueFactory property="unit"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Tồn" prefWidth="80">
+                            <cellValueFactory><PropertyValueFactory property="stockQty"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <ProgressIndicator fx:id="progressIndicator" maxWidth="50" maxHeight="50" visible="false" managed="false"/>
+</StackPane>
