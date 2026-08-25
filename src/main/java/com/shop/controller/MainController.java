@@ -78,6 +78,17 @@ public class MainController {
     }
 
     @FXML
+    private void showStockAdjustments() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/stock-adjustment-list.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load stock adjustment list view", e);
+        }
+    }
+
+    @FXML
     private void showCustomers() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/customer-list.fxml"));

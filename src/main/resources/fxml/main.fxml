@@ -36,6 +36,11 @@
                     <FontIcon iconLiteral="fth-box" />
                 </graphic>
             </Button>
+            <Button maxWidth="Infinity" onAction="#showStockAdjustments" styleClass="sidebar-btn" text=" Kiểm kho">
+                <graphic>
+                    <FontIcon iconLiteral="fth-check-square" />
+                </graphic>
+            </Button>
             <Button maxWidth="Infinity" onAction="#showCustomers" styleClass="sidebar-btn" text=" Khách hàng">
                 <graphic>
                     <FontIcon iconLiteral="fth-users" />

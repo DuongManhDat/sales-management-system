@@ -73,4 +73,8 @@ public class AdjustmentService {
     public List<StockAdjustment> getAllAdjustments() throws SQLException {
         return adjustmentDao.findAll();
     }
+    
+    public List<StockAdjustmentItem> getAdjustmentItems(int adjustmentId) throws SQLException {
+        return adjustmentDao.findItemsByAdjustmentId(adjustmentId);
+    }
 }

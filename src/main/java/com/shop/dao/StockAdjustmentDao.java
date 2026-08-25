@@ -91,7 +91,6 @@ public class StockAdjustmentDao {
         return list;
     }
     
-    // To count modified items for a history view if needed
     public int countItems(Connection conn, int adjustmentId) throws SQLException {
         String query = "SELECT COUNT(*) FROM stock_adjustment_items WHERE adjustment_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -101,5 +100,39 @@ public class StockAdjustmentDao {
             }
         }
         return 0;
+    }
+
+    public List<StockAdjustmentItem> findItemsByAdjustmentId(int adjustmentId) throws SQLException {
+        List<StockAdjustmentItem> list = new ArrayList<>();
+        String query = "SELECT i.*, p.code as product_code, p.name as product_name " +
+                       "FROM stock_adjustment_items i " +
+                       "JOIN products p ON i.product_id = p.id " +
+                       "WHERE i.adjustment_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, adjustmentId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    StockAdjustmentItem item = new StockAdjustmentItem();
+                    item.setId(rs.getInt("id"));
+                    item.setAdjustmentId(rs.getInt("adjustment_id"));
+                    item.setProductId(rs.getInt("product_id"));
+                    item.setProductCode(rs.getString("product_code"));
+                    item.setProductName(rs.getString("product_name"));
+                    item.setCurrentQty(rs.getDouble("current_qty"));
+                    item.setActualQty(rs.getDouble("actual_qty"));
+                    item.setVariance(rs.getDouble("variance"));
+                    long costPrice = rs.getLong("cost_price");
+                    if (rs.wasNull()) {
+                        item.setCostPrice(null);
+                    } else {
+                        item.setCostPrice(costPrice);
+                    }
+                    item.setReason(rs.getString("reason"));
+                    list.add(item);
+                }
+            }
+        }
+        return list;
     }
 }
