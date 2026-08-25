@@ -69,6 +69,24 @@ public class SchemaInitializer {
                 }
                 logger.info("V3 Dashboard Schema initialized successfully.");
             }
+            // Execute V4 schema
+            InputStream isV4 = SchemaInitializer.class.getResourceAsStream("/db/migration/V4__QuanLyHangHoa_Schema.sql");
+            if (isV4 != null) {
+                String sqlV4 = new BufferedReader(new InputStreamReader(isV4))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+                String[] statementsV4 = sqlV4.split(";");
+                for (String s : statementsV4) {
+                    if (!s.trim().isEmpty()) {
+                        try {
+                            stmt.execute(s);
+                        } catch (Exception ex) {
+                            logger.warn("Migration V4 warning: " + ex.getMessage());
+                        }
+                    }
+                }
+                logger.info("V4 Quan Ly Hang Hoa Schema initialized successfully.");
+            }
             
         } catch (Exception e) {
             logger.error("Failed to initialize database schema", e);

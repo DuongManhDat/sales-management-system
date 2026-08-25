@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PriceHistoryController" prefWidth="600" prefHeight="400">
+
+    <Label fx:id="lblTitle" text="Lịch sử giá bán" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+
+    <TableView fx:id="historyTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+        <placeholder>
+            <Label text="Chưa có lịch sử thay đổi giá"/>
+        </placeholder>
+        <columns>
+            <TableColumn fx:id="colDate" text="Ngày thay đổi" prefWidth="200"/>
+            <TableColumn fx:id="colOldPrice" text="Giá cũ" prefWidth="150"/>
+            <TableColumn fx:id="colNewPrice" text="Giá mới" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Đóng" onAction="#handleClose" styleClass="btn-secondary"/>
+    </HBox>
+</VBox>

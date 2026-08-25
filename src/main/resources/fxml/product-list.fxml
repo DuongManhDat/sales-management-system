@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+
+<VBox spacing="24" style="-fx-background-color: #FFFFFF; -fx-padding: 32;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ProductListController">
+    
+    <Label text="Hàng hóa" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="Tìm theo tên, mã..." prefWidth="300" styleClass="flat-input"/>
+        
+        <ComboBox fx:id="categoryCombo" prefWidth="150" styleClass="flat-input">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Tất cả"/>
+                </FXCollections>
+            </items>
+            <value>
+                <String fx:value="Tất cả"/>
+            </value>
+        </ComboBox>
+
+        <ComboBox fx:id="statusFilterCombo" prefWidth="150" styleClass="flat-input">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Hoạt động"/>
+                    <String fx:value="Đã xóa"/>
+                    <String fx:value="Tất cả"/>
+                </FXCollections>
+            </items>
+            <value>
+                <String fx:value="Hoạt động"/>
+            </value>
+        </ComboBox>
+        
+        <Region HBox.hgrow="ALWAYS" />
+        
+        <Button text="Lịch sử giá" styleClass="btn-secondary" onAction="#handlePriceHistory"/>
+        <Button text="Kiểm kho" styleClass="btn-secondary" onAction="#handleStockAdjustment"/>
+        <Button text="Export" styleClass="btn-secondary" onAction="#handleExport"/>
+        <Button text="Import" styleClass="btn-secondary" onAction="#handleImport"/>
+        <Button text="+ Thêm mới" styleClass="btn-primary" onAction="#handleAdd"/>
+    </HBox>
+
+    <TableView fx:id="productTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+        <placeholder>
+            <Label text="Không có dữ liệu"/>
+        </placeholder>
+        <columns>
+            <TableColumn fx:id="colCode" text="Mã hàng" prefWidth="100"/>
+            <TableColumn fx:id="colName" text="Tên hàng hóa" prefWidth="250"/>
+            <TableColumn fx:id="colUnit" text="Đơn vị" prefWidth="100"/>
+            <TableColumn fx:id="colCategory" text="Danh mục" prefWidth="150"/>
+            <TableColumn fx:id="colPrice" text="Giá bán" prefWidth="120"/>
+            <TableColumn fx:id="colStock" text="Tồn kho" prefWidth="100"/>
+            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="100"/>
+            <TableColumn fx:id="colAction" text="Thao tác" prefWidth="150" sortable="false"/>
+        </columns>
+    </TableView>
+</VBox>

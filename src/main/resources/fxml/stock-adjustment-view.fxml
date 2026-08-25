@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="16" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.StockAdjustmentController" prefWidth="900" prefHeight="600">
+
+    <Label text="Kiểm Kho (Điều chỉnh tồn kho)" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+
+    <HBox spacing="16" alignment="CENTER_LEFT">
+        <Label text="Thêm hàng hóa:"/>
+        <ComboBox fx:id="comboProductSearch" editable="true" prefWidth="300" promptText="Gõ mã hoặc tên hàng hóa..." styleClass="flat-input"/>
+        <Button text="Thêm" onAction="#handleAddProduct" styleClass="btn-secondary"/>
+        
+        <Region HBox.hgrow="ALWAYS" />
+        <Label text="Ngày kiểm kho:"/>
+        <TextField fx:id="txtDate" disable="true" text="Hôm nay" styleClass="flat-input"/>
+    </HBox>
+
+    <TableView fx:id="adjustmentTable" VBox.vgrow="ALWAYS" styleClass="flat-table" editable="true">
+        <placeholder>
+            <Label text="Chưa có hàng hóa nào được thêm vào phiếu kiểm kho"/>
+        </placeholder>
+        <columns>
+            <TableColumn fx:id="colCode" text="Mã hàng" prefWidth="100"/>
+            <TableColumn fx:id="colName" text="Tên hàng hóa" prefWidth="200"/>
+            <TableColumn fx:id="colCurrentQty" text="Tồn kho hiện tại" prefWidth="120"/>
+            <TableColumn fx:id="colActualQty" text="Tồn thực tế" prefWidth="120"/>
+            <TableColumn fx:id="colVariance" text="Lệch" prefWidth="100"/>
+            <TableColumn fx:id="colReason" text="Lý do" prefWidth="150"/>
+            <TableColumn fx:id="colAction" text="Thao tác" prefWidth="100" sortable="false"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="16" alignment="TOP_LEFT">
+        <Label text="Ghi chú phiếu:"/>
+        <TextArea fx:id="txtNote" prefRowCount="2" prefWidth="400" promptText="Ghi chú chung cho phiếu kiểm kho" styleClass="flat-input"/>
+        
+        <Region HBox.hgrow="ALWAYS" />
+        
+        <VBox spacing="12" alignment="BOTTOM_RIGHT">
+            <HBox spacing="12">
+                <Button text="Đóng" onAction="#handleClose" styleClass="btn-secondary"/>
+                <Button text="Hoàn thành phiếu" onAction="#handleSave" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </HBox>
+</VBox>

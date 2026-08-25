@@ -4,8 +4,8 @@
  */
 
 .sidebar {
-    -fx-background-color: -fx-color-bg-subtle;
-    -fx-border-color: -fx-color-border-subtle;
+    -fx-background-color: #F7F6F3;
+    -fx-border-color: #EAEAEA;
     -fx-border-width: 0 1 0 0; /* Only right border */
 }
 
@@ -13,7 +13,7 @@
 .sidebar-btn {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: -fx-color-fg-default;
+    -fx-text-fill: #111111;
     -fx-padding: 12 16 12 16;
     -fx-alignment: center-left;
     -fx-font-size: 14px;
@@ -22,24 +22,24 @@
 }
 
 .sidebar-btn:hover {
-    -fx-background-color: -fx-color-bg-default;
+    -fx-background-color: #EAEAEA;
 }
 
 .sidebar-btn:pressed {
-    -fx-background-color: -fx-color-bg-inset;
+    -fx-background-color: #DDDDDD;
 }
 
 /* Active/selected state (optional if you have an active state later) */
 .sidebar-btn.active {
-    -fx-background-color: -fx-color-bg-default;
+    -fx-background-color: #EAEAEA;
     -fx-font-weight: bold;
-    -fx-text-fill: -fx-color-fg-default;
+    -fx-text-fill: #111111;
 }
 
 /* Styling the main header area (HBox replacing ToolBar) */
 .app-header {
-    -fx-background-color: -fx-color-bg-default;
-    -fx-border-color: -fx-color-border-subtle;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #EAEAEA;
     -fx-border-width: 0 0 1 0; /* Bottom border only */
     -fx-padding: 10 20 10 20;
 }

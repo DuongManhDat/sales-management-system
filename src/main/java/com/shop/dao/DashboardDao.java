@@ -135,7 +135,7 @@ public class DashboardDao {
         String query = "SELECT p.code, p.name, u.name as unit, p.stock_qty " +
                        "FROM products p " +
                        "LEFT JOIN units u ON u.id = p.unit_id " +
-                       "WHERE p.stock_qty <= ? AND p.status=1 " +
+                       "WHERE p.stock_qty <= ? AND p.deleted_at IS NULL " +
                        "ORDER BY p.stock_qty ASC";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, threshold);
