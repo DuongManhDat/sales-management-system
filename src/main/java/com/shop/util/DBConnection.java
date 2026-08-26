@@ -12,6 +12,7 @@ import java.sql.SQLException;
 public class DBConnection {
     private static final Logger log = LoggerFactory.getLogger(DBConnection.class);
     private static HikariDataSource dataSource;
+    private static String currentDbPath;
 
     static {
         try {
@@ -30,10 +31,10 @@ public class DBConnection {
                 }
             }
 
-            String dbPath = dataDir.getAbsolutePath() + "/shop.db";
+            currentDbPath = dataDir.getAbsolutePath() + "/shop.db";
             String url = System.getProperty("db.url");
             if (url == null) {
-                url = "jdbc:sqlite:" + dbPath;
+                url = "jdbc:sqlite:" + currentDbPath;
             }
 
             HikariConfig config = new HikariConfig();
@@ -67,5 +68,9 @@ public class DBConnection {
             dataSource.close();
             log.info("Đã đóng Database Connection Pool.");
         }
+    }
+    
+    public static String getDbPath() {
+        return currentDbPath;
     }
 }

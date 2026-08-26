@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<VBox spacing="30" alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.BackupRestoreTabController" style="-fx-padding: 40; -fx-background-color: #ffffff;">
+    
+    <VBox spacing="10" alignment="CENTER" maxWidth="500" style="-fx-background-color: #f9fafb; -fx-padding: 30; -fx-border-color: #e5e7eb; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <Label text="Sao Lưu Dữ Liệu" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+        <Text text="Tạo một bản sao của cơ sở dữ liệu hiện tại để đề phòng rủi ro mất dữ liệu." fill="#6b7280" wrappingWidth="400" textAlignment="CENTER" />
+        <Region prefHeight="10" />
+        <Button text="Thực hiện Sao Lưu" onAction="#handleBackup" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 24; -fx-background-radius: 4; -fx-cursor: hand;" />
+    </VBox>
+
+    <VBox spacing="10" alignment="CENTER" maxWidth="500" style="-fx-background-color: #fff1f2; -fx-padding: 30; -fx-border-color: #fecdd3; -fx-border-radius: 8; -fx-background-radius: 8;">
+        <Label text="Khôi Phục Dữ Liệu" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #9f1239;" />
+        <Text text="Khôi phục cơ sở dữ liệu từ một file sao lưu. Cảnh báo: Thao tác này sẽ ghi đè toàn bộ dữ liệu hiện tại và yêu cầu khởi động lại ứng dụng." fill="#be123c" wrappingWidth="400" textAlignment="CENTER" />
+        <Region prefHeight="10" />
+        <Button text="Chọn File &amp; Khôi Phục" onAction="#handleRestore" style="-fx-background-color: #e11d48; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 24; -fx-background-radius: 4; -fx-cursor: hand;" />
+    </VBox>
+    
+</VBox>

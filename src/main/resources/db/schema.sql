@@ -97,3 +97,12 @@ CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT
 );
+
+CREATE TABLE IF NOT EXISTS activity_log (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    action     TEXT NOT NULL,
+    entity     TEXT,
+    entity_id  INTEGER,
+    detail     TEXT,
+    created_at TEXT NOT NULL
+);
