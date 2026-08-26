@@ -29,11 +29,11 @@
         <Label text="DANH SÁCH HÀNG NHẬP" style="-fx-font-weight: bold;" />
         <TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn text="Sản phẩm" prefWidth="300" />
-                <TableColumn text="Số lượng" prefWidth="100" />
-                <TableColumn text="Giá nhập (đ)" prefWidth="150" />
-                <TableColumn text="Thành tiền" prefWidth="150" />
-                <TableColumn text="" prefWidth="50" />
+                <TableColumn fx:id="colProduct" text="Sản phẩm" prefWidth="300" />
+                <TableColumn fx:id="colQty" text="Số lượng" prefWidth="100" />
+                <TableColumn fx:id="colPrice" text="Giá nhập (đ)" prefWidth="150" />
+                <TableColumn fx:id="colAmount" text="Thành tiền" prefWidth="150" />
+                <TableColumn fx:id="colAction" text="" prefWidth="50" />
             </columns>
         </TableView>
         <Button text="+ Thêm dòng sản phẩm" onAction="#handleAddLine" style="-fx-background-color: #F7F6F3; -fx-text-fill: #111111; -fx-border-color: #EAEAEA; -fx-border-radius: 4px;" />

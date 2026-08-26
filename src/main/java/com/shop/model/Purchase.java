@@ -11,6 +11,9 @@ public class Purchase {
     private String status;
     private String note;
     private String createdAt;
+    
+    // Transient field for UI
+    private String supplierName;
 
     public Purchase() {}
 
@@ -44,4 +47,7 @@ public class Purchase {
     
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    
+    public String getSupplierName() { return supplierName; }
+    public void setSupplierName(String supplierName) { this.supplierName = supplierName; }
 }

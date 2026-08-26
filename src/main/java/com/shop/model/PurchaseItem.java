@@ -8,6 +8,9 @@ public class PurchaseItem {
     private int qty;
     private long costPrice;
     private long amount;
+    
+    // Transient field for UI
+    private String productName;
 
     public PurchaseItem() {}
 
@@ -32,4 +35,7 @@ public class PurchaseItem {
     
     public long getAmount() { return amount; }
     public void setAmount(long amount) { this.amount = amount; }
+    
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 }
