@@ -155,6 +155,17 @@ public class MainController {
     }
 
     @FXML
+    private void showReports() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/report-view.fxml"));
+            Parent view = loader.load();
+            mainPane.setCenter(view);
+        } catch (IOException e) {
+            log.error("Failed to load report view", e);
+        }
+    }
+
+    @FXML
     private void showSettings() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/settings-view.fxml"));
