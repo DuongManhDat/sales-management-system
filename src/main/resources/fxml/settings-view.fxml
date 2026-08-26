@@ -17,6 +17,11 @@
                     <fx:include source="category-tab.fxml" />
                 </content>
             </Tab>
+            <Tab text="Nhà cung cấp">
+                <content>
+                    <fx:include source="supplier-tab.fxml" />
+                </content>
+            </Tab>
         </tabs>
     </TabPane>
 </VBox>
