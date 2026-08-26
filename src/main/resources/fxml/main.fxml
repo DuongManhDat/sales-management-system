@@ -71,6 +71,11 @@
                     <FontIcon iconLiteral="fth-rotate-ccw" />
                 </graphic>
             </Button>
+            <Button maxWidth="Infinity" onAction="#showReports" styleClass="sidebar-btn" text=" Báo cáo">
+                <graphic>
+                    <FontIcon iconLiteral="fth-bar-chart-2" />
+                </graphic>
+            </Button>
             <Button maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-btn" text=" Thiết lập">
                 <graphic>
                     <FontIcon iconLiteral="fth-settings" />
