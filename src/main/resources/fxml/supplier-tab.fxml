@@ -31,6 +31,9 @@
             <TableColumn fx:id="noteColumn" text="Ghi chú" prefWidth="150" />
             <TableColumn fx:id="actionColumn" text="Thao tác" prefWidth="150" sortable="false" />
         </columns>
+            <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
     </TableView>
 
     <HBox alignment="CENTER_RIGHT">

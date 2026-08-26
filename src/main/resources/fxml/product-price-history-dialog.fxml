@@ -16,6 +16,9 @@
             <TableColumn fx:id="colOldPrice" text="Giá cũ" prefWidth="150"/>
             <TableColumn fx:id="colNewPrice" text="Giá mới" prefWidth="150"/>
         </columns>
+            <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
     </TableView>
 
     <HBox alignment="CENTER_RIGHT">

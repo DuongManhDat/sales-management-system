@@ -28,6 +28,9 @@
     <VBox spacing="12" styleClass="bento-card" VBox.vgrow="ALWAYS">
         <Label text="DANH SÁCH HÀNG NHẬP" style="-fx-font-weight: bold;" />
         <TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
+            <placeholder>
+                <Label text="Không có dữ liệu"/>
+            </placeholder>
             <columns>
                 <TableColumn fx:id="colProduct" text="Sản phẩm" prefWidth="300" />
                 <TableColumn fx:id="colQty" text="Số lượng" prefWidth="100" />
@@ -35,7 +38,10 @@
                 <TableColumn fx:id="colAmount" text="Thành tiền" prefWidth="150" />
                 <TableColumn fx:id="colAction" text="" prefWidth="50" />
             </columns>
-        </TableView>
+                <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
         <Button text="+ Thêm dòng sản phẩm" onAction="#handleAddLine" style="-fx-background-color: #F7F6F3; -fx-text-fill: #111111; -fx-border-color: #EAEAEA; -fx-border-radius: 4px;" />
     </VBox>
 

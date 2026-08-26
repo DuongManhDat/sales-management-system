@@ -87,6 +87,9 @@
             <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
                 <Label text="Top 5 Sản phẩm bán chạy" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-padding: 0 0 10 0;"/>
                 <TableView fx:id="tblTopProducts" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: #e5e7eb;">
+                    <placeholder>
+                        <Label text="Không có dữ liệu"/>
+                    </placeholder>
                     <columns>
                         <TableColumn text="Tên SP" prefWidth="150">
                             <cellValueFactory><PropertyValueFactory property="productName"/></cellValueFactory>
@@ -101,7 +104,10 @@
                             <cellValueFactory><PropertyValueFactory property="revenue"/></cellValueFactory>
                         </TableColumn>
                     </columns>
-                </TableView>
+                        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
             </VBox>
 
             <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 0; -fx-border-color: #e5e7eb; -fx-border-width: 1;">
@@ -112,6 +118,9 @@
                     <ComboBox fx:id="cboLowStockThreshold" prefWidth="80" style="-fx-background-color: white; -fx-border-color: #d1d5db; -fx-border-radius: 0;"/>
                 </HBox>
                 <TableView fx:id="tblLowStock" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: #e5e7eb;">
+                    <placeholder>
+                        <Label text="Không có dữ liệu"/>
+                    </placeholder>
                     <columns>
                         <TableColumn text="Mã" prefWidth="80">
                             <cellValueFactory><PropertyValueFactory property="code"/></cellValueFactory>
@@ -126,7 +135,10 @@
                             <cellValueFactory><PropertyValueFactory property="stockQty"/></cellValueFactory>
                         </TableColumn>
                     </columns>
-                </TableView>
+                        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
             </VBox>
         </HBox>
     </VBox>

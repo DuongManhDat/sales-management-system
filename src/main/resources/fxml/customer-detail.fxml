@@ -87,7 +87,10 @@
                         <TableColumn fx:id="colDebt" text="Còn nợ" prefWidth="120"/>
                         <TableColumn fx:id="colInvoiceStatus" text="Trạng thái" prefWidth="120"/>
                     </columns>
-                </TableView>
+                        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
             </VBox>
         </VBox>
     </HBox>

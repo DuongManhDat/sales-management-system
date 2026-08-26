@@ -41,13 +41,17 @@
                 </BarChart>
                 
                 <TableView fx:id="tvRevenue" VBox.vgrow="ALWAYS" style="-fx-background-radius: 0; -fx-border-radius: 0; -fx-border-color: #e0e0e0;">
+                    <placeholder><Label text="Không có dữ liệu"/></placeholder>
                     <columns>
                         <TableColumn fx:id="colRevDate" text="Ngày" prefWidth="150" />
                         <TableColumn fx:id="colRevRevenue" text="Doanh thu" prefWidth="200" style="-fx-alignment: CENTER-RIGHT;" />
                         <TableColumn fx:id="colRevCost" text="Giá vốn" prefWidth="200" style="-fx-alignment: CENTER-RIGHT;" />
                         <TableColumn fx:id="colRevProfit" text="Lợi nhuận gộp" prefWidth="200" style="-fx-alignment: CENTER-RIGHT;" />
                     </columns>
-                </TableView>
+                        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
             </VBox>
         </Tab>
         
@@ -65,6 +69,7 @@
                 <HBox spacing="20.0" VBox.vgrow="ALWAYS">
                     <PieChart fx:id="productChart" prefWidth="350.0" animated="false" />
                     <TableView fx:id="tvProduct" HBox.hgrow="ALWAYS" style="-fx-background-radius: 0; -fx-border-radius: 0; -fx-border-color: #e0e0e0;">
+                        <placeholder><Label text="Không có dữ liệu"/></placeholder>
                         <columns>
                             <TableColumn fx:id="colProdId" text="Mã SP" prefWidth="80" />
                             <TableColumn fx:id="colProdName" text="Tên Sản Phẩm" prefWidth="250" />
@@ -72,7 +77,10 @@
                             <TableColumn fx:id="colProdRevenue" text="Doanh thu" prefWidth="150" style="-fx-alignment: CENTER-RIGHT;" />
                             <TableColumn fx:id="colProdProfit" text="Lợi nhuận" prefWidth="150" style="-fx-alignment: CENTER-RIGHT;" />
                         </columns>
-                    </TableView>
+                            <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
                 </HBox>
             </VBox>
         </Tab>
@@ -89,6 +97,7 @@
                 </HBox>
                 
                 <TableView fx:id="tvInventory" VBox.vgrow="ALWAYS" style="-fx-background-radius: 0; -fx-border-radius: 0; -fx-border-color: #e0e0e0;">
+                    <placeholder><Label text="Không có dữ liệu"/></placeholder>
                     <columns>
                         <TableColumn fx:id="colInvId" text="Mã SP" prefWidth="80" />
                         <TableColumn fx:id="colInvName" text="Tên Sản Phẩm" prefWidth="250" />
@@ -97,7 +106,10 @@
                         <TableColumn fx:id="colInvOut" text="Tổng xuất" prefWidth="120" style="-fx-alignment: CENTER-RIGHT;" />
                         <TableColumn fx:id="colInvEnd" text="Tồn cuối kỳ" prefWidth="120" style="-fx-alignment: CENTER-RIGHT;" />
                     </columns>
-                </TableView>
+                        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
             </VBox>
         </Tab>
     </TabPane>

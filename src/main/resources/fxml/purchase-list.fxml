@@ -19,6 +19,9 @@
 
     <!-- Table -->
     <TableView fx:id="purchaseTable" VBox.vgrow="ALWAYS">
+        <placeholder>
+            <Label text="Không có dữ liệu"/>
+        </placeholder>
         <columns>
             <TableColumn fx:id="colCode" text="Mã phiếu" prefWidth="120" />
             <TableColumn fx:id="colDate" text="Ngày nhập" prefWidth="120" />
@@ -27,5 +30,8 @@
             <TableColumn fx:id="colDebt" text="Còn nợ" prefWidth="150" />
             <TableColumn fx:id="colAction" text="Thao tác" prefWidth="100" />
         </columns>
+            <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
     </TableView>
 </VBox>
