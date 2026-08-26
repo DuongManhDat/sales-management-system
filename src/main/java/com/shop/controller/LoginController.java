@@ -49,6 +49,7 @@ public class LoginController {
                 log.info("Đăng nhập thành công");
                 Platform.runLater(() -> {
                     try {
+                        com.shop.util.SceneManager.getPrimaryStage().setMaximized(true);
                         com.shop.util.SceneManager.switchScene("/fxml/main.fxml", "Hệ thống quản lý bán hàng");
                     } catch (Exception ex) {
                         showError("Lỗi chuyển màn hình: " + ex.getMessage());

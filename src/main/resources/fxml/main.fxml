@@ -84,10 +84,5 @@
         </VBox>
     </left>
     <center>
-        <Label text="Chào mừng đến với Hệ thống Quản lý Bán hàng" BorderPane.alignment="CENTER">
-            <font>
-                <Font size="24.0" />
-            </font>
-        </Label>
     </center>
 </BorderPane>

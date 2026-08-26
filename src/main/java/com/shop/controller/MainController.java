@@ -30,6 +30,11 @@ public class MainController {
     private boolean isSidebarVisible = true;
 
     @FXML
+    public void initialize() {
+        showDashboard();
+    }
+
+    @FXML
     private void toggleSidebar() {
         Timeline timeline = new Timeline();
         if (isSidebarVisible) {

@@ -35,7 +35,7 @@ public class OrderListController {
 
     @FXML
     public void initialize() {
-        statusFilter.setItems(FXCollections.observableArrayList("PENDING", "CANCELLED"));
+        statusFilter.setItems(FXCollections.observableArrayList("Đang xử lý", "Đã hủy"));
         statusFilter.getSelectionModel().selectFirst();
         
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
@@ -43,7 +43,13 @@ public class OrderListController {
         colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
         colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
         colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
-        colStatus.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatus()));
+        colStatus.setCellValueFactory(data -> {
+            String st = data.getValue().getStatus();
+            if ("PENDING".equals(st)) return new SimpleStringProperty("Đang xử lý");
+            if ("CANCELLED".equals(st)) return new SimpleStringProperty("Đã hủy");
+            if ("COMPLETED".equals(st)) return new SimpleStringProperty("Đã hoàn thành");
+            return new SimpleStringProperty(st);
+        });
 
         statusFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
         
@@ -54,7 +60,11 @@ public class OrderListController {
     private void loadOrders() {
         try {
             String filter = statusFilter.getValue();
-            List<Invoice> orders = invoiceDao.findByStatus(filter);
+            String dbStatus = "PENDING";
+            if ("Đã hủy".equals(filter)) {
+                dbStatus = "CANCELLED";
+            }
+            List<Invoice> orders = invoiceDao.findByStatus(dbStatus);
             orderTable.setItems(FXCollections.observableArrayList(orders));
         } catch (SQLException e) {
             log.error("Failed to load orders", e);

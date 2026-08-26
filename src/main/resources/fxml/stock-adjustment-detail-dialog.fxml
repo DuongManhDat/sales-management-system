@@ -28,6 +28,7 @@
     </GridPane>
 
     <TableView fx:id="tableItems" prefHeight="400.0" prefWidth="800.0" VBox.vgrow="ALWAYS" styleClass="table-view">
+        <placeholder><Label text="Không có dữ liệu"/></placeholder>
         <columns>
             <TableColumn fx:id="colProductCode" prefWidth="120.0" text="Mã HH" />
             <TableColumn fx:id="colProductName" prefWidth="200.0" text="Tên HH" />

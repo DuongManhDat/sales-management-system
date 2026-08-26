@@ -34,5 +34,8 @@
             <TableColumn fx:id="colPaid" text="Đã trả" prefWidth="120" />
             <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="100" />
         </columns>
+            <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
     </TableView>
 </VBox>
