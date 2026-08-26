@@ -22,6 +22,16 @@
                     <fx:include source="supplier-tab.fxml" />
                 </content>
             </Tab>
+            <Tab text="Nhật ký hoạt động">
+                <content>
+                    <fx:include source="activity-log-tab.fxml" />
+                </content>
+            </Tab>
+            <Tab text="Hệ thống (Sao lưu)">
+                <content>
+                    <fx:include source="backup-restore-tab.fxml" />
+                </content>
+            </Tab>
         </tabs>
     </TabPane>
 </VBox>
