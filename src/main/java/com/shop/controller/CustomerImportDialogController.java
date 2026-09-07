@@ -1,7 +1,7 @@
 package com.shop.controller;
 
-import com.shop.model.ProductImportItem;
-import com.shop.service.ImportExportService;
+import com.shop.model.CustomerImportItem;
+import com.shop.service.CustomerImportExportService;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,38 +15,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.time.format.DateTimeFormatter;
 
-public class ProductImportDialogController {
+public class CustomerImportDialogController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProductImportDialogController.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomerImportDialogController.class);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML private VBox bannerBox;
     @FXML private Label lblBannerTitle;
     @FXML private Label lblBannerDesc;
 
-    @FXML private TableView<ProductImportItem> tableView;
-    @FXML private TableColumn<ProductImportItem, Integer> colRow;
-    @FXML private TableColumn<ProductImportItem, String> colCode;
-    @FXML private TableColumn<ProductImportItem, String> colName;
-    @FXML private TableColumn<ProductImportItem, String> colUnit;
-    @FXML private TableColumn<ProductImportItem, String> colCategory;
-    @FXML private TableColumn<ProductImportItem, String> colCostPrice;
-    @FXML private TableColumn<ProductImportItem, String> colPrice;
-    @FXML private TableColumn<ProductImportItem, String> colInitialStock;
-    @FXML private TableColumn<ProductImportItem, String> colNote;
-    @FXML private TableColumn<ProductImportItem, String> colError;
+    @FXML private TableView<CustomerImportItem> tableView;
+    @FXML private TableColumn<CustomerImportItem, Integer> colRow;
+    @FXML private TableColumn<CustomerImportItem, String> colCode;
+    @FXML private TableColumn<CustomerImportItem, String> colName;
+    @FXML private TableColumn<CustomerImportItem, String> colPhone;
+    @FXML private TableColumn<CustomerImportItem, String> colEmail;
+    @FXML private TableColumn<CustomerImportItem, String> colDob;
+    @FXML private TableColumn<CustomerImportItem, String> colGender;
+    @FXML private TableColumn<CustomerImportItem, String> colAddress;
+    @FXML private TableColumn<CustomerImportItem, String> colNote;
+    @FXML private TableColumn<CustomerImportItem, String> colError;
 
     @FXML private ProgressIndicator progressIndicator;
     @FXML private Label lblProgress;
     @FXML private Button btnConfirm;
 
-    private final ImportExportService importExportService = new ImportExportService();
-    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+    private final CustomerImportExportService importExportService = new CustomerImportExportService();
 
     private File currentFile;
-    private ImportExportService.ImportResult currentResult;
+    private CustomerImportExportService.CustomerImportResult currentResult;
     private Runnable onImportSuccessCallback;
 
     @FXML
@@ -65,7 +64,7 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(String.valueOf(item));
-                    ProductImportItem rowItem = getRowItem(this);
+                    CustomerImportItem rowItem = getRowItem(this);
                     if (rowItem != null && rowItem.hasError()) {
                         setStyle("-fx-background-color: #FEF2F2; -fx-text-fill: #991B1B; -fx-font-weight: bold; -fx-alignment: CENTER;");
                     } else {
@@ -85,7 +84,7 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
+                    CustomerImportItem rowItem = getRowItem(this);
                     if (rowItem != null && rowItem.isCodeError()) {
                         setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
@@ -105,7 +104,7 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
+                    CustomerImportItem rowItem = getRowItem(this);
                     if (rowItem != null && rowItem.isNameError()) {
                         setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
@@ -115,8 +114,8 @@ public class ProductImportDialogController {
             }
         });
 
-        colUnit.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUnitName()));
-        colUnit.setCellFactory(column -> new TableCell<>() {
+        colPhone.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getPhone()));
+        colPhone.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -125,8 +124,8 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
-                    if (rowItem != null && rowItem.isUnitError()) {
+                    CustomerImportItem rowItem = getRowItem(this);
+                    if (rowItem != null && rowItem.isPhoneError()) {
                         setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
                         setStyle("");
@@ -135,8 +134,8 @@ public class ProductImportDialogController {
             }
         });
 
-        colCategory.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategoryName()));
-        colCategory.setCellFactory(column -> new TableCell<>() {
+        colEmail.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEmail()));
+        colEmail.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -145,8 +144,8 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
-                    if (rowItem != null && rowItem.isCategoryError()) {
+                    CustomerImportItem rowItem = getRowItem(this);
+                    if (rowItem != null && rowItem.isEmailError()) {
                         setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
                         setStyle("");
@@ -155,14 +154,17 @@ public class ProductImportDialogController {
             }
         });
 
-        colCostPrice.setCellValueFactory(data -> {
-            ProductImportItem item = data.getValue();
-            if (item.isCostPriceError()) {
-                return new SimpleStringProperty(item.getCostPriceStr());
+        colDob.setCellValueFactory(data -> {
+            CustomerImportItem item = data.getValue();
+            if (item.isDobError()) {
+                return new SimpleStringProperty(item.getDateOfBirthStr());
             }
-            return new SimpleStringProperty(currencyFormat.format(item.getCostPrice()));
+            if (item.getDateOfBirth() != null) {
+                return new SimpleStringProperty(item.getDateOfBirth().format(DATE_FORMATTER));
+            }
+            return new SimpleStringProperty("");
         });
-        colCostPrice.setCellFactory(column -> new TableCell<>() {
+        colDob.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -171,24 +173,27 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
-                    if (rowItem != null && rowItem.isCostPriceError()) {
-                        setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold; -fx-alignment: CENTER_RIGHT;");
+                    CustomerImportItem rowItem = getRowItem(this);
+                    if (rowItem != null && rowItem.isDobError()) {
+                        setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
-                        setStyle("-fx-alignment: CENTER_RIGHT;");
+                        setStyle("");
                     }
                 }
             }
         });
 
-        colPrice.setCellValueFactory(data -> {
-            ProductImportItem item = data.getValue();
-            if (item.isPriceError()) {
-                return new SimpleStringProperty(item.getSalePriceStr());
+        colGender.setCellValueFactory(data -> {
+            CustomerImportItem item = data.getValue();
+            if (item.isGenderError()) {
+                return new SimpleStringProperty(item.getGenderStr());
             }
-            return new SimpleStringProperty(currencyFormat.format(item.getSalePrice()));
+            if (item.getGender() != null) {
+                return new SimpleStringProperty(item.getGender().toString());
+            }
+            return new SimpleStringProperty("");
         });
-        colPrice.setCellFactory(column -> new TableCell<>() {
+        colGender.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -197,42 +202,17 @@ public class ProductImportDialogController {
                     setStyle("");
                 } else {
                     setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
-                    if (rowItem != null && rowItem.isPriceError()) {
-                        setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold; -fx-alignment: CENTER_RIGHT;");
+                    CustomerImportItem rowItem = getRowItem(this);
+                    if (rowItem != null && rowItem.isGenderError()) {
+                        setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold;");
                     } else {
-                        setStyle("-fx-alignment: CENTER_RIGHT;");
+                        setStyle("");
                     }
                 }
             }
         });
 
-        colInitialStock.setCellValueFactory(data -> {
-            ProductImportItem item = data.getValue();
-            if (item.isStockError()) {
-                return new SimpleStringProperty(item.getInitialStockStr());
-            }
-            return new SimpleStringProperty(String.valueOf(item.getInitialStock()));
-        });
-        colInitialStock.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                    setStyle("");
-                } else {
-                    setText(item);
-                    ProductImportItem rowItem = getRowItem(this);
-                    if (rowItem != null && rowItem.isStockError()) {
-                        setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-font-weight: bold; -fx-alignment: CENTER_RIGHT;");
-                    } else {
-                        setStyle("-fx-alignment: CENTER_RIGHT;");
-                    }
-                }
-            }
-        });
-
+        colAddress.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getAddress()));
         colNote.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNote()));
 
         colError.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getErrorMessage()));
@@ -266,8 +246,8 @@ public class ProductImportDialogController {
         });
     }
 
-    private ProductImportItem getRowItem(TableCell<?, ?> cell) {
-        if (cell.getTableRow() != null && cell.getTableRow().getItem() instanceof ProductImportItem item) {
+    private CustomerImportItem getRowItem(TableCell<?, ?> cell) {
+        if (cell.getTableRow() != null && cell.getTableRow().getItem() instanceof CustomerImportItem item) {
             return item;
         }
         int index = cell.getIndex();
@@ -277,15 +257,15 @@ public class ProductImportDialogController {
         return null;
     }
 
-    public void setData(File file, ImportExportService.ImportResult result, Runnable onImportSuccess) {
+    public void setData(File file, CustomerImportExportService.CustomerImportResult result, Runnable onImportSuccess) {
         this.currentFile = file;
         this.currentResult = result;
         this.onImportSuccessCallback = onImportSuccess;
 
         if (!result.isAllValid()) {
-            // Chỉ hiển thị (preview) những dòng bị lỗi theo yêu cầu người dùng
-            java.util.List<ProductImportItem> errorRows = result.getAllRows().stream()
-                    .filter(ProductImportItem::hasError)
+            // Chỉ hiển thị (preview) những dòng bị lỗi
+            java.util.List<CustomerImportItem> errorRows = result.getAllRows().stream()
+                    .filter(CustomerImportItem::hasError)
                     .toList();
             tableView.getItems().setAll(errorRows);
 
@@ -311,18 +291,18 @@ public class ProductImportDialogController {
     @FXML
     private void handleDownloadTemplate() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Lưu file Excel mẫu nhập hàng hóa");
+        fileChooser.setTitle("Lưu file Excel mẫu nhập khách hàng");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
-        fileChooser.setInitialFileName("mau-nhap-hang-hoa.xlsx");
+        fileChooser.setInitialFileName("mau-nhap-khach-hang.xlsx");
 
         Stage stage = (Stage) tableView.getScene().getWindow();
         File saveFile = fileChooser.showSaveDialog(stage);
         if (saveFile != null) {
             try {
-                importExportService.generateImportTemplate(saveFile);
+                importExportService.generateTemplate(saveFile);
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tải file mẫu Excel thành công!");
             } catch (Exception e) {
-                log.error("Lỗi khi tạo file mẫu Excel: {}", e.getMessage(), e);
+                log.error("Lỗi khi tạo file mẫu Excel khách hàng: {}", e.getMessage(), e);
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo file mẫu: " + e.getMessage());
             }
         }
@@ -338,7 +318,7 @@ public class ProductImportDialogController {
         btnConfirm.setDisable(true);
         progressIndicator.setVisible(true);
         progressIndicator.setManaged(true);
-        lblProgress.setText("Đang nhập dữ liệu vào hệ thống...");
+        lblProgress.setText("Đang nhập dữ liệu khách hàng vào hệ thống...");
 
         Task<Void> importTask = new Task<>() {
             @Override
@@ -353,7 +333,7 @@ public class ProductImportDialogController {
                 progressIndicator.setVisible(false);
                 progressIndicator.setManaged(false);
                 lblProgress.setText("");
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Import thành công!");
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Import thành công " + currentResult.getValidRows() + " khách hàng!");
                 if (onImportSuccessCallback != null) {
                     onImportSuccessCallback.run();
                 }
@@ -368,7 +348,7 @@ public class ProductImportDialogController {
                 lblProgress.setText("");
                 btnConfirm.setDisable(false);
                 Throwable ex = importTask.getException();
-                log.error("Lỗi khi thực hiện import vào CSDL: {}", ex.getMessage(), ex);
+                log.error("Lỗi khi thực hiện import khách hàng vào CSDL: {}", ex.getMessage(), ex);
                 showAlert(Alert.AlertType.ERROR, "Lỗi Import", "Đã xảy ra lỗi khi lưu vào cơ sở dữ liệu:\n" + ex.getMessage());
             });
         });

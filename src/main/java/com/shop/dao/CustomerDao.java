@@ -19,54 +19,10 @@ public class CustomerDao {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void insert(Customer customer) throws SQLException {
-        String query = "INSERT INTO customers (code, name, phone, email, date_of_birth, gender, address, note, is_active, created_at) " +
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                int nextId = 1;
-                try (PreparedStatement stmt = conn.prepareStatement("SELECT IFNULL(MAX(id), 0) + 1 FROM customers");
-                     ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        nextId = rs.getInt(1);
-                    }
-                }
-                
-                String code = "KH" + String.format("%05d", nextId);
-                customer.setCode(code);
-                customer.setCreatedAt(LocalDateTime.now().format(FORMATTER));
-                
-                try (PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-                    pstmt.setString(1, customer.getCode());
-                    pstmt.setString(2, customer.getName());
-                    pstmt.setString(3, customer.getPhone());
-                    pstmt.setString(4, customer.getEmail());
-                    pstmt.setString(5, customer.getDateOfBirth() != null ? customer.getDateOfBirth().toString() : null);
-                    pstmt.setString(6, customer.getGender() != null ? customer.getGender().name() : null);
-                    pstmt.setString(7, customer.getAddress());
-                    pstmt.setString(8, customer.getNote());
-                    pstmt.setInt(9, customer.isActive() ? 1 : 0);
-                    pstmt.setString(10, customer.getCreatedAt());
-                    
-                    pstmt.executeUpdate();
-                    
-                    try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            int actualId = rs.getInt(1);
-                            customer.setId(actualId);
-                            // Correct code if it mismatched
-                            if (actualId != nextId) {
-                                String actualCode = "KH" + String.format("%05d", actualId);
-                                try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE customers SET code = ? WHERE id = ?")) {
-                                    updateStmt.setString(1, actualCode);
-                                    updateStmt.setInt(2, actualId);
-                                    updateStmt.executeUpdate();
-                                }
-                                customer.setCode(actualCode);
-                            }
-                        }
-                    }
-                }
+                insert(conn, customer);
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
@@ -76,6 +32,61 @@ public class CustomerDao {
             }
         }
     }
+
+    public void insert(Connection conn, Customer customer) throws SQLException {
+        String query = "INSERT INTO customers (code, name, phone, email, date_of_birth, gender, address, note, is_active, created_at) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        int nextId = 1;
+        try (PreparedStatement stmt = conn.prepareStatement("SELECT IFNULL(MAX(id), 0) + 1 FROM customers");
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                nextId = rs.getInt(1);
+            }
+        }
+
+        if (customer.getCode() == null || customer.getCode().trim().isEmpty()) {
+            String code = "KH" + String.format("%05d", nextId);
+            customer.setCode(code);
+        }
+        if (customer.getCreatedAt() == null || customer.getCreatedAt().trim().isEmpty()) {
+            customer.setCreatedAt(LocalDateTime.now().format(FORMATTER));
+        }
+
+        try (PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, customer.getCode());
+            pstmt.setString(2, customer.getName());
+            pstmt.setString(3, customer.getPhone());
+            pstmt.setString(4, customer.getEmail());
+            pstmt.setString(5, customer.getDateOfBirth() != null ? customer.getDateOfBirth().toString() : null);
+            pstmt.setString(6, customer.getGender() != null ? customer.getGender().name() : null);
+            pstmt.setString(7, customer.getAddress());
+            pstmt.setString(8, customer.getNote());
+            pstmt.setInt(9, customer.isActive() ? 1 : 0);
+            pstmt.setString(10, customer.getCreatedAt());
+
+            pstmt.executeUpdate();
+
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int actualId = rs.getInt(1);
+                    customer.setId(actualId);
+                    // Nếu id sinh ra thực tế khác nextId ban đầu (do xóa bản ghi cũ trước đó) và mã tự sinh KHxxxxx bị lệch
+                    if (customer.getCode().startsWith("KH") && customer.getCode().length() == 7) {
+                        String actualCode = "KH" + String.format("%05d", actualId);
+                        if (!actualCode.equals(customer.getCode())) {
+                            try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE customers SET code = ? WHERE id = ?")) {
+                                updateStmt.setString(1, actualCode);
+                                updateStmt.setInt(2, actualId);
+                                updateStmt.executeUpdate();
+                            }
+                            customer.setCode(actualCode);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     public void update(Customer customer) throws SQLException {
         String query = "UPDATE customers SET name = ?, phone = ?, email = ?, date_of_birth = ?, gender = ?, address = ?, note = ?, is_active = ? WHERE id = ?";

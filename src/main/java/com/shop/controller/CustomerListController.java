@@ -120,14 +120,105 @@ public class CustomerListController {
         openFormDialog(null);
     }
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(CustomerListController.class);
+    private final com.shop.service.CustomerImportExportService customerImportExportService = new com.shop.service.CustomerImportExportService();
+
+    @FXML
+    private void handleDownloadTemplate() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Lưu file Excel mẫu nhập khách hàng");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fileChooser.setInitialFileName("mau-nhap-khach-hang.xlsx");
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) customerTable.getScene().getWindow();
+        java.io.File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile != null) {
+            try {
+                customerImportExportService.generateTemplate(saveFile);
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã tải file mẫu Excel thành công!");
+            } catch (Exception e) {
+                log.error("Lỗi khi tạo file mẫu Excel khách hàng: {}", e.getMessage(), e);
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo file mẫu: " + e.getMessage());
+            }
+        }
+    }
+
     @FXML
     private void handleImport() {
-        System.out.println("Import clicked");
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Chọn file Excel danh sách khách hàng cần nhập");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) customerTable.getScene().getWindow();
+        java.io.File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                com.shop.service.CustomerImportExportService.CustomerImportResult result = customerImportExportService.validateImport(file);
+
+                javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/customer-import-dialog.fxml"));
+                javafx.scene.Parent root = loader.load();
+
+                CustomerImportDialogController dialogController = loader.getController();
+                dialogController.setData(file, result, this::loadData);
+
+                javafx.stage.Stage dialogStage = new javafx.stage.Stage();
+                dialogStage.setTitle("Xem trước nhập file Excel: " + file.getName());
+                dialogStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                dialogStage.initOwner(stage);
+                dialogStage.setScene(new javafx.scene.Scene(root));
+                dialogStage.showAndWait();
+
+            } catch (Exception e) {
+                log.error("Lỗi khi đọc file hoặc mở hộp thoại nhập Excel khách hàng: {}", e.getMessage(), e);
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể đọc file Excel: " + e.getMessage());
+            }
+        }
     }
 
     @FXML
     private void handleExport() {
-        System.out.println("Export clicked");
+        List<Customer> items = customerTable.getItems();
+        if (items == null || items.isEmpty()) {
+            showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Không có dữ liệu khách hàng để xuất Excel.");
+            return;
+        }
+
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Xuất danh sách khách hàng ra Excel");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fileChooser.setInitialFileName("danh-sach-khach-hang.xlsx");
+
+        javafx.stage.Stage stage = (javafx.stage.Stage) customerTable.getScene().getWindow();
+        java.io.File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            Task<Void> exportTask = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    customerImportExportService.exportCustomers(file, items);
+                    return null;
+                }
+            };
+
+            exportTask.setOnSucceeded(e -> javafx.application.Platform.runLater(() ->
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Xuất file Excel thành công!")
+            ));
+
+            exportTask.setOnFailed(e -> javafx.application.Platform.runLater(() -> {
+                Throwable ex = exportTask.getException();
+                log.error("Lỗi khi xuất danh sách khách hàng ra Excel: {}", ex.getMessage(), ex);
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể xuất file Excel: " + ex.getMessage());
+            }));
+
+            new Thread(exportTask).start();
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     private void handleDetail(Customer customer) {
