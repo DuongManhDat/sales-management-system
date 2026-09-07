@@ -9,9 +9,9 @@
     <Label text="Kiểm Kho (Điều chỉnh tồn kho)" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
 
     <HBox spacing="16" alignment="CENTER_LEFT">
-        <Label text="Thêm hàng hóa:"/>
-        <ComboBox fx:id="comboProductSearch" editable="true" prefWidth="300" promptText="Gõ mã hoặc tên hàng hóa..." styleClass="flat-input"/>
-        <Button text="Thêm" onAction="#handleAddProduct" styleClass="btn-secondary"/>
+        <Label text="Thêm hàng hóa:" style="-fx-font-weight: bold;"/>
+        <ComboBox fx:id="comboProductSearch" editable="true" prefWidth="380" promptText="Gõ mã hoặc tên hàng hóa (nhấn Enter để thêm)..." styleClass="flat-input"/>
+        <Button text="Thêm" onAction="#handleAddProduct" styleClass="btn-primary"/>
         
         <Region HBox.hgrow="ALWAYS" />
         <Label text="Ngày kiểm kho:"/>

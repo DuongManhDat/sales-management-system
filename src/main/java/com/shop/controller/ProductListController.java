@@ -224,6 +224,12 @@ public class ProductListController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/stock-adjustment-view.fxml"));
             Parent root = loader.load();
 
+            StockAdjustmentController controller = loader.getController();
+            Product selected = productTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                controller.addProductDirectly(selected);
+            }
+
             Stage stage = new Stage();
             stage.setTitle("Kiểm kho (Điều chỉnh tồn kho)");
             stage.initModality(Modality.APPLICATION_MODAL);
