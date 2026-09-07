@@ -21,10 +21,10 @@
         <TextField fx:id="txtName" promptText="Nhập tên hàng hóa" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
         <Label text="Đơn vị:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <ComboBox fx:id="comboUnit" prefWidth="MAX_VALUE" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="comboUnit" maxWidth="Infinity" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
         <Label text="Danh mục:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <ComboBox fx:id="comboCategory" prefWidth="MAX_VALUE" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        <ComboBox fx:id="comboCategory" maxWidth="Infinity" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
         <Label text="Giá bán:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
         <TextField fx:id="txtPrice" promptText="Nhập giá bán" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="4"/>

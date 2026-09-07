@@ -11,11 +11,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
 
 public class ProductFormController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductFormController.class);
 
     @FXML private Label lblTitle;
     @FXML private TextField txtCode;
@@ -58,27 +62,31 @@ public class ProductFormController {
     }
 
     private void setupComboBoxes() {
-        List<Unit> units = unitDao.findAllActive();
-        comboUnit.getItems().setAll(units);
-        comboUnit.setConverter(new StringConverter<>() {
-            @Override public String toString(Unit object) { return object != null ? object.getName() : ""; }
-            @Override public Unit fromString(String string) { return null; }
-        });
-        
-        comboUnit.valueProperty().addListener((obs, oldV, newV) -> {
-            if (newV != null) viewModel.unitIdProperty().set(newV.getId());
-        });
+        try {
+            List<Unit> units = unitDao.findAllActive();
+            comboUnit.getItems().setAll(units);
+            comboUnit.setConverter(new StringConverter<>() {
+                @Override public String toString(Unit object) { return object != null ? object.getName() : ""; }
+                @Override public Unit fromString(String string) { return null; }
+            });
+            
+            comboUnit.valueProperty().addListener((obs, oldV, newV) -> {
+                if (newV != null) viewModel.unitIdProperty().set(newV.getId());
+            });
 
-        List<Category> categories = categoryDao.findAllActive();
-        comboCategory.getItems().setAll(categories);
-        comboCategory.setConverter(new StringConverter<>() {
-            @Override public String toString(Category object) { return object != null ? object.getName() : ""; }
-            @Override public Category fromString(String string) { return null; }
-        });
-        
-        comboCategory.valueProperty().addListener((obs, oldV, newV) -> {
-            if (newV != null) viewModel.categoryIdProperty().set(newV.getId());
-        });
+            List<Category> categories = categoryDao.findAllActive();
+            comboCategory.getItems().setAll(categories);
+            comboCategory.setConverter(new StringConverter<>() {
+                @Override public String toString(Category object) { return object != null ? object.getName() : ""; }
+                @Override public Category fromString(String string) { return null; }
+            });
+            
+            comboCategory.valueProperty().addListener((obs, oldV, newV) -> {
+                if (newV != null) viewModel.categoryIdProperty().set(newV.getId());
+            });
+        } catch (Exception e) {
+            log.error("Lỗi khi tải dữ liệu đơn vị tính hoặc danh mục: {}", e.getMessage(), e);
+        }
     }
 
     public void setProduct(Product product) {
@@ -107,14 +115,24 @@ public class ProductFormController {
             if (currentProduct == null) {
                 Product newProduct = new Product();
                 viewModel.updateProduct(newProduct);
-                productService.addProduct(newProduct);
+                log.info("Đang thêm mới hàng hóa: name='{}', unitId={}, categoryId={}, salePrice={}",
+                        newProduct.getName(), newProduct.getUnitId(), newProduct.getCategoryId(), newProduct.getSalePrice());
+                int createdId = productService.addProduct(newProduct);
+                log.info("Thêm mới hàng hóa thành công với ID={}", createdId);
             } else {
                 viewModel.updateProduct(currentProduct);
+                log.info("Đang cập nhật hàng hóa ID={}, code='{}', name='{}'",
+                        currentProduct.getId(), currentProduct.getCode(), currentProduct.getName());
                 productService.updateProduct(currentProduct);
+                log.info("Cập nhật hàng hóa ID={} thành công", currentProduct.getId());
             }
             closeDialog();
         } catch (SQLException e) {
+            log.error("Lỗi cơ sở dữ liệu khi lưu hàng hóa: {}", e.getMessage(), e);
             showAlert("Lỗi", "Không thể lưu hàng hóa: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Lỗi không mong muốn khi lưu hàng hóa: {}", e.getMessage(), e);
+            showAlert("Lỗi", "Đã xảy ra lỗi: " + e.getMessage());
         }
     }
 
