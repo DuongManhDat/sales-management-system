@@ -73,4 +73,27 @@ public class UnitDao {
         }
         return count;
     }
+
+    public Unit findByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        String sql = "SELECT id, name, status FROM units WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) AND status = 1 LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name.trim());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Unit u = new Unit();
+                    u.setId(rs.getInt("id"));
+                    u.setName(rs.getString("name"));
+                    u.setStatus(rs.getInt("status"));
+                    return u;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

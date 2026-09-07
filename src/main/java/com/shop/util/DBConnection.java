@@ -14,6 +14,13 @@ public class DBConnection {
     private static HikariDataSource dataSource;
 
     static {
+        initDataSource();
+    }
+
+    private static synchronized void initDataSource() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            return;
+        }
         try {
             // Lấy thư mục %APPDATA%
             String appData = System.getenv("APPDATA");
@@ -58,7 +65,10 @@ public class DBConnection {
         // Private constructor
     }
 
-    public static Connection getConnection() throws SQLException {
+    public static synchronized Connection getConnection() throws SQLException {
+        if (dataSource == null || dataSource.isClosed()) {
+            initDataSource();
+        }
         return dataSource.getConnection();
     }
 

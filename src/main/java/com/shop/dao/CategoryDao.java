@@ -73,4 +73,27 @@ public class CategoryDao {
         }
         return count;
     }
+
+    public Category findByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        String sql = "SELECT id, name, status FROM categories WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) AND status = 1 LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name.trim());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Category c = new Category();
+                    c.setId(rs.getInt("id"));
+                    c.setName(rs.getString("name"));
+                    c.setStatus(rs.getInt("status"));
+                    return c;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
