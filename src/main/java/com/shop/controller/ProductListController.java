@@ -1,23 +1,29 @@
 package com.shop.controller;
 
 import com.shop.model.Product;
+import com.shop.service.ImportExportService;
 import com.shop.service.ProductService;
 import com.shop.viewmodel.ProductListViewModel;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 public class ProductListController {
@@ -40,7 +46,8 @@ public class ProductListController {
 
     private ProductListViewModel viewModel;
     private ProductService productService;
-    private NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+    private final ImportExportService importExportService = new ImportExportService();
+    private final NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
     @FXML
     public void initialize() {
@@ -68,7 +75,14 @@ public class ProductListController {
         
         colPrice.setCellValueFactory(data -> new SimpleStringProperty(currencyFormat.format(data.getValue().getSalePrice())));
         
-        colStock.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.2f", data.getValue().getStockQty())));
+        colStock.setCellValueFactory(data -> {
+            double qty = data.getValue().getStockQty();
+            if (qty == Math.floor(qty)) {
+                return new SimpleStringProperty(String.format("%,d", (long) qty));
+            } else {
+                return new SimpleStringProperty(String.format("%,.2f", qty));
+            }
+        });
         
         colStatus.setCellValueFactory(data -> {
             boolean isDeleted = data.getValue().getDeletedAt() != null;
@@ -224,15 +238,93 @@ public class ProductListController {
     }
 
     @FXML
+    private void handleDownloadTemplate() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Lưu file Excel mẫu nhập hàng hóa");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fileChooser.setInitialFileName("mau-nhap-hang-hoa.xlsx");
+
+        Stage stage = (Stage) productTable.getScene().getWindow();
+        File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile != null) {
+            try {
+                importExportService.generateImportTemplate(saveFile);
+                showAlert("Thành công", "Đã tải file mẫu Excel thành công!");
+            } catch (Exception e) {
+                log.error("Lỗi khi tạo file mẫu Excel: {}", e.getMessage(), e);
+                showAlert("Lỗi", "Không thể tạo file mẫu: " + e.getMessage());
+            }
+        }
+    }
+
+    @FXML
     private void handleExport() {
-        // Simple placeholder for export
-        showAlert("Thông báo", "Chức năng Export Excel chưa được gọi UI.");
+        List<Product> items = productTable.getItems();
+        if (items == null || items.isEmpty()) {
+            showAlert("Thông báo", "Không có dữ liệu hàng hóa để xuất Excel.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Xuất danh sách hàng hóa ra Excel");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+        fileChooser.setInitialFileName("danh-sach-hang-hoa.xlsx");
+
+        Stage stage = (Stage) productTable.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            Task<Void> exportTask = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    importExportService.exportProducts(file, items);
+                    return null;
+                }
+            };
+
+            exportTask.setOnSucceeded(e -> Platform.runLater(() ->
+                    showAlert("Thành công", "Xuất thành công!")
+            ));
+
+            exportTask.setOnFailed(e -> Platform.runLater(() -> {
+                Throwable ex = exportTask.getException();
+                log.error("Lỗi khi xuất danh sách hàng hóa ra Excel: {}", ex.getMessage(), ex);
+                showAlert("Lỗi", "Không thể xuất file Excel: " + ex.getMessage());
+            }));
+
+            new Thread(exportTask).start();
+        }
     }
 
     @FXML
     private void handleImport() {
-        // Simple placeholder for import
-        showAlert("Thông báo", "Chức năng Import Excel chưa được gọi UI.");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Chọn file Excel danh sách hàng hóa cần nhập");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Workbook (*.xlsx)", "*.xlsx"));
+
+        Stage stage = (Stage) productTable.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                ImportExportService.ImportResult result = importExportService.validateImport(file);
+
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/product-import-dialog.fxml"));
+                Parent root = loader.load();
+
+                ProductImportDialogController dialogController = loader.getController();
+                dialogController.setData(file, result, this::loadData);
+
+                Stage dialogStage = new Stage();
+                dialogStage.setTitle("Xem trước nhập file Excel: " + file.getName());
+                dialogStage.initModality(Modality.APPLICATION_MODAL);
+                dialogStage.initOwner(stage);
+                dialogStage.setScene(new Scene(root));
+                dialogStage.showAndWait();
+
+            } catch (Exception e) {
+                log.error("Lỗi khi đọc file hoặc mở hộp thoại nhập Excel: {}", e.getMessage(), e);
+                showAlert("Lỗi", "Không thể đọc file Excel: " + e.getMessage());
+            }
+        }
     }
 
     private void showAlert(String title, String content) {

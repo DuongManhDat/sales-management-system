@@ -40,8 +40,9 @@
         
         <Button text="Lịch sử giá" styleClass="btn-secondary" onAction="#handlePriceHistory"/>
         <Button text="Kiểm kho" styleClass="btn-secondary" onAction="#handleStockAdjustment"/>
-        <Button text="Export" styleClass="btn-secondary" onAction="#handleExport"/>
-        <Button text="Import" styleClass="btn-secondary" onAction="#handleImport"/>
+        <Button text="Tải file mẫu" styleClass="btn-secondary" onAction="#handleDownloadTemplate"/>
+        <Button text="Xuất Excel" styleClass="btn-secondary" onAction="#handleExport"/>
+        <Button text="Nhập Excel" styleClass="btn-secondary" onAction="#handleImport"/>
         <Button text="+ Thêm mới" styleClass="btn-primary" onAction="#handleAdd"/>
     </HBox>
 
