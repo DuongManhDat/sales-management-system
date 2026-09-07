@@ -2,6 +2,8 @@ package com.shop.dao;
 
 import com.shop.model.Product;
 import com.shop.util.DBConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDao {
+    private static final Logger log = LoggerFactory.getLogger(ProductDao.class);
     
     // Create new Product and return the generated ID
     // Note: the code "HH..." is generated after insertion
@@ -42,6 +45,10 @@ public class ProductDao {
                     return id;
                 }
             }
+        } catch (SQLException e) {
+            log.error("Lỗi khi thực thi câu lệnh SQL insert vào bảng products (name='{}', unitId={}): {}",
+                    product.getName(), product.getUnitId(), e.getMessage(), e);
+            throw e;
         }
         throw new SQLException("Insert failed, no ID obtained.");
     }

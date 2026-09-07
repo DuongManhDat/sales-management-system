@@ -12,6 +12,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -19,6 +21,8 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 public class ProductListController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductListController.class);
 
     @FXML private TextField searchField;
     @FXML private ComboBox<String> categoryCombo;
@@ -115,6 +119,7 @@ public class ProductListController {
         try {
             viewModel.setProducts(productService.getAllProducts());
         } catch (SQLException e) {
+            log.error("Lỗi khi tải danh sách hàng hóa: {}", e.getMessage(), e);
             showAlert("Lỗi", "Không thể tải danh sách hàng hóa: " + e.getMessage());
         }
     }
@@ -140,6 +145,7 @@ public class ProductListController {
 
             loadData();
         } catch (IOException e) {
+            log.error("Lỗi khi mở giao diện form hàng hóa: {}", e.getMessage(), e);
             showAlert("Lỗi", "Không thể mở form: " + e.getMessage());
         }
     }
@@ -155,6 +161,7 @@ public class ProductListController {
                     productService.softDelete(product.getId());
                     loadData();
                 } catch (Exception e) {
+                    log.error("Lỗi khi xóa hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
                     showAlert("Lỗi", "Không thể xóa: " + e.getMessage());
                 }
             }
@@ -166,6 +173,7 @@ public class ProductListController {
             productService.restore(product.getId());
             loadData();
         } catch (Exception e) {
+            log.error("Lỗi khi khôi phục hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
             showAlert("Lỗi", "Không thể khôi phục: " + e.getMessage());
         }
     }
@@ -191,6 +199,7 @@ public class ProductListController {
             stage.setScene(new Scene(root));
             stage.showAndWait();
         } catch (IOException e) {
+            log.error("Lỗi khi mở form lịch sử giá cho hàng hóa ID={}: {}", selected.getId(), e.getMessage(), e);
             showAlert("Lỗi", "Không thể mở form: " + e.getMessage());
         }
     }
@@ -209,6 +218,7 @@ public class ProductListController {
 
             loadData();
         } catch (IOException e) {
+            log.error("Lỗi khi mở form kiểm kho: {}", e.getMessage(), e);
             showAlert("Lỗi", "Không thể mở form kiểm kho: " + e.getMessage());
         }
     }
