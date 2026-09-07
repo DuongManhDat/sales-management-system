@@ -28,8 +28,9 @@
         
         <Region HBox.hgrow="ALWAYS" />
         
-        <Button text="Export" styleClass="btn-secondary" onAction="#handleExport"/>
-        <Button text="Import" styleClass="btn-secondary" onAction="#handleImport"/>
+        <Button text="Tải file mẫu" styleClass="btn-secondary" onAction="#handleDownloadTemplate"/>
+        <Button text="Xuất Excel" styleClass="btn-secondary" onAction="#handleExport"/>
+        <Button text="Nhập Excel" styleClass="btn-secondary" onAction="#handleImport"/>
         <Button text="+ Thêm mới" styleClass="btn-primary" onAction="#handleAdd"/>
     </HBox>
 

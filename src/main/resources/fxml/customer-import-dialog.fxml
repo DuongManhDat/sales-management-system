@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox prefHeight="650.0" prefWidth="1080.0" spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ProductImportDialogController">
+<VBox prefHeight="680.0" prefWidth="1200.0" spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerImportDialogController">
 
     <!-- Header bar -->
     <HBox alignment="CENTER_LEFT" spacing="16.0">
-        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Xem trước dữ liệu Nhập hàng hóa" />
+        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Xem trước dữ liệu Nhập khách hàng" />
         <Pane HBox.hgrow="ALWAYS" />
         <Button onAction="#handleDownloadTemplate" styleClass="btn-secondary" text="📥 Tải file mẫu Excel" />
     </HBox>
@@ -22,14 +22,14 @@
     <TableView fx:id="tableView" styleClass="flat-table" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="colRow" prefWidth="55.0" text="Dòng" />
-            <TableColumn fx:id="colCode" prefWidth="95.0" text="Mã hàng" />
-            <TableColumn fx:id="colName" prefWidth="190.0" text="Tên hàng hóa" />
-            <TableColumn fx:id="colUnit" prefWidth="85.0" text="ĐVT" />
-            <TableColumn fx:id="colCategory" prefWidth="110.0" text="Danh mục" />
-            <TableColumn fx:id="colCostPrice" prefWidth="100.0" text="Giá vốn" />
-            <TableColumn fx:id="colPrice" prefWidth="100.0" text="Giá bán" />
-            <TableColumn fx:id="colInitialStock" prefWidth="85.0" text="Tồn kho" />
-            <TableColumn fx:id="colNote" prefWidth="100.0" text="Ghi chú" />
+            <TableColumn fx:id="colCode" prefWidth="95.0" text="Mã KH" />
+            <TableColumn fx:id="colName" prefWidth="170.0" text="Họ và tên" />
+            <TableColumn fx:id="colPhone" prefWidth="110.0" text="Số điện thoại" />
+            <TableColumn fx:id="colEmail" prefWidth="140.0" text="Email" />
+            <TableColumn fx:id="colDob" prefWidth="95.0" text="Ngày sinh" />
+            <TableColumn fx:id="colGender" prefWidth="75.0" text="Giới tính" />
+            <TableColumn fx:id="colAddress" prefWidth="150.0" text="Địa chỉ" />
+            <TableColumn fx:id="colNote" prefWidth="110.0" text="Ghi chú" />
             <TableColumn fx:id="colError" minWidth="300.0" prefWidth="420.0" text="Nguyên nhân lỗi" />
         </columns>
         <columnResizePolicy>
