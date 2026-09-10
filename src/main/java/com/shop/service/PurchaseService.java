@@ -66,4 +66,8 @@ public class PurchaseService {
 
         purchaseDao.createPurchaseTransaction(purchase, items);
     }
+
+    public List<PurchaseItem> getItemsByPurchaseId(int purchaseId) {
+        return purchaseDao.getItemsByPurchaseId(purchaseId);
+    }
 }

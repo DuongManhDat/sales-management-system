@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="16" style="-fx-background-color: #FBFBFA;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PurchaseDetailController" prefWidth="880" prefHeight="620">
+    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Label text="CHI TIẾT PHIẾU NHẬP HÀNG" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblStatus" text="Trạng thái" style="-fx-padding: 4 12; -fx-background-radius: 4; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <!-- Thông tin phiếu nhập -->
+    <GridPane hgap="24" vgap="12" styleClass="bento-card">
+        <columnConstraints>
+            <ColumnConstraints minWidth="90" prefWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+            <ColumnConstraints minWidth="90" prefWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Mã phiếu:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-text-fill: #6b7280;"/>
+        <Label fx:id="lblCode" text="-" style="-fx-font-weight: bold; -fx-text-fill: #111111;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Ngày nhập:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-text-fill: #6b7280;"/>
+        <Label fx:id="lblDate" text="-" style="-fx-text-fill: #111111;" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+        <Label text="Nhà cung cấp:" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-text-fill: #6b7280;"/>
+        <Label fx:id="lblSupplier" text="-" style="-fx-text-fill: #111111;" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Ghi chú:" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-text-fill: #6b7280;"/>
+        <Label fx:id="lblNote" text="-" wrapText="true" style="-fx-text-fill: #111111;" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+    </GridPane>
+
+    <!-- Bảng danh sách hàng hóa -->
+    <VBox spacing="10" styleClass="bento-card" VBox.vgrow="ALWAYS">
+        <Label text="DANH SÁCH HÀNG HÓA NHẬP" style="-fx-font-weight: bold; -fx-text-fill: #111111;"/>
+
+        <TableView fx:id="tableItems" VBox.vgrow="ALWAYS" styleClass="table-view">
+            <placeholder>
+                <Label text="Không có mặt hàng nào"/>
+            </placeholder>
+            <columns>
+                <TableColumn fx:id="colIndex" text="STT" prefWidth="50" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colProductCode" text="Mã hàng" prefWidth="130"/>
+                <TableColumn fx:id="colProductName" text="Tên hàng hóa" prefWidth="240"/>
+                <TableColumn fx:id="colUnitName" text="ĐVT" prefWidth="80" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colQty" text="Số lượng" prefWidth="90" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colPrice" text="Đơn giá nhập" prefWidth="130" style="-fx-alignment: CENTER_RIGHT;"/>
+                <TableColumn fx:id="colAmount" text="Thành tiền" prefWidth="140" style="-fx-alignment: CENTER_RIGHT;"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+        <!-- Thống kê tài chính -->
+        <HBox spacing="32" alignment="CENTER_RIGHT" style="-fx-padding: 8 0 0 0;">
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Label text="Tổng tiền:" style="-fx-text-fill: #6b7280;"/>
+                <Label fx:id="lblTotal" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #111111;"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Label text="Đã trả NCC:" style="-fx-text-fill: #6b7280;"/>
+                <Label fx:id="lblPaid" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #15803d;"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Label text="Còn nợ NCC:" style="-fx-text-fill: #6b7280;"/>
+                <Label fx:id="lblDebt" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #dc2626;"/>
+            </HBox>
+        </HBox>
+    </VBox>
+
+    <!-- Nút thao tác -->
+    <HBox alignment="CENTER_RIGHT" spacing="12">
+        <Button text="📊 Xuất Excel" onAction="#handleExportDetail" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+        <Button text="Đóng" onAction="#handleClose" styleClass="btn-secondary" style="-fx-padding: 8 28;"/>
+    </HBox>
+</VBox>

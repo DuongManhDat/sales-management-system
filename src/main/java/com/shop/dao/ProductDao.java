@@ -166,6 +166,24 @@ public class ProductDao {
         return products;
     }
 
+    public Product findByCode(String code) throws SQLException {
+        String query = "SELECT p.*, u.name as unit_name, c.name as category_name " +
+                       "FROM products p " +
+                       "LEFT JOIN units u ON p.unit_id = u.id " +
+                       "LEFT JOIN categories c ON p.category_id = c.id " +
+                       "WHERE p.code = ? AND p.deleted_at IS NULL";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, code);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToProduct(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product p = new Product();
         p.setId(rs.getInt("id"));

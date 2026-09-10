@@ -131,6 +131,20 @@ public class SupplierDao {
         return false;
     }
 
+    public Supplier findByCode(String code) throws SQLException {
+        String query = "SELECT * FROM suppliers WHERE code = ? AND is_active = 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, code);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     private Supplier mapRow(ResultSet rs) throws SQLException {
         Supplier s = new Supplier();
         s.setId(rs.getInt("id"));
