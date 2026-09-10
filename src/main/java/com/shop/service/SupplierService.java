@@ -13,6 +13,10 @@ public class SupplierService {
         this.supplierDao = new SupplierDao();
     }
 
+    public List<Supplier> findAllActive() throws java.sql.SQLException {
+        return supplierDao.findAllActive();
+    }
+
     public Task<List<Supplier>> getAllActiveSuppliersTask() {
         return new Task<List<Supplier>>() {
             @Override

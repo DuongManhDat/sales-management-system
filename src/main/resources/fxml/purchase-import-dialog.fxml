@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="680.0" prefWidth="1200.0" spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PurchaseImportDialogController">
+
+    <!-- Header bar -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Xem trước dữ liệu Nhập hàng (Excel)" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleDownloadTemplate" styleClass="btn-secondary" text="📥 Tải file mẫu Excel" />
+    </HBox>
+
+    <!-- Status Banner Box -->
+    <VBox fx:id="bannerBox" spacing="6.0" style="-fx-padding: 14; -fx-background-radius: 4; -fx-border-radius: 4; -fx-border-width: 1;">
+        <Label fx:id="lblBannerTitle" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Trạng thái kiểm tra dữ liệu" />
+        <Label fx:id="lblBannerDesc" style="-fx-font-size: 13px;" text="Chi tiết kết quả kiểm tra..." wrapText="true" />
+    </VBox>
+
+    <!-- Table of records -->
+    <TableView fx:id="tableView" styleClass="flat-table" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colRow" prefWidth="55.0" text="Dòng" />
+            <TableColumn fx:id="colPurchaseCode" prefWidth="105.0" text="Mã phiếu" />
+            <TableColumn fx:id="colSupplierCode" prefWidth="95.0" text="Mã NCC" />
+            <TableColumn fx:id="colPurchaseDate" prefWidth="95.0" text="Ngày nhập" />
+            <TableColumn fx:id="colPaidAmount" prefWidth="110.0" text="Tiền trả NCC" />
+            <TableColumn fx:id="colProductCode" prefWidth="95.0" text="Mã hàng" />
+            <TableColumn fx:id="colProductName" prefWidth="160.0" text="Tên hàng hóa" />
+            <TableColumn fx:id="colUnit" prefWidth="65.0" text="ĐVT" />
+            <TableColumn fx:id="colQuantity" prefWidth="75.0" text="Số lượng" />
+            <TableColumn fx:id="colUnitPrice" prefWidth="105.0" text="Đơn giá nhập" />
+            <TableColumn fx:id="colLineTotal" prefWidth="115.0" text="Thành tiền" />
+            <TableColumn fx:id="colError" minWidth="280.0" prefWidth="360.0" text="Nguyên nhân lỗi" />
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+        </columnResizePolicy>
+    </TableView>
+
+    <!-- Bottom Actions -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0">
+        <ProgressIndicator fx:id="progressIndicator" managed="false" prefHeight="24.0" prefWidth="24.0" visible="false" />
+        <Label fx:id="lblProgress" style="-fx-text-fill: #4B5563; -fx-font-size: 13px;" text="" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleCancel" styleClass="btn-secondary" text="Hủy bỏ" />
+        <Button fx:id="btnConfirm" onAction="#handleConfirmImport" styleClass="btn-primary" text="Xác nhận Import" />
+    </HBox>
+
+</VBox>
