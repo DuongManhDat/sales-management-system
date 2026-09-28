@@ -42,7 +42,7 @@ public class StockAdjustmentListController {
 
     private void setupTable() {
         colCode.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCode()));
-        colDate.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCreatedAt()));
+        colDate.setCellValueFactory(cellData -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(cellData.getValue().getCreatedAt())));
         colNote.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNote()));
 
         tableAdjustments.setItems(adjustmentList);

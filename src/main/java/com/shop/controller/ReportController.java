@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javafx.util.StringConverter;
 
 public class ReportController {
 
@@ -71,6 +72,29 @@ public class ReportController {
     }
 
     private void setupDatePickers() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.trim().isEmpty()) {
+                    return LocalDate.parse(string.trim(), formatter);
+                }
+                return null;
+            }
+        };
+
+        dpRevStart.setConverter(converter);
+        dpRevEnd.setConverter(converter);
+        dpProdStart.setConverter(converter);
+        dpProdEnd.setConverter(converter);
+        dpInvStart.setConverter(converter);
+        dpInvEnd.setConverter(converter);
+
         LocalDate today = LocalDate.now();
         LocalDate startOfMonth = today.withDayOfMonth(1);
         
@@ -88,7 +112,7 @@ public class ReportController {
         // Revenue Table
         colRevDate.setCellValueFactory(cellData -> {
             LocalDate d = cellData.getValue().getDate();
-            return new SimpleStringProperty(d != null ? d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "");
+            return new SimpleStringProperty(d != null ? d.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) : "");
         });
         colRevRevenue.setCellValueFactory(cellData -> 
             new SimpleStringProperty(FormatterUtil.formatCurrency(new BigDecimal(cellData.getValue().getRevenue()))));

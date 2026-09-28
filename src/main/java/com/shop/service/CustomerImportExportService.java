@@ -30,7 +30,8 @@ public class CustomerImportExportService {
     private final CustomerDao customerDao = new CustomerDao();
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-    private static final DateTimeFormatter DATE_FORMATTER_VN = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER_VN = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER_SLASH = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter DATE_FORMATTER_ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATE_FORMATTER_DASH = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
@@ -85,7 +86,7 @@ public class CustomerImportExportService {
                     "Họ và tên (*)",
                     "Số điện thoại (*)",
                     "Email",
-                    "Ngày sinh (dd/MM/yyyy)",
+                    "Ngày sinh (dd-MM-yyyy)",
                     "Giới tính",
                     "Địa chỉ",
                     "Ghi chú"
@@ -130,7 +131,7 @@ public class CustomerImportExportService {
             c1_2.setCellStyle(textStyle);
             c1_2.setCellValue("0912345678");
             sampleRow1.createCell(3).setCellValue("nguyenvanan@gmail.com");
-            sampleRow1.createCell(4).setCellValue("15/05/1990");
+            sampleRow1.createCell(4).setCellValue("15-05-1990");
             sampleRow1.createCell(5).setCellValue("Nam");
             sampleRow1.createCell(6).setCellValue("123 Hoàng Hoa Thám, Hà Nội");
             sampleRow1.createCell(7).setCellValue("Khách hàng thân thiết");
@@ -145,7 +146,7 @@ public class CustomerImportExportService {
             c2_2.setCellStyle(textStyle);
             c2_2.setCellValue("0987654321");
             sampleRow2.createCell(3).setCellValue("binhtran@yahoo.com");
-            sampleRow2.createCell(4).setCellValue("20/10/1995");
+            sampleRow2.createCell(4).setCellValue("20-10-1995");
             sampleRow2.createCell(5).setCellValue("Nữ");
             sampleRow2.createCell(6).setCellValue("456 Lê Lợi, TP. Hồ Chí Minh");
             sampleRow2.createCell(7).setCellValue("Mã khách hàng sẽ tự động sinh");
@@ -270,7 +271,7 @@ public class CustomerImportExportService {
                 if (dobCell != null && !dobStr.isEmpty()) {
                     if (parsedDob == null) {
                         item.setDobError(true);
-                        item.addErrorMessage("Ngày sinh '" + dobStr + "' không đúng định dạng (dd/MM/yyyy hoặc yyyy-MM-dd)");
+                        item.addErrorMessage("Ngày sinh '" + dobStr + "' không đúng định dạng (dd-MM-yyyy hoặc yyyy-MM-dd)");
                     } else {
                         item.setDateOfBirth(parsedDob);
                     }
@@ -480,6 +481,10 @@ public class CustomerImportExportService {
 
         try {
             return LocalDate.parse(str, DATE_FORMATTER_VN);
+        } catch (Exception ignored) {}
+
+        try {
+            return LocalDate.parse(str, DATE_FORMATTER_SLASH);
         } catch (Exception ignored) {}
 
         try {

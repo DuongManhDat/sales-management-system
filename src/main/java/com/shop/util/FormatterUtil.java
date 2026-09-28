@@ -12,8 +12,8 @@ public class FormatterUtil {
     
     private static final Locale VI_LOCALE = new Locale("vi", "VN");
     private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(VI_LOCALE);
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final DateTimeFormatter DATE_FORMAT_DASH = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public static String formatCurrency(BigDecimal amount) {
@@ -45,6 +45,16 @@ public class FormatterUtil {
     public static String formatDate(LocalDateTime date) {
         if (date == null) return "";
         return date.format(DATE_FORMAT);
+    }
+
+    public static String formatDateToDdMmYyyy(LocalDate date) {
+        if (date == null) return "";
+        return date.format(DATE_FORMAT_DASH);
+    }
+
+    public static String formatDateToDdMmYyyy(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        return dateTime.format(DATE_FORMAT_DASH);
     }
 
     public static String formatDateToDdMmYyyy(String rawDate) {
@@ -87,5 +97,45 @@ public class FormatterUtil {
             return "Còn nợ";
         }
         return status;
+    }
+
+    public static String formatInvoiceStatus(String status) {
+        if (status == null || status.trim().isEmpty()) return "Đã thanh toán";
+        String s = status.trim().toUpperCase();
+        switch (s) {
+            case "PAID":
+            case "ĐÃ THANH TOÁN":
+            case "DA THANH TOAN":
+                return "Đã thanh toán";
+            case "DEBT":
+            case "UNPAID":
+            case "PARTIAL":
+            case "CÒN NỢ":
+            case "CON NO":
+                return "Còn nợ";
+            case "PENDING":
+            case "ĐANG XỬ LÝ":
+            case "DANG XU LY":
+                return "Đang xử lý";
+            case "CANCELLED":
+            case "CANCELED":
+            case "ĐÃ HỦY":
+            case "DA HUY":
+                return "Đã hủy";
+            case "COMPLETED":
+            case "ĐÃ HOÀN THÀNH":
+            case "DA HOAN THANH":
+                return "Đã hoàn thành";
+            default:
+                return status;
+        }
+    }
+
+    public static String formatInvoiceStatus(com.shop.model.Invoice invoice) {
+        if (invoice == null) return "";
+        if (invoice.getStatus() != null && !invoice.getStatus().trim().isEmpty()) {
+            return formatInvoiceStatus(invoice.getStatus());
+        }
+        return invoice.getDebt() > 0 ? "Còn nợ" : "Đã thanh toán";
     }
 }

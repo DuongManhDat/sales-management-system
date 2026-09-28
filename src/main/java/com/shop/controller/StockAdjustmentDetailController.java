@@ -54,7 +54,7 @@ public class StockAdjustmentDetailController {
     public void setAdjustment(StockAdjustment adjustment) {
         if (adjustment == null) return;
         lblCode.setText(adjustment.getCode());
-        lblDate.setText(adjustment.getCreatedAt());
+        lblDate.setText(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(adjustment.getCreatedAt()));
         lblNote.setText(adjustment.getNote());
         loadItems(adjustment.getId());
     }

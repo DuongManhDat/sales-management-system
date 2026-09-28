@@ -34,7 +34,7 @@ public class PriceHistoryController {
     }
 
     private void setupColumns() {
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getChangedAt()));
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getChangedAt())));
         colOldPrice.setCellValueFactory(data -> new SimpleStringProperty(currencyFormat.format(data.getValue().getOldPrice())));
         colNewPrice.setCellValueFactory(data -> new SimpleStringProperty(currencyFormat.format(data.getValue().getNewPrice())));
     }

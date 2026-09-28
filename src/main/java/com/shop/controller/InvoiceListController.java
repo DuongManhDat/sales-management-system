@@ -36,12 +36,39 @@ public class InvoiceListController {
         statusFilter.getSelectionModel().selectFirst();
         
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getInvoiceDate()));
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
         colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
         colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
         colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
         colDebt.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getDebt()));
-        colStatus.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getStatus()));
+        colStatus.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatInvoiceStatus(data.getValue())));
+        colStatus.setCellFactory(column -> new javafx.scene.control.TableCell<Invoice, String>() {
+            private final javafx.scene.control.Label badge = new javafx.scene.control.Label();
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.trim().isEmpty()) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    badge.setText(item);
+                    if ("Đã thanh toán".equalsIgnoreCase(item) || "Đã hoàn thành".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #ECFDF5; -fx-text-fill: #047857; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Còn nợ".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #FEF2F2; -fx-text-fill: #B91C1C; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Đang xử lý".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #EFF6FF; -fx-text-fill: #1D4ED8; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Đã hủy".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #4B5563; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #374151; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    }
+                    setGraphic(badge);
+                    setText(null);
+                    setStyle("-fx-alignment: CENTER;");
+                }
+            }
+        });
 
         statusFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
         

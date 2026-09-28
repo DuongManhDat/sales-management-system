@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 public class CustomerImportDialogController {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerImportDialogController.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     @FXML private VBox bannerBox;
     @FXML private Label lblBannerTitle;
