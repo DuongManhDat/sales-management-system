@@ -37,7 +37,7 @@ public class DashboardController {
         cboLowStockThreshold.getItems().addAll(5, 10, 20);
         
         // DatePicker formatting
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         datePicker.setConverter(new StringConverter<LocalDate>() {
             @Override
             public String toString(LocalDate date) {

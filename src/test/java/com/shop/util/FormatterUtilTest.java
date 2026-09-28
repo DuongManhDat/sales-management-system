@@ -25,8 +25,8 @@ class FormatterUtilTest {
     @Test
     void testFormatDate() {
         LocalDateTime dt = LocalDateTime.of(2026, 6, 27, 14, 30);
-        assertEquals("27/06/2026 14:30", FormatterUtil.formatDateTime(dt));
-        assertEquals("27/06/2026", FormatterUtil.formatDate(dt));
+        assertEquals("27-06-2026 14:30", FormatterUtil.formatDateTime(dt));
+        assertEquals("27-06-2026", FormatterUtil.formatDate(dt));
     }
 
     @Test
@@ -35,8 +35,17 @@ class FormatterUtilTest {
         assertEquals("10-09-2026", FormatterUtil.formatDateToDdMmYyyy("2026-09-10"));
         assertEquals("10-09-2026", FormatterUtil.formatDateToDdMmYyyy("10/09/2026"));
         assertEquals("10-09-2026", FormatterUtil.formatDateToDdMmYyyy("10-09-2026"));
-        assertEquals("", FormatterUtil.formatDateToDdMmYyyy(null));
+        assertEquals("12-08-2026", FormatterUtil.formatDateToDdMmYyyy("2026-08-12T15:21:57.250781500Z"));
+        assertEquals("", FormatterUtil.formatDateToDdMmYyyy((String) null));
         assertEquals("", FormatterUtil.formatDateToDdMmYyyy("   "));
+
+        java.time.LocalDate ld = java.time.LocalDate.of(2026, 9, 28);
+        assertEquals("28-09-2026", FormatterUtil.formatDateToDdMmYyyy(ld));
+        assertEquals("", FormatterUtil.formatDateToDdMmYyyy((java.time.LocalDate) null));
+
+        java.time.LocalDateTime ldt = java.time.LocalDateTime.of(2026, 9, 28, 22, 30, 0);
+        assertEquals("28-09-2026", FormatterUtil.formatDateToDdMmYyyy(ldt));
+        assertEquals("", FormatterUtil.formatDateToDdMmYyyy((java.time.LocalDateTime) null));
     }
 
     @Test

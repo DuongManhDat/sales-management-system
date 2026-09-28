@@ -32,7 +32,7 @@ public class ReturnListController {
     public void initialize() {
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
         colInvoiceId.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getInvoiceId())));
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getReturnDate()));
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getReturnDate())));
         colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
         colTotalRefund.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotalRefund()));
         colFee.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getReturnFee()));

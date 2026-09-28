@@ -12,8 +12,8 @@ public class FormatterUtil {
     
     private static final Locale VI_LOCALE = new Locale("vi", "VN");
     private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(VI_LOCALE);
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static final DateTimeFormatter DATE_FORMAT_DASH = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     public static String formatCurrency(BigDecimal amount) {
@@ -45,6 +45,16 @@ public class FormatterUtil {
     public static String formatDate(LocalDateTime date) {
         if (date == null) return "";
         return date.format(DATE_FORMAT);
+    }
+
+    public static String formatDateToDdMmYyyy(LocalDate date) {
+        if (date == null) return "";
+        return date.format(DATE_FORMAT_DASH);
+    }
+
+    public static String formatDateToDdMmYyyy(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        return dateTime.format(DATE_FORMAT_DASH);
     }
 
     public static String formatDateToDdMmYyyy(String rawDate) {

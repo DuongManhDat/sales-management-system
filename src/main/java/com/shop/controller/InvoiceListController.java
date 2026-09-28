@@ -36,7 +36,7 @@ public class InvoiceListController {
         statusFilter.getSelectionModel().selectFirst();
         
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getInvoiceDate()));
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
         colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
         colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
         colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));

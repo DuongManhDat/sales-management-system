@@ -25,7 +25,7 @@ public class PdfExporterUtil {
             document.add(new Paragraph(" ")); // empty line
 
             document.add(new Paragraph("Ma HD: " + invoice.getCode()));
-            document.add(new Paragraph("Ngay: " + invoice.getInvoiceDate()));
+            document.add(new Paragraph("Ngay: " + FormatterUtil.formatDateToDdMmYyyy(invoice.getInvoiceDate())));
             document.add(new Paragraph("Khach hang ID: " + invoice.getCustomerId()));
             document.add(new Paragraph(" "));
             

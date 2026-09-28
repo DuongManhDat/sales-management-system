@@ -64,7 +64,9 @@ public class CustomerDetailController {
 
     private void setupTable() {
         colInvoiceCode.setCellValueFactory(new PropertyValueFactory<>("code"));
-        colInvoiceDate.setCellValueFactory(new PropertyValueFactory<>("invoiceDate"));
+        colInvoiceDate.setCellValueFactory(data -> new SimpleStringProperty(
+                FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())
+        ));
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colPaid.setCellValueFactory(new PropertyValueFactory<>("paid"));
         colDebt.setCellValueFactory(new PropertyValueFactory<>("debt"));

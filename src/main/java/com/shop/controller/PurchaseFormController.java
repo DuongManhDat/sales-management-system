@@ -68,6 +68,21 @@ public class PurchaseFormController {
         String autoCode = "PN" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmss"));
         txtCode.setText(autoCode);
 
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        datePicker.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? dateFormatter.format(date) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.trim().isEmpty()) {
+                    return LocalDate.parse(string.trim(), dateFormatter);
+                }
+                return null;
+            }
+        });
         datePicker.setValue(LocalDate.now());
 
         loadSuppliers();
