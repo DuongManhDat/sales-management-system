@@ -3,6 +3,8 @@ package com.shop.controller;
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Customer;
 import com.shop.model.Invoice;
+import com.shop.util.FormatterUtil;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -66,7 +68,74 @@ public class CustomerDetailController {
         colTotal.setCellValueFactory(new PropertyValueFactory<>("total"));
         colPaid.setCellValueFactory(new PropertyValueFactory<>("paid"));
         colDebt.setCellValueFactory(new PropertyValueFactory<>("debt"));
-        colInvoiceStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        colTotal.setCellFactory(column -> new TableCell<Invoice, Long>() {
+            @Override
+            protected void updateItem(Long item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%,d đ", item));
+                }
+                setStyle("-fx-alignment: CENTER-RIGHT;");
+            }
+        });
+
+        colPaid.setCellFactory(column -> new TableCell<Invoice, Long>() {
+            @Override
+            protected void updateItem(Long item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%,d đ", item));
+                }
+                setStyle("-fx-alignment: CENTER-RIGHT;");
+            }
+        });
+
+        colDebt.setCellFactory(column -> new TableCell<Invoice, Long>() {
+            @Override
+            protected void updateItem(Long item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("%,d đ", item));
+                }
+                setStyle("-fx-alignment: CENTER-RIGHT;");
+            }
+        });
+
+        colInvoiceStatus.setCellValueFactory(data -> new SimpleStringProperty(FormatterUtil.formatInvoiceStatus(data.getValue())));
+        colInvoiceStatus.setCellFactory(column -> new TableCell<Invoice, String>() {
+            private final Label badge = new Label();
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.trim().isEmpty()) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    badge.setText(item);
+                    if ("Đã thanh toán".equalsIgnoreCase(item) || "Đã hoàn thành".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #ECFDF5; -fx-text-fill: #047857; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Còn nợ".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #FEF2F2; -fx-text-fill: #B91C1C; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Đang xử lý".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #EFF6FF; -fx-text-fill: #1D4ED8; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else if ("Đã hủy".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #4B5563; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #374151; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
+                    }
+                    setGraphic(badge);
+                    setText(null);
+                    setStyle("-fx-alignment: CENTER;");
+                }
+            }
+        });
         
         invoiceTable.setItems(invoiceList);
     }
