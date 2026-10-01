@@ -4,6 +4,7 @@ import com.shop.model.Purchase;
 import com.shop.model.PurchaseItem;
 import com.shop.service.PurchaseImportExportService;
 import com.shop.service.PurchaseService;
+import com.shop.util.FormatterUtil;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -44,6 +45,7 @@ public class PurchaseDetailController {
     @FXML private Label lblTotal;
     @FXML private Label lblPaid;
     @FXML private Label lblDebt;
+    @FXML private Button btnPayDebt;
 
     private final PurchaseService purchaseService = new PurchaseService();
     private final PurchaseImportExportService purchaseImportExportService = new PurchaseImportExportService();
@@ -112,8 +114,61 @@ public class PurchaseDetailController {
         lblPaid.setText(currencyFormat.format(purchase.getPaid()) + " đ");
         lblDebt.setText(currencyFormat.format(purchase.getDebt()) + " đ");
 
+        if (btnPayDebt != null) {
+            boolean hasDebt = purchase.getDebt() > 0;
+            btnPayDebt.setDisable(!hasDebt);
+            if (!hasDebt) {
+                btnPayDebt.setStyle("-fx-background-color: #E5E7EB; -fx-text-fill: #9CA3AF; -fx-padding: 8 20; -fx-font-weight: bold;");
+            } else {
+                btnPayDebt.setStyle("-fx-background-color: #059669; -fx-text-fill: white; -fx-padding: 8 20; -fx-font-weight: bold;");
+            }
+        }
+
         List<PurchaseItem> items = purchaseService.getItemsByPurchaseId(purchase.getId());
         tableItems.setItems(FXCollections.observableArrayList(items));
+    }
+
+    @FXML
+    private void handlePayDebt() {
+        if (currentPurchase == null) return;
+        if (currentPurchase.getDebt() <= 0) {
+            showAlert(Alert.AlertType.INFORMATION, "Thông báo", "Phiếu nhập này đã thanh toán đủ 100%, không còn nợ.");
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog(FormatterUtil.formatNumberWithDots(currentPurchase.getDebt()));
+        dialog.setTitle("Trả nợ Nhà cung cấp");
+        dialog.setHeaderText("Phiếu nhập: " + currentPurchase.getCode() + "\n" +
+                "Nhà cung cấp: " + (currentPurchase.getSupplierName() != null ? currentPurchase.getSupplierName() : "-") + "\n" +
+                "Số tiền còn nợ hiện tại: " + currencyFormat.format(currentPurchase.getDebt()) + " đ");
+        dialog.setContentText("Nhập số tiền trả (VND):");
+
+        Stage stage = (Stage) lblCode.getScene().getWindow();
+        dialog.initOwner(stage);
+
+        // Tự động phân tách hàng nghìn (dấu chấm) khi người dùng gõ số tiền trả nợ
+        FormatterUtil.attachCurrencyFormatter(dialog.getEditor(), null);
+
+        dialog.showAndWait().ifPresent(input -> {
+            try {
+                long amount = FormatterUtil.parseNumberFromText(input);
+                if (amount <= 0) {
+                    showAlert(Alert.AlertType.WARNING, "Số tiền không hợp lệ", "Số tiền thanh toán phải lớn hơn 0.");
+                    return;
+                }
+                if (amount > currentPurchase.getDebt()) {
+                    showAlert(Alert.AlertType.WARNING, "Số tiền vượt mức nợ", "Số tiền thanh toán (" + currencyFormat.format(amount) + " đ) vượt quá số nợ còn lại (" + currencyFormat.format(currentPurchase.getDebt()) + " đ).");
+                    return;
+                }
+
+                Purchase updated = purchaseService.payDebt(currentPurchase.getId(), amount, "Thanh toán nợ bổ sung cho NCC");
+                setPurchase(updated);
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã ghi nhận thanh toán " + currencyFormat.format(amount) + " đ cho nhà cung cấp thành công!");
+            } catch (Exception e) {
+                log.error("Lỗi khi trả nợ NCC: {}", e.getMessage(), e);
+                showAlert(Alert.AlertType.ERROR, "Lỗi thanh toán", "Không thể cập nhật trả nợ: " + e.getMessage());
+            }
+        });
     }
 
     @FXML

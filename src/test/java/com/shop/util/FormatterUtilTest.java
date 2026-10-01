@@ -100,4 +100,20 @@ class FormatterUtilTest {
 
         assertEquals("", FormatterUtil.formatInvoiceStatus((com.shop.model.Invoice) null));
     }
+
+    @Test
+    void testFormatNumberWithDots() {
+        assertEquals("0", FormatterUtil.formatNumberWithDots(0L));
+        assertEquals("1.000", FormatterUtil.formatNumberWithDots(1000L));
+        assertEquals("1.500.000", FormatterUtil.formatNumberWithDots(1500000L));
+        assertEquals("25.000.000", FormatterUtil.formatNumberWithDots(25000000L));
+    }
+
+    @Test
+    void testParseNumberFromText() {
+        assertEquals(0L, FormatterUtil.parseNumberFromText(null));
+        assertEquals(0L, FormatterUtil.parseNumberFromText(""));
+        assertEquals(1500000L, FormatterUtil.parseNumberFromText("1.500.000"));
+        assertEquals(1500000L, FormatterUtil.parseNumberFromText("1,500,000 đ"));
+    }
 }

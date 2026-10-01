@@ -269,4 +269,72 @@ public class PurchaseDao {
         }
         return false;
     }
+
+    public Purchase getPurchaseById(int id) {
+        String sql = "SELECT p.*, s.name as supplier_name " +
+                     "FROM purchases p " +
+                     "LEFT JOIN suppliers s ON p.supplier_id = s.id " +
+                     "WHERE p.id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Purchase p = new Purchase();
+                    p.setId(rs.getInt("id"));
+                    p.setCode(rs.getString("code"));
+                    p.setSupplierId(rs.getObject("supplier_id") != null ? rs.getInt("supplier_id") : null);
+                    p.setPurchaseDate(rs.getString("purchase_date"));
+                    p.setTotalCost(rs.getLong("total_cost"));
+                    p.setPaid(rs.getLong("paid"));
+                    p.setDebt(rs.getLong("debt"));
+                    p.setStatus(com.shop.util.FormatterUtil.formatPurchaseStatus(rs.getString("status")));
+                    p.setNote(rs.getString("note"));
+                    p.setCreatedAt(rs.getString("created_at"));
+                    p.setSupplierName(rs.getString("supplier_name"));
+                    return p;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void recordPayment(int purchaseId, long paymentAmount, long newPaid, long newDebt, String newStatus, String paymentDate, String note) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Cập nhật phiếu nhập
+            String updatePurchaseSql = "UPDATE purchases SET paid = ?, debt = ?, status = ? WHERE id = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(updatePurchaseSql)) {
+                pstmt.setLong(1, newPaid);
+                pstmt.setLong(2, newDebt);
+                pstmt.setString(3, com.shop.util.FormatterUtil.formatPurchaseStatus(newStatus));
+                pstmt.setInt(4, purchaseId);
+                pstmt.executeUpdate();
+            }
+
+            // 2. Ghi nhật ký thanh toán NCC
+            String insertPaymentSql = "INSERT INTO supplier_payments (purchase_id, amount, payment_date, note) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement pstmt = conn.prepareStatement(insertPaymentSql)) {
+                pstmt.setInt(1, purchaseId);
+                pstmt.setLong(2, paymentAmount);
+                pstmt.setString(3, paymentDate);
+                pstmt.setString(4, note);
+                pstmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(true);
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
 }

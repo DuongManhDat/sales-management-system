@@ -70,4 +70,41 @@ public class PurchaseService {
     public List<PurchaseItem> getItemsByPurchaseId(int purchaseId) {
         return purchaseDao.getItemsByPurchaseId(purchaseId);
     }
+
+    public Purchase getPurchaseById(int id) {
+        return purchaseDao.getPurchaseById(id);
+    }
+
+    public Purchase payDebt(int purchaseId, long paymentAmount, String note) throws SQLException, IllegalArgumentException {
+        if (paymentAmount <= 0) {
+            throw new IllegalArgumentException("Số tiền thanh toán phải lớn hơn 0.");
+        }
+
+        Purchase current = purchaseDao.getPurchaseById(purchaseId);
+        if (current == null) {
+            throw new IllegalArgumentException("Không tìm thấy phiếu nhập có ID: " + purchaseId);
+        }
+
+        if (current.getDebt() <= 0) {
+            throw new IllegalArgumentException("Phiếu nhập này đã thanh toán đủ, không còn nợ.");
+        }
+
+        if (paymentAmount > current.getDebt()) {
+            throw new IllegalArgumentException("Số tiền thanh toán (" + paymentAmount + " đ) không được vượt quá số tiền còn nợ (" + current.getDebt() + " đ).");
+        }
+
+        long newPaid = current.getPaid() + paymentAmount;
+        long newDebt = current.getTotalCost() - newPaid;
+        if (newDebt < 0) {
+            newDebt = 0;
+        }
+
+        String newStatus = (newDebt == 0) ? "Đã thanh toán" : "Còn nợ";
+        String paymentDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String paymentNote = (note != null && !note.trim().isEmpty()) ? note.trim() : "Trả nợ NCC cho phiếu " + current.getCode();
+
+        purchaseDao.recordPayment(purchaseId, paymentAmount, newPaid, newDebt, newStatus, paymentDate, paymentNote);
+
+        return purchaseDao.getPurchaseById(purchaseId);
+    }
 }
