@@ -138,4 +138,80 @@ public class FormatterUtil {
         }
         return invoice.getDebt() > 0 ? "Còn nợ" : "Đã thanh toán";
     }
+
+    public static String formatNumberWithDots(long amount) {
+        NumberFormat nf = NumberFormat.getInstance(Locale.GERMANY);
+        return nf.format(amount);
+    }
+
+    public static long parseNumberFromText(String text) {
+        if (text == null || text.trim().isEmpty()) return 0L;
+        String digits = text.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) return 0L;
+        try {
+            return Long.parseLong(digits);
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
+    }
+
+    public static void attachCurrencyFormatter(javafx.scene.control.TextField textField, Runnable onValueChange) {
+        textField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) return;
+            String cleanOld = oldVal != null ? oldVal.replaceAll("[^0-9]", "") : "";
+            String cleanNew = newVal.replaceAll("[^0-9]", "");
+
+            if (cleanOld.equals(cleanNew) && newVal.contains(".")) {
+                return;
+            }
+
+            if (cleanNew.isEmpty()) {
+                if (!newVal.isEmpty()) {
+                    textField.setText("");
+                }
+                if (onValueChange != null) {
+                    onValueChange.run();
+                }
+                return;
+            }
+
+            try {
+                long val = Long.parseLong(cleanNew);
+                String formatted = formatNumberWithDots(val);
+
+                int originalCaret = textField.getCaretPosition();
+                int digitsBeforeCaret = 0;
+                for (int i = 0; i < Math.min(originalCaret, newVal.length()); i++) {
+                    if (Character.isDigit(newVal.charAt(i))) {
+                        digitsBeforeCaret++;
+                    }
+                }
+
+                textField.setText(formatted);
+
+                int newCaret = 0;
+                int countDigits = 0;
+                for (int i = 0; i < formatted.length(); i++) {
+                    if (Character.isDigit(formatted.charAt(i))) {
+                        countDigits++;
+                    }
+                    if (countDigits == digitsBeforeCaret) {
+                        newCaret = i + 1;
+                        break;
+                    }
+                }
+                if (digitsBeforeCaret == 0) {
+                    newCaret = 0;
+                } else if (countDigits < digitsBeforeCaret) {
+                    newCaret = formatted.length();
+                }
+
+                textField.positionCaret(Math.min(newCaret, formatted.length()));
+            } catch (NumberFormatException ignored) {}
+
+            if (onValueChange != null) {
+                onValueChange.run();
+            }
+        });
+    }
 }

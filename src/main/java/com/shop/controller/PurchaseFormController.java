@@ -7,6 +7,7 @@ import com.shop.model.Supplier;
 import com.shop.service.ProductService;
 import com.shop.service.PurchaseService;
 import com.shop.service.SupplierService;
+import com.shop.util.FormatterUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -90,7 +91,7 @@ public class PurchaseFormController {
         setupProductSearch();
         setupTable();
 
-        txtPaid.textProperty().addListener((obs, oldV, newV) -> calculateTotals());
+        FormatterUtil.attachCurrencyFormatter(txtPaid, this::calculateTotals);
     }
 
     private void loadSuppliers() {
@@ -348,13 +349,7 @@ public class PurchaseFormController {
         currentTotalCost = total;
         lblTotal.setText(currencyFormat.format(total) + " đ");
 
-        long paid = 0;
-        try {
-            String rawPaid = txtPaid.getText();
-            if (rawPaid != null && !rawPaid.trim().isEmpty()) {
-                paid = Long.parseLong(rawPaid.trim().replaceAll("[^0-9]", ""));
-            }
-        } catch (NumberFormatException ignored) {}
+        long paid = FormatterUtil.parseNumberFromText(txtPaid.getText());
 
         long debt = total - paid;
         if (debt < 0) debt = 0;
@@ -363,7 +358,7 @@ public class PurchaseFormController {
 
     @FXML
     public void handlePayFull() {
-        txtPaid.setText(String.valueOf(currentTotalCost));
+        txtPaid.setText(FormatterUtil.formatNumberWithDots(currentTotalCost));
         calculateTotals();
     }
 
@@ -402,13 +397,7 @@ public class PurchaseFormController {
 
         purchase.setNote(txtNote.getText() != null ? txtNote.getText().trim() : "");
 
-        long paid = 0;
-        try {
-            String rawPaid = txtPaid.getText();
-            if (rawPaid != null && !rawPaid.trim().isEmpty()) {
-                paid = Long.parseLong(rawPaid.trim().replaceAll("[^0-9]", ""));
-            }
-        } catch (NumberFormatException ignored) {}
+        long paid = FormatterUtil.parseNumberFromText(txtPaid.getText());
         purchase.setPaid(paid);
 
         try {

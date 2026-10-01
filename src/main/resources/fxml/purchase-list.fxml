@@ -10,13 +10,14 @@
 
     <!-- Toolbar -->
     <HBox spacing="12" alignment="CENTER_LEFT">
-        <Label text="MUA HÀNG" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+        <Label text="NHẬP HÀNG" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
         <Region HBox.hgrow="ALWAYS" />
         <TextField fx:id="searchField" promptText="Tìm mã phiếu / NCC..." prefWidth="240" styleClass="flat-input"/>
         <ComboBox fx:id="statusFilter" prefWidth="140" promptText="Trạng thái" />
         <Button text="📥 Tải file mẫu" styleClass="btn-secondary" onAction="#handleDownloadTemplate" />
-        <Button text="📤 Import Excel" styleClass="btn-primary" onAction="#handleImportPurchases" />
+        <Button text="📤 Import Excel" styleClass="btn-secondary" onAction="#handleImportPurchases" />
         <Button text="📊 Xuất danh sách" styleClass="btn-secondary" onAction="#handleExportPurchases" />
+        <Button text="+ Nhập hàng" styleClass="btn-primary" onAction="#handleCreatePurchase" />
     </HBox>
 
     <!-- Table -->

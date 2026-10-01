@@ -239,6 +239,32 @@ public class PurchaseListController {
         }
     }
 
+    @FXML
+    private void handleCreatePurchase() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/purchase-form.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            if (purchaseTable != null && purchaseTable.getScene() != null) {
+                stage.initOwner(purchaseTable.getScene().getWindow());
+            }
+            stage.setTitle("Tạo Phiếu Nhập Hàng Mới");
+            Scene scene = new Scene(root, 960, 680);
+            if (getClass().getResource("/css/app.css") != null) {
+                scene.getStylesheets().add(getClass().getResource("/css/app.css").toExternalForm());
+            }
+            stage.setScene(scene);
+            stage.showAndWait();
+            // Tự động làm mới danh sách sau khi tạo phiếu nhập
+            loadData();
+        } catch (IOException e) {
+            log.error("Lỗi khi mở màn hình tạo phiếu nhập: {}", e.getMessage(), e);
+            showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể mở form tạo phiếu nhập: " + e.getMessage());
+        }
+    }
+
     private void showDetailDialog(Purchase purchase) {
         if (purchase == null) return;
         try {
@@ -257,6 +283,8 @@ public class PurchaseListController {
             }
             stage.setScene(scene);
             stage.showAndWait();
+            // Tự động làm mới danh sách phiếu nhập sau khi đóng chi tiết (cập nhật nợ mới nếu có trả nợ)
+            loadData();
         } catch (IOException e) {
             log.error("Lỗi khi mở chi tiết phiếu nhập: {}", e.getMessage(), e);
         }

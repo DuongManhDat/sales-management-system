@@ -29,6 +29,44 @@ class PurchaseServiceTest {
         purchaseService = new PurchaseService();
 
         try (Connection conn = DBConnection.getConnection()) {
+            try (PreparedStatement u1 = conn.prepareStatement("UPDATE inventory_batches SET purchase_item_id = NULL");
+                 PreparedStatement del0 = conn.prepareStatement("DELETE FROM invoice_item_batches");
+                 PreparedStatement del1 = conn.prepareStatement("DELETE FROM supplier_payments");
+                 PreparedStatement del2 = conn.prepareStatement("DELETE FROM return_invoice_items");
+                 PreparedStatement del3 = conn.prepareStatement("DELETE FROM return_invoices");
+                 PreparedStatement del4 = conn.prepareStatement("DELETE FROM payments");
+                 PreparedStatement del5 = conn.prepareStatement("DELETE FROM invoice_items");
+                 PreparedStatement del6 = conn.prepareStatement("DELETE FROM invoices");
+                 PreparedStatement del7 = conn.prepareStatement("DELETE FROM stock_adjustment_items");
+                 PreparedStatement del8 = conn.prepareStatement("DELETE FROM stock_adjustments");
+                 PreparedStatement del9 = conn.prepareStatement("DELETE FROM purchase_items");
+                 PreparedStatement del10 = conn.prepareStatement("DELETE FROM inventory_batches");
+                 PreparedStatement del11 = conn.prepareStatement("DELETE FROM purchases");
+                 PreparedStatement del12 = conn.prepareStatement("DELETE FROM stock_movements");
+                 PreparedStatement del13 = conn.prepareStatement("DELETE FROM price_history");
+                 PreparedStatement del14 = conn.prepareStatement("DELETE FROM products");
+                 PreparedStatement del15 = conn.prepareStatement("DELETE FROM suppliers");
+                 PreparedStatement del16 = conn.prepareStatement("DELETE FROM units")) {
+                u1.executeUpdate();
+                del0.executeUpdate();
+                del1.executeUpdate();
+                del2.executeUpdate();
+                del3.executeUpdate();
+                del4.executeUpdate();
+                del5.executeUpdate();
+                del6.executeUpdate();
+                del7.executeUpdate();
+                del8.executeUpdate();
+                del9.executeUpdate();
+                del10.executeUpdate();
+                del11.executeUpdate();
+                del12.executeUpdate();
+                del13.executeUpdate();
+                del14.executeUpdate();
+                del15.executeUpdate();
+                del16.executeUpdate();
+            }
+
             // Tạo nhà cung cấp mẫu
             String insertSupplier = "INSERT INTO suppliers (code, name, phone, is_active, created_at) VALUES ('NCC_TEST', 'Nhà Cung Cấp Test', '0901234567', 1, datetime('now'))";
             try (PreparedStatement stmt = conn.prepareStatement(insertSupplier, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -138,5 +176,74 @@ class PurchaseServiceTest {
         assertEquals(20, savedItem.getQty());
         assertEquals(25000, savedItem.getCostPrice());
         assertEquals(500000, savedItem.getAmount());
+    }
+
+    @Test
+    void testPayDebt_Success_PartialAndFull() throws SQLException {
+        Purchase purchase = new Purchase();
+        purchase.setCode("PN_PAY_001");
+        purchase.setSupplierId(testSupplierId);
+        purchase.setPurchaseDate("2026-09-10 10:00:00");
+        purchase.setPaid(100000);
+
+        List<PurchaseItem> items = new ArrayList<>();
+        PurchaseItem item = new PurchaseItem();
+        item.setProductId(testProductId);
+        item.setQty(10);
+        item.setCostPrice(20000); // Tổng 200.000, nợ 100.000
+        items.add(item);
+
+        purchaseService.createPurchase(purchase, items);
+        assertEquals(100000, purchase.getDebt());
+        assertEquals("Còn nợ", purchase.getStatus());
+
+        // 1. Trả một phần 40.000
+        Purchase updatedPartial = purchaseService.payDebt(purchase.getId(), 40000, "Trả nợ đợt 1");
+        assertEquals(140000, updatedPartial.getPaid());
+        assertEquals(60000, updatedPartial.getDebt());
+        assertEquals("Còn nợ", updatedPartial.getStatus());
+
+        // 2. Trả hết nợ còn lại 60.000
+        Purchase updatedFull = purchaseService.payDebt(purchase.getId(), 60000, "Trả hết nợ còn lại");
+        assertEquals(200000, updatedFull.getPaid());
+        assertEquals(0, updatedFull.getDebt());
+        assertEquals("Đã thanh toán", updatedFull.getStatus());
+
+        // Kiểm tra bảng supplier_payments có ghi nhận các lần thanh toán
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM supplier_payments WHERE purchase_id = ?")) {
+            stmt.setInt(1, purchase.getId());
+            try (ResultSet rs = stmt.executeQuery()) {
+                assertTrue(rs.next());
+                // 1 lần khi tạo phiếu (paid > 0) + 2 lần trả nợ = 3 lần
+                assertEquals(3, rs.getInt(1));
+            }
+        }
+    }
+
+    @Test
+    void testPayDebt_ValidationExceptions() throws SQLException {
+        Purchase purchase = new Purchase();
+        purchase.setCode("PN_PAY_002");
+        purchase.setSupplierId(testSupplierId);
+        purchase.setPurchaseDate("2026-09-10 10:00:00");
+        purchase.setPaid(100000);
+
+        List<PurchaseItem> items = new ArrayList<>();
+        PurchaseItem item = new PurchaseItem();
+        item.setProductId(testProductId);
+        item.setQty(5);
+        item.setCostPrice(20000); // Tổng 100.000, nợ 0
+        items.add(item);
+
+        purchaseService.createPurchase(purchase, items);
+        assertEquals(0, purchase.getDebt());
+
+        // Trả nợ khi không còn nợ
+        assertThrows(IllegalArgumentException.class, () -> purchaseService.payDebt(purchase.getId(), 10000, null));
+
+        // Trả số tiền <= 0
+        assertThrows(IllegalArgumentException.class, () -> purchaseService.payDebt(purchase.getId(), 0, null));
+        assertThrows(IllegalArgumentException.class, () -> purchaseService.payDebt(purchase.getId(), -5000, null));
     }
 }

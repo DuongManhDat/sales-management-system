@@ -76,7 +76,8 @@
 
     <!-- Nút thao tác -->
     <HBox alignment="CENTER_RIGHT" spacing="12">
-        <Button text="📊 Xuất Excel" onAction="#handleExportDetail" styleClass="btn-primary" style="-fx-padding: 8 20;"/>
+        <Button fx:id="btnPayDebt" text="💵 Trả nợ NCC" onAction="#handlePayDebt" styleClass="btn-primary" style="-fx-background-color: #059669; -fx-text-fill: white; -fx-padding: 8 20; -fx-font-weight: bold;"/>
+        <Button text="📊 Xuất Excel" onAction="#handleExportDetail" styleClass="btn-secondary" style="-fx-padding: 8 20;"/>
         <Button text="Đóng" onAction="#handleClose" styleClass="btn-secondary" style="-fx-padding: 8 28;"/>
     </HBox>
 </VBox>

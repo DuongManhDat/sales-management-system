@@ -46,9 +46,9 @@
                     <FontIcon iconLiteral="fth-users" />
                 </graphic>
             </Button>
-            <Button maxWidth="Infinity" onAction="#showPurchases" styleClass="sidebar-btn" text=" Mua hàng">
+            <Button maxWidth="Infinity" onAction="#showPurchases" styleClass="sidebar-btn" text=" Nhập hàng">
                 <graphic>
-                    <FontIcon iconLiteral="fth-shopping-cart" />
+                    <FontIcon iconLiteral="fth-truck" />
                 </graphic>
             </Button>
             <Button maxWidth="Infinity" onAction="#showSales" styleClass="sidebar-btn" text=" Bán hàng">
