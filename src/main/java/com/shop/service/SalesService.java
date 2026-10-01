@@ -23,12 +23,16 @@ public class SalesService {
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false); // Begin transaction
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            if (invoice.getCode() == null || invoice.getCode().trim().isEmpty()) {
+                invoice.setCode("HD" + new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
+            }
+            if (invoice.getInvoiceDate() == null || invoice.getInvoiceDate().trim().isEmpty()) {
+                invoice.setInvoiceDate(currentTime);
+            }
 
             // 1. Insert invoice
             invoiceDao.insert(conn, invoice);
-
-            // 2. Insert items and update stock
-            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
             for (InvoiceItem item : items) {
                 item.setInvoiceId(invoice.getId());
                 
