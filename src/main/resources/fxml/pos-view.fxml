@@ -5,72 +5,139 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<HBox spacing="10" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PosController" styleClass="pos-root">
-    
-    <!-- Left Panel: Product Search & List -->
-    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="pos-panel">
-        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-        
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Tìm kiếm sản phẩm:" styleClass="title-4"/>
-            <TextField fx:id="searchProductField" promptText="Mã hoặc tên sản phẩm..." HBox.hgrow="ALWAYS" styleClass="search-field" />
-        </HBox>
-        
-        <ListView fx:id="productListView" VBox.vgrow="ALWAYS" styleClass="flat-list" />
-    </VBox>
+<HBox spacing="14" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.PosController" styleClass="pos-root">
+    <padding><Insets top="12" right="14" bottom="12" left="14"/></padding>
 
-    <!-- Right Panel: Cart & Checkout -->
-    <VBox spacing="10" prefWidth="400" styleClass="pos-panel">
-        <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-        
-        <Label text="Khách hàng:" styleClass="title-4" />
-        <ComboBox fx:id="customerComboBox" promptText="Chọn khách hàng..." maxWidth="Infinity" styleClass="flat-combo" />
-        
-        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
+    <!-- ========================================== -->
+    <!-- LEFT PANEL: CART & CURRENT INVOICE (60%)   -->
+    <!-- ========================================== -->
+    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="pos-panel" minWidth="600">
+        <padding><Insets top="12" right="14" bottom="12" left="14"/></padding>
+
+        <!-- Top Header of Cart -->
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                <Label text="HÓA ĐƠN BÁN HÀNG" styleClass="pos-section-title"/>
+                <Label fx:id="lblInvoiceMeta" text="Đơn bán lẻ trực tiếp tại quầy" styleClass="pos-section-subtitle"/>
+            </VBox>
+            <Button fx:id="btnClearCart" text="Xóa giỏ hàng" onAction="#handleClearCart" styleClass="btn-secondary">
+                <graphic>
+                    <FontIcon iconLiteral="fth-trash-2"/>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Cart Table -->
+        <TableView fx:id="cartTable" VBox.vgrow="ALWAYS" styleClass="cart-table">
             <placeholder>
-                <Label text="Không có dữ liệu"/>
+                <VBox alignment="CENTER" spacing="8">
+                    <FontIcon iconLiteral="fth-shopping-cart" iconSize="36" style="-fx-icon-color: #94A3B8;"/>
+                    <Label text="Giỏ hàng trống" styleClass="title-4" style="-fx-text-fill: #94A3B8;"/>
+                    <Label text="Chọn sản phẩm từ danh mục bên phải hoặc quét mã để thêm món" styleClass="text-muted"/>
+                </VBox>
             </placeholder>
             <columns>
-                <TableColumn fx:id="colProductName" text="Sản phẩm" prefWidth="150" />
-                <TableColumn fx:id="colQty" text="SL" prefWidth="50" />
-                <TableColumn fx:id="colPrice" text="Đơn giá" prefWidth="80" />
-                <TableColumn fx:id="colAmount" text="Thành tiền" prefWidth="100" />
+                <TableColumn fx:id="colIndex" text="#" prefWidth="38" minWidth="38" maxWidth="38" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colDelete" text="" prefWidth="40" minWidth="40" maxWidth="40" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colProductCode" text="MÃ SP" prefWidth="85" minWidth="75" maxWidth="100" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colProductName" text="TÊN SẢN PHẨM" prefWidth="240" minWidth="180" style="-fx-alignment: CENTER_LEFT;"/>
+                <TableColumn fx:id="colPrice" text="ĐƠN GIÁ" prefWidth="105" minWidth="90" style="-fx-alignment: CENTER_RIGHT;"/>
+                <TableColumn fx:id="colQty" text="SỐ LƯỢNG" prefWidth="125" minWidth="120" maxWidth="130" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colAmount" text="THÀNH TIỀN" prefWidth="120" minWidth="100" style="-fx-alignment: CENTER_RIGHT;"/>
             </columns>
-                <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-        </columnResizePolicy>
-    </TableView>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
 
-        <GridPane hgap="10" vgap="10">
+        <!-- Cart Summary Stats Footer -->
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="cart-summary-box">
+            <Label text="Mặt hàng:" styleClass="text-muted"/>
+            <Label fx:id="lblItemCount" text="0" styleClass="badge-stat"/>
+            
+            <Separator orientation="VERTICAL"/>
+            
+            <Label text="Tổng số lượng SP:" styleClass="text-muted"/>
+            <Label fx:id="lblTotalQty" text="0" styleClass="badge-stat"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label text="Tạm tính:" styleClass="text-muted"/>
+            <Label fx:id="lblSubtotalFooter" text="0 đ" styleClass="text-bold" style="-fx-font-size: 15px;"/>
+        </HBox>
+    </VBox>
+
+    <!-- ======================================================== -->
+    <!-- RIGHT PANEL: CATALOG, CUSTOMER & CHECKOUT ACTION (40%)  -->
+    <!-- ======================================================== -->
+    <VBox spacing="10" prefWidth="450" minWidth="420" maxWidth="480" styleClass="pos-panel">
+        <padding><Insets top="12" right="14" bottom="12" left="14"/></padding>
+
+        <!-- Customer Section -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT" spacing="6">
+                <Label text="Khách hàng:" styleClass="title-4" HBox.hgrow="ALWAYS"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnQuickAddCustomer" text="Thêm KH" onAction="#handleQuickAddCustomer" styleClass="btn-icon-square">
+                    <graphic>
+                        <FontIcon iconLiteral="fth-user-plus"/>
+                    </graphic>
+                </Button>
+            </HBox>
+            
+            <HBox spacing="6" alignment="CENTER_LEFT">
+                <ComboBox fx:id="customerComboBox" promptText="Tìm khách hàng (Tên, SĐT)..." maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="flat-combo" />
+                <Button fx:id="btnClearCustomer" text="✕" onAction="#handleClearCustomer" styleClass="btn-icon-square" tooltip="$clearCustomerTip">
+                    <tooltip><Tooltip fx:id="clearCustomerTip" text="Bỏ chọn khách hàng"/></tooltip>
+                </Button>
+            </HBox>
+        </VBox>
+
+        <!-- Product Search Section -->
+        <VBox spacing="6">
+            <Label text="Tìm kiếm sản phẩm:" styleClass="title-4"/>
+            <HBox spacing="6" alignment="CENTER_LEFT">
+                <TextField fx:id="searchProductField" promptText="Nhập từ khóa tìm mã, tên sản phẩm hoặc barcode (F2)..." HBox.hgrow="ALWAYS" styleClass="search-field" />
+            </HBox>
+        </VBox>
+
+        <!-- Product Search Result List -->
+        <ListView fx:id="productListView" VBox.vgrow="ALWAYS" styleClass="flat-list" prefHeight="220" />
+
+        <Separator/>
+
+        <!-- Billing Summary Section -->
+        <GridPane hgap="10" vgap="8">
             <columnConstraints>
-                <ColumnConstraints percentWidth="40"/>
-                <ColumnConstraints percentWidth="60" halignment="RIGHT"/>
+                <ColumnConstraints percentWidth="42"/>
+                <ColumnConstraints percentWidth="58" halignment="RIGHT"/>
             </columnConstraints>
             
             <Label text="Tổng tiền hàng:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-muted"/>
-            <Label fx:id="lblSubtotal" text="0" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="text-bold"/>
+            <Label fx:id="lblSubtotal" text="0 đ" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="text-bold"/>
 
-            <Label text="Khách cần trả:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="title-3"/>
-            <Label fx:id="lblTotal" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="title-3, text-primary"/>
+            <Label text="Chiết khấu (VND):" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-muted"/>
+            <TextField fx:id="txtDiscount" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_RIGHT" styleClass="flat-input" prefHeight="28"/>
 
-            <Label text="Khách thanh toán:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-            <TextField fx:id="txtCustomerPaid" text="0" GridPane.rowIndex="2" GridPane.columnIndex="1" alignment="CENTER_RIGHT" styleClass="flat-input"/>
+            <Label text="KHÁCH CẦN TRẢ:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="title-3"/>
+            <Label fx:id="lblTotal" text="0 đ" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="title-3, text-primary"/>
 
-            <Label text="Tiền thừa/Nợ:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-            <Label fx:id="lblChange" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="text-bold"/>
+            <Label text="Tiền khách đưa:" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="text-bold"/>
+            <TextField fx:id="txtCustomerPaid" text="0" GridPane.rowIndex="3" GridPane.columnIndex="1" alignment="CENTER_RIGHT" styleClass="flat-input" prefHeight="32" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
         </GridPane>
 
-        <HBox spacing="10">
-            <Button text="TẠO ĐẶT HÀNG" onAction="#handleCreateOrder" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-outline-primary" prefHeight="50">
-                <graphic>
-                    <FontIcon iconLiteral="fth-clipboard" />
-                </graphic>
-            </Button>
-            <Button text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" HBox.hgrow="ALWAYS" styleClass="btn-checkout" prefHeight="50">
-                <graphic>
-                    <FontIcon iconLiteral="fth-check-circle" />
-                </graphic>
-            </Button>
+        <!-- Change / Debt Row -->
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 4 0 4 0;">
+            <Label fx:id="lblChangeTitle" text="Tiền thừa trả khách:" styleClass="text-bold"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblChange" text="0 đ" styleClass="title-4" style="-fx-text-fill: #16A34A;"/>
         </HBox>
+
+        <!-- Big Checkout Action Button -->
+        <Button fx:id="btnCheckout" text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" prefHeight="56" styleClass="btn-checkout-primary">
+            <graphic>
+                <FontIcon iconLiteral="fth-check-circle" iconSize="20"/>
+            </graphic>
+        </Button>
     </VBox>
 </HBox>

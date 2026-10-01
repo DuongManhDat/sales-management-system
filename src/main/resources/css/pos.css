@@ -1,109 +1,361 @@
 /* Industrial Brutalist / Minimalist POS Styles */
 
 .pos-root {
-    -fx-background-color: #F4F4F5; /* light gray bg */
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-background-color: #F8F9FA;
+    -fx-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .pos-panel {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #E4E4E7;
+    -fx-border-color: #E2E8F0;
     -fx-border-width: 1;
-    -fx-border-radius: 0;
-    -fx-background-radius: 0;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+/* Typography */
+.pos-section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.pos-section-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #64748B;
 }
 
 .title-4 {
-    -fx-font-size: 16px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-text-fill: #18181B;
+    -fx-text-fill: #1E293B;
 }
 
 .title-3 {
-    -fx-font-size: 18px;
+    -fx-font-size: 17px;
     -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
 }
 
 .text-bold {
     -fx-font-weight: bold;
-    -fx-text-fill: #18181B;
+    -fx-text-fill: #0F172A;
 }
 
 .text-primary {
-    -fx-text-fill: #2563EB; /* modern blue */
+    -fx-text-fill: #2563EB;
     -fx-font-weight: bold;
-    -fx-font-size: 20px;
+    -fx-font-size: 22px;
 }
 
 .text-muted {
-    -fx-text-fill: #71717A;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 13px;
 }
 
-/* Flat fields, zero radius, no shadows */
+/* Flat Input Fields */
 .search-field, .flat-input, .flat-combo {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #D4D4D8;
+    -fx-border-color: #CBD5E1;
     -fx-border-width: 1;
-    -fx-background-radius: 0;
-    -fx-border-radius: 0;
-    -fx-padding: 8px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px 10px;
+    -fx-font-size: 13px;
     -fx-effect: none;
 }
 
 .search-field:focused, .flat-input:focused, .flat-combo:focused {
     -fx-border-color: #2563EB;
+    -fx-background-color: #FFFFFF;
 }
 
-/* Flat table, zero radius, no shadows */
-.flat-table {
+/* Cart Table Styles */
+.cart-table {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-effect: none;
+}
+
+.cart-table .column-header-background {
+    -fx-background-color: #F1F5F9;
+    -fx-border-color: transparent transparent #E2E8F0 transparent;
+    -fx-border-width: 1;
+    -fx-padding: 4px 0;
+}
+
+.cart-table .column-header {
     -fx-background-color: transparent;
-    -fx-border-color: #E4E4E7;
-    -fx-border-width: 1;
-    -fx-effect: none;
+    -fx-border-color: transparent #E2E8F0 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-size: 38px;
 }
 
-.flat-table .column-header-background {
-    -fx-background-color: #F4F4F5;
-    -fx-border-color: transparent transparent #E4E4E7 transparent;
-    -fx-border-width: 1;
-    -fx-padding: 5px;
-}
-
-/* Flat list view */
-.flat-list {
-    -fx-border-color: #E4E4E7;
-    -fx-border-width: 1;
-    -fx-effect: none;
-    -fx-background-insets: 0;
-}
-
-.flat-list .list-cell {
-    -fx-padding: 10px;
-    -fx-border-color: transparent transparent #E4E4E7 transparent;
-    -fx-border-width: 1;
-}
-
-.flat-list .list-cell:selected {
-    -fx-background-color: #DBEAFE;
-    -fx-text-fill: #1E3A8A;
-}
-
-/* Brutalist Button */
-.btn-checkout {
-    -fx-background-color: #09090B; /* Dark modern */
-    -fx-text-fill: #FAFAFA;
+.cart-table .column-header .label {
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-font-size: 16px;
-    -fx-border-radius: 0;
-    -fx-background-radius: 0;
+    -fx-text-fill: #475569;
+    -fx-alignment: center;
+}
+
+.cart-table .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #F1F5F9 transparent;
+    -fx-border-width: 1;
+    -fx-cell-size: 38px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.cart-table .table-cell {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 8px;
+}
+
+.cart-table .table-row-cell:odd {
+    -fx-background-color: #FAFAFA;
+}
+
+.cart-table .table-row-cell:hover {
+    -fx-background-color: #F8FAFC;
+}
+
+.cart-table .table-row-cell:selected {
+    -fx-background-color: #EFF6FF;
+}
+
+/* Quantity Control Box */
+.qty-control-box {
+    -fx-alignment: center;
+    -fx-spacing: 2px;
+}
+
+.qty-btn {
+    -fx-background-color: #F1F5F9;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-min-width: 28px;
+    -fx-pref-width: 28px;
+    -fx-max-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.qty-btn:hover {
+    -fx-background-color: #E2E8F0;
+    -fx-border-color: #94A3B8;
+}
+
+.qty-btn:pressed {
+    -fx-background-color: #CBD5E1;
+}
+
+.qty-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-alignment: center;
+    -fx-pref-width: 44px;
+    -fx-min-width: 44px;
+    -fx-pref-height: 28px;
+    -fx-min-height: 28px;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+    -fx-padding: 2px;
+}
+
+.qty-field:focused {
+    -fx-border-color: #2563EB;
+}
+
+/* Row Action Buttons */
+.btn-delete-row {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #94A3B8;
+    -fx-cursor: hand;
+    -fx-padding: 4px;
+    -fx-font-size: 13px;
+}
+
+.btn-delete-row:hover {
+    -fx-background-color: #FEE2E2;
+    -fx-text-fill: #EF4444;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
+.btn-more-row {
+    -fx-background-color: transparent;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-text-fill: #64748B;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-min-width: 26px;
+    -fx-pref-width: 26px;
+    -fx-min-height: 26px;
+    -fx-pref-height: 26px;
+    -fx-padding: 0;
+}
+
+.btn-more-row:hover {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #0F172A;
+    -fx-border-color: #CBD5E1;
+}
+
+/* Cart Summary & Badges */
+.cart-summary-box {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 8px 12px;
+}
+
+.badge-stat {
+    -fx-background-color: #E2E8F0;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1E293B;
+}
+
+/* Category Filter Chips */
+.category-chip {
+    -fx-background-color: #F1F5F9;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #334155;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 12px;
+    -fx-cursor: hand;
+}
+
+.category-chip:hover {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #0F172A;
+}
+
+.category-chip.active {
+    -fx-background-color: #0F172A;
+    -fx-border-color: #0F172A;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: bold;
+}
+
+/* Product Quick List */
+.product-cell-box {
+    -fx-padding: 8px 10px;
+    -fx-border-color: transparent transparent #F1F5F9 transparent;
+    -fx-border-width: 1;
+    -fx-background-color: #FFFFFF;
+}
+
+.product-cell-box:hover {
+    -fx-background-color: #F8FAFC;
+}
+
+.stock-tag-ok {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #166534;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 6px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
+.stock-tag-warn {
+    -fx-background-color: #FEF3C7;
+    -fx-text-fill: #92400E;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 2px 6px;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
+/* Quick Cash Tender Chips */
+.quick-cash-chip {
+    -fx-background-color: #F1F5F9;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #1E293B;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 8px;
+    -fx-cursor: hand;
+}
+
+.quick-cash-chip:hover {
+    -fx-background-color: #E2E8F0;
+    -fx-border-color: #94A3B8;
+}
+
+/* Big Checkout Button */
+.btn-checkout-primary {
+    -fx-background-color: #2563EB;
+    -fx-border-color: #1D4ED8;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-effect: none;
 }
 
-.btn-checkout:hover {
-    -fx-background-color: #27272A;
+.btn-checkout-primary:hover {
+    -fx-background-color: #1D4ED8;
 }
 
-.btn-checkout:pressed {
-    -fx-background-color: #000000;
+.btn-checkout-primary:pressed {
+    -fx-background-color: #1E40AF;
+}
+
+.btn-checkout-primary .ikonli-font-icon {
+    -fx-icon-color: #FFFFFF;
+}
+
+/* Icon Buttons */
+.btn-icon-square {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E1;
+    -fx-border-width: 1;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 7px 10px;
+    -fx-cursor: hand;
+    -fx-text-fill: #0F172A;
+    -fx-font-weight: bold;
+}
+
+.btn-icon-square:hover {
+    -fx-background-color: #E2E8F0;
 }
