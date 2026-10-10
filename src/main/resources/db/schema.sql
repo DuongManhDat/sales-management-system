@@ -83,7 +83,10 @@ CREATE TABLE IF NOT EXISTS payments (
     invoice_id    INTEGER NOT NULL REFERENCES invoices(id),
     amount        INTEGER NOT NULL,
     payment_date  TEXT    NOT NULL,
-    note          TEXT
+    note          TEXT,
+    status        TEXT    NOT NULL DEFAULT 'ACTIVE',
+    cancelled_at  TEXT,
+    cancel_reason TEXT
 );
 
 CREATE TABLE IF NOT EXISTS app_user (

@@ -34,7 +34,9 @@ public class InvoiceDao {
 
     public List<Invoice> findByStatus(String status) throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
-        String query = "SELECT * FROM invoices WHERE status = ?";
+        String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                       "LEFT JOIN customers c ON i.customer_id = c.id " +
+                       "WHERE i.status = ? ORDER BY i.id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, status);
@@ -49,7 +51,9 @@ public class InvoiceDao {
 
     public List<Invoice> findAll() throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
-        String query = "SELECT * FROM invoices ORDER BY id DESC";
+        String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                       "LEFT JOIN customers c ON i.customer_id = c.id " +
+                       "ORDER BY i.id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query);
              ResultSet rs = pstmt.executeQuery()) {
@@ -62,7 +66,9 @@ public class InvoiceDao {
 
     public List<Invoice> findByCustomerId(int customerId) throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
-        String query = "SELECT * FROM invoices WHERE customer_id = ? ORDER BY id DESC";
+        String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                       "LEFT JOIN customers c ON i.customer_id = c.id " +
+                       "WHERE i.customer_id = ? ORDER BY i.id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, customerId);
@@ -101,9 +107,16 @@ public class InvoiceDao {
     }
 
     public Invoice findById(int id) throws SQLException {
-        String query = "SELECT * FROM invoices WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBConnection.getConnection()) {
+            return findById(conn, id);
+        }
+    }
+
+    public Invoice findById(Connection conn, int id) throws SQLException {
+        String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                       "LEFT JOIN customers c ON i.customer_id = c.id " +
+                       "WHERE i.id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -127,6 +140,11 @@ public class InvoiceDao {
         invoice.setPaid(rs.getLong("paid"));
         invoice.setDebt(rs.getLong("debt"));
         invoice.setStatus(rs.getString("status"));
+        try {
+            invoice.setCustomerName(rs.getString("customer_name"));
+        } catch (SQLException ignored) {
+            // Trường customer_name có thể không tồn tại nếu query đơn giản không join
+        }
         return invoice;
     }
 }

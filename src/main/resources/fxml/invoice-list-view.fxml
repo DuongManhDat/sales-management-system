@@ -17,6 +17,11 @@
                 <FontIcon iconLiteral="fth-refresh-cw" />
             </graphic>
         </Button>
+        <Button fx:id="btnPaymentHistory" text="Lịch sử &amp; Thu nợ" onAction="#handleOpenPaymentHistory" styleClass="btn-primary" style="-fx-background-color: #047857; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-weight: bold;">
+            <graphic>
+                <FontIcon iconLiteral="fth-dollar-sign" iconColor="white"/>
+            </graphic>
+        </Button>
     </HBox>
     
     <TableView fx:id="invoiceTable" VBox.vgrow="ALWAYS" styleClass="flat-table">

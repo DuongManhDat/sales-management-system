@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -140,6 +141,43 @@ public class CustomerDetailController {
         });
         
         invoiceTable.setItems(invoiceList);
+
+        // Double click vào hóa đơn để xem lịch sử thanh toán & thu nợ
+        invoiceTable.setRowFactory(tv -> {
+            TableRow<Invoice> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    openPaymentHistoryDialog(row.getItem());
+                }
+            });
+            return row;
+        });
+    }
+
+    private void openPaymentHistoryDialog(Invoice invoice) {
+        if (invoice == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/invoice-payment-history-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            InvoicePaymentHistoryController controller = loader.getController();
+            controller.setInvoice(invoice);
+
+            Stage stage = new Stage();
+            stage.setTitle("Lịch sử thanh toán & Thu nợ - " + invoice.getCode());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            if (invoiceTable.getScene() != null) {
+                stage.initOwner(invoiceTable.getScene().getWindow());
+            }
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+
+            // Nếu đã thực hiện thu nợ, tải lại danh sách hóa đơn và tổng nợ của khách hàng
+            if (controller.isPaymentRecorded()) {
+                loadInvoices();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void populateCustomerInfo() {

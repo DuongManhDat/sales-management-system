@@ -44,6 +44,7 @@ public class SchemaInitializer {
             executeMigration(conn, stmt, appliedVersions, "V3", "/db/migration/V3__Dashboard_Schema.sql");
             executeMigration(conn, stmt, appliedVersions, "V4", "/db/migration/V4__QuanLyHangHoa_Schema.sql");
             executeMigration(conn, stmt, appliedVersions, "V5", "/db/migration/V5__BanHang_Phase2_Schema.sql");
+            executeMigration(conn, stmt, appliedVersions, "V6", "/db/migration/V6__Payment_Audit_Schema.sql");
 
         } catch (Exception e) {
             logger.error("Failed to initialize database schema", e);
