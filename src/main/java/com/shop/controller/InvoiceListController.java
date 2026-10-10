@@ -37,7 +37,13 @@ public class InvoiceListController {
         
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
         colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
-        colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
+        colCustomer.setCellValueFactory(data -> {
+            String name = data.getValue().getCustomerName();
+            if (name != null && !name.trim().isEmpty()) {
+                return new SimpleStringProperty(name);
+            }
+            return new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId()));
+        });
         colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
         colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
         colDebt.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getDebt()));
@@ -70,9 +76,60 @@ public class InvoiceListController {
             }
         });
 
+        // Double-click mở dialog lịch sử thanh toán
+        invoiceTable.setRowFactory(tv -> {
+            javafx.scene.control.TableRow<Invoice> row = new javafx.scene.control.TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    openPaymentHistoryDialog(row.getItem());
+                }
+            });
+            return row;
+        });
+
         statusFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
         
         loadInvoices();
+    }
+
+    @FXML
+    private void handleOpenPaymentHistory() {
+        Invoice selected = invoiceTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Chưa chọn hóa đơn");
+            alert.setHeaderText(null);
+            alert.setContentText("Vui lòng chọn một hóa đơn từ bảng để xem lịch sử thanh toán hoặc thu nợ.");
+            alert.showAndWait();
+            return;
+        }
+        openPaymentHistoryDialog(selected);
+    }
+
+    private void openPaymentHistoryDialog(Invoice invoice) {
+        if (invoice == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/invoice-payment-history-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            InvoicePaymentHistoryController controller = loader.getController();
+            controller.setInvoice(invoice);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Lịch sử thanh toán & Thu nợ - " + invoice.getCode());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            if (invoiceTable.getScene() != null) {
+                stage.initOwner(invoiceTable.getScene().getWindow());
+            }
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+
+            // Nếu có thanh toán mới được ghi nhận, tải lại danh sách hóa đơn
+            if (controller.isPaymentRecorded()) {
+                loadInvoices();
+            }
+        } catch (Exception e) {
+            log.error("Lỗi khi mở dialog lịch sử thanh toán hóa đơn: {}", e.getMessage(), e);
+        }
     }
 
     @FXML

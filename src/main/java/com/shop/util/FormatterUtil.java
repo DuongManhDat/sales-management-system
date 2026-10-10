@@ -87,6 +87,30 @@ public class FormatterUtil {
         return s;
     }
 
+    public static String formatDateTimeToDdMmYyyy(String rawDateTime) {
+        if (rawDateTime == null || rawDateTime.trim().isEmpty()) return "";
+        String s = rawDateTime.trim();
+        try {
+            if (s.contains(" ")) {
+                String[] parts = s.split(" ");
+                String datePart = formatDateToDdMmYyyy(parts[0]);
+                return datePart + " " + parts[1];
+            } else if (s.contains("T")) {
+                String[] parts = s.split("T");
+                String datePart = formatDateToDdMmYyyy(parts[0]);
+                return datePart + " " + parts[1];
+            }
+        } catch (Exception ignored) {}
+        return formatDateToDdMmYyyy(s);
+    }
+
+    public static String formatDateSlash(String rawDate) {
+        String dashDate = formatDateToDdMmYyyy(rawDate);
+        if (dashDate == null || dashDate.isEmpty()) return "";
+        return dashDate.replace('-', '/');
+    }
+
+
     public static String formatPurchaseStatus(String status) {
         if (status == null || status.trim().isEmpty()) return "Đã thanh toán";
         String s = status.trim().toUpperCase();

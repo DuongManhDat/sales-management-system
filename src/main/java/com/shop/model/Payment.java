@@ -6,6 +6,9 @@ public class Payment {
     private long amount;
     private String paymentDate;
     private String note;
+    private String status = "ACTIVE";
+    private String cancelledAt;
+    private String cancelReason;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -21,4 +24,13 @@ public class Payment {
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getCancelledAt() { return cancelledAt; }
+    public void setCancelledAt(String cancelledAt) { this.cancelledAt = cancelledAt; }
+
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
 }

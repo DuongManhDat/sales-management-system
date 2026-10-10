@@ -12,6 +12,7 @@ public class Invoice {
     private long paid;
     private long debt;
     private String status;
+    private String customerName;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -45,4 +46,7 @@ public class Invoice {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 }
