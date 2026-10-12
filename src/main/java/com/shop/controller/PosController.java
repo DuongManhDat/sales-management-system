@@ -71,6 +71,7 @@ public class PosController {
     @FXML private TextField txtCustomerPaid;
     @FXML private Label lblChangeTitle;
     @FXML private Label lblChange;
+    @FXML private Button btnPlaceOrder;
     @FXML private Button btnCheckout;
 
     private final PosViewModel viewModel = new PosViewModel();
@@ -535,6 +536,102 @@ public class PosController {
         }
     }
 
+    @FXML
+    private void handlePlaceOrder() {
+        if (viewModel.getInvoiceItems().isEmpty()) {
+            showAlert("Giỏ hàng trống", "Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
+            return;
+        }
+
+        Customer selectedCustomer = customerComboBox.getValue();
+        if (selectedCustomer == null) {
+            showAlert("Yêu cầu khách hàng", "Vui lòng chọn khách hàng để tạo đơn đặt hàng.");
+            customerComboBox.requestFocus();
+            return;
+        }
+
+        // Dialog 1: Ngày giao hàng
+        TextInputDialog deliveryDialog = new TextInputDialog("");
+        deliveryDialog.setTitle("Đặt hàng");
+        deliveryDialog.setHeaderText("Nhập ngày hẹn giao hàng");
+        deliveryDialog.setContentText("Ngày giao (dd/MM/yyyy):");
+        deliveryDialog.getEditor().setPromptText("VD: 20/10/2026");
+
+        java.util.Optional<String> deliveryResult = deliveryDialog.showAndWait();
+        if (deliveryResult.isEmpty()) return;
+
+        String deliveryDate = null;
+        String deliveryDateRaw = deliveryResult.get().trim();
+        if (!deliveryDateRaw.isEmpty()) {
+            try {
+                java.text.SimpleDateFormat inputFmt = new java.text.SimpleDateFormat("dd/MM/yyyy");
+                java.text.SimpleDateFormat dbFmt = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                inputFmt.setLenient(false);
+                deliveryDate = dbFmt.format(inputFmt.parse(deliveryDateRaw));
+            } catch (java.text.ParseException e) {
+                showAlert("Ngày không hợp lệ", "Định dạng phải là dd/MM/yyyy. VD: 20/10/2026");
+                return;
+            }
+        }
+
+        // Dialog 2: Tiền cọc
+        TextInputDialog depositDialog = new TextInputDialog("0");
+        depositDialog.setTitle("Tiền cọc đặt hàng");
+        depositDialog.setHeaderText("Khách đặt cọc trước?");
+        depositDialog.setContentText("Số tiền cọc (đ):");
+
+        java.util.Optional<String> depositResult = depositDialog.showAndWait();
+        if (depositResult.isEmpty()) return;
+
+        long depositAmount = 0L;
+        try {
+            String raw = depositResult.get().trim().replace(",", "").replace(".", "");
+            if (!raw.isEmpty()) depositAmount = Long.parseLong(raw);
+            if (depositAmount < 0) {
+                showAlert("Lỗi", "Tiền cọc không được âm.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Lỗi", "Số tiền cọc không hợp lệ.");
+            return;
+        }
+
+        long total = viewModel.totalProperty().get();
+        if (depositAmount > total) {
+            showAlert("Lỗi", "Tiền cọc (" + CURRENCY_FORMAT.format(depositAmount) +
+                    " đ) không được lớn hơn tổng đơn (" + CURRENCY_FORMAT.format(total) + " đ).");
+            return;
+        }
+
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(selectedCustomer.getId());
+        invoice.setSubtotal(viewModel.subtotalProperty().get());
+        invoice.setDiscountAmt(viewModel.discountAmtProperty().get());
+        invoice.setDiscountPct(0);
+        invoice.setTotal(total);
+        invoice.setDeliveryDate(deliveryDate);
+
+        java.util.List<InvoiceItem> items = new java.util.ArrayList<>(viewModel.getInvoiceItems());
+
+        try {
+            salesService.createOrder(invoice, items, depositAmount);
+            String msg = "Đã tạo đơn đặt hàng " + invoice.getCode();
+            if (deliveryDate != null) msg += "\nNgày giao: " + deliveryDateRaw;
+            if (depositAmount > 0) msg += "\nTiền cọc: " + CURRENCY_FORMAT.format(depositAmount) + " đ";
+            showAlert("Thành công", msg);
+            viewModel.clearCart();
+            txtDiscount.setText("0");
+            txtCustomerPaid.setText("0");
+            customerComboBox.setValue(null);
+            refreshProductList();
+        } catch (IllegalStateException e) {
+            showAlert("Không đủ hàng", e.getMessage());
+        } catch (java.sql.SQLException e) {
+            log.error("Lỗi khi tạo đơn đặt hàng", e);
+            showAlert("Lỗi hệ thống", "Không thể tạo đơn: " + e.getMessage());
+        }
+    }
+
     private void setupKeyShortcuts() {
         Platform.runLater(() -> {
             if (cartTable.getScene() != null) {
@@ -545,6 +642,9 @@ public class PosController {
                         event.consume();
                     } else if (event.getCode() == KeyCode.F3) {
                         customerComboBox.requestFocus();
+                        event.consume();
+                    } else if (event.getCode() == KeyCode.F8) {
+                        handlePlaceOrder();
                         event.consume();
                     } else if (event.getCode() == KeyCode.F9) {
                         handleCheckout();

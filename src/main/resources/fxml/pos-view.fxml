@@ -133,6 +133,13 @@
             <Label fx:id="lblChange" text="0 đ" styleClass="title-4" style="-fx-text-fill: #16A34A;"/>
         </HBox>
 
+        <!-- Place Order Button -->
+        <Button fx:id="btnPlaceOrder" text="ĐẶT HÀNG (F8)" onAction="#handlePlaceOrder" maxWidth="Infinity" prefHeight="44" styleClass="btn-outline-primary">
+            <graphic>
+                <FontIcon iconLiteral="fth-clipboard" iconSize="18"/>
+            </graphic>
+        </Button>
+
         <!-- Big Checkout Action Button -->
         <Button fx:id="btnCheckout" text="THANH TOÁN (F9)" onAction="#handleCheckout" maxWidth="Infinity" prefHeight="56" styleClass="btn-checkout-primary">
             <graphic>
