@@ -9,6 +9,7 @@ public class Payment {
     private String status = "ACTIVE";
     private String cancelledAt;
     private String cancelReason;
+    private String paymentType = "PAYMENT";
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -33,4 +34,7 @@ public class Payment {
 
     public String getCancelReason() { return cancelReason; }
     public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+
+    public String getPaymentType() { return paymentType; }
+    public void setPaymentType(String paymentType) { this.paymentType = paymentType; }
 }

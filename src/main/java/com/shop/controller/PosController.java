@@ -16,12 +16,14 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -36,7 +38,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public class PosController {
     private static final Logger log = LoggerFactory.getLogger(PosController.class);
@@ -71,6 +76,7 @@ public class PosController {
     @FXML private TextField txtCustomerPaid;
     @FXML private Label lblChangeTitle;
     @FXML private Label lblChange;
+    @FXML private Button btnPlaceOrder;
     @FXML private Button btnCheckout;
 
     private final PosViewModel viewModel = new PosViewModel();
@@ -535,6 +541,141 @@ public class PosController {
         }
     }
 
+    @FXML
+    private void handlePlaceOrder() {
+        if (viewModel.getInvoiceItems().isEmpty()) {
+            showAlert("Giỏ hàng trống", "Vui lòng thêm sản phẩm vào giỏ hàng trước khi đặt hàng.");
+            return;
+        }
+
+        Customer selectedCustomer = customerComboBox.getValue();
+        if (selectedCustomer == null) {
+            showAlert("Yêu cầu khách hàng", "Vui lòng chọn khách hàng để tạo đơn đặt hàng.");
+            customerComboBox.requestFocus();
+            return;
+        }
+
+        long total = viewModel.totalProperty().get();
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Tạo Đơn Đặt Hàng");
+        dialog.setHeaderText("Đặt hàng cho khách: " + selectedCustomer.getName());
+
+        ButtonType confirmBtnType = new ButtonType("Xác nhận đặt hàng", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(confirmBtnType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(12);
+        grid.setVgap(14);
+        grid.setPadding(new Insets(16, 20, 16, 20));
+
+        // 1. Khách hàng
+        Label lblCustTitle = new Label("Khách hàng:");
+        lblCustTitle.setStyle("-fx-text-fill: #64748B; -fx-font-weight: bold;");
+        String phoneStr = (selectedCustomer.getPhone() != null && !selectedCustomer.getPhone().isEmpty())
+                ? " (" + selectedCustomer.getPhone() + ")" : "";
+        Label lblCustVal = new Label(selectedCustomer.getName() + phoneStr);
+        lblCustVal.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        grid.add(lblCustTitle, 0, 0);
+        grid.add(lblCustVal, 1, 0);
+
+        // 2. Tổng tiền đơn
+        Label lblTotalTitle = new Label("Tổng tiền đơn:");
+        lblTotalTitle.setStyle("-fx-text-fill: #64748B; -fx-font-weight: bold;");
+        Label lblTotalVal = new Label(CURRENCY_FORMAT.format(total) + " đ");
+        lblTotalVal.setStyle("-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #2563EB;");
+        grid.add(lblTotalTitle, 0, 1);
+        grid.add(lblTotalVal, 1, 1);
+
+        // 3. Ngày hẹn giao hàng (Chọn trên lịch DatePicker)
+        Label lblDateTitle = new Label("Ngày hẹn giao:");
+        lblDateTitle.setStyle("-fx-font-weight: bold;");
+        DatePicker deliveryDatePicker = new DatePicker();
+        deliveryDatePicker.setPromptText("Chọn ngày giao trên lịch (dd/MM/yyyy)");
+        deliveryDatePicker.setMaxWidth(Double.MAX_VALUE);
+        deliveryDatePicker.setConverter(new StringConverter<LocalDate>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                if (string == null || string.trim().isEmpty()) return null;
+                try {
+                    return LocalDate.parse(string.trim(), formatter);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
+        grid.add(lblDateTitle, 0, 2);
+        grid.add(deliveryDatePicker, 1, 2);
+
+        // 4. Tiền khách cọc trước (Format trực tiếp phân cách hàng nghìn khi nhập)
+        Label lblDepositTitle = new Label("Tiền khách cọc (đ):");
+        lblDepositTitle.setStyle("-fx-font-weight: bold;");
+        TextField txtDeposit = new TextField("0");
+        txtDeposit.setAlignment(Pos.CENTER_RIGHT);
+        txtDeposit.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        FormatterUtil.attachCurrencyFormatter(txtDeposit, null);
+        grid.add(lblDepositTitle, 0, 3);
+        grid.add(txtDeposit, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != confirmBtnType) {
+            return;
+        }
+
+        LocalDate selectedDate = deliveryDatePicker.getValue();
+        String deliveryDate = selectedDate != null ? selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
+
+        long depositAmount = FormatterUtil.parseNumberFromText(txtDeposit.getText());
+        if (depositAmount < 0) {
+            showAlert("Lỗi", "Tiền cọc không được âm.");
+            return;
+        }
+        if (depositAmount > total) {
+            showAlert("Lỗi", "Tiền cọc (" + CURRENCY_FORMAT.format(depositAmount) +
+                    " đ) không được lớn hơn tổng đơn (" + CURRENCY_FORMAT.format(total) + " đ).");
+            return;
+        }
+
+        Invoice invoice = new Invoice();
+        invoice.setCustomerId(selectedCustomer.getId());
+        invoice.setSubtotal(viewModel.subtotalProperty().get());
+        invoice.setDiscountAmt(viewModel.discountAmtProperty().get());
+        invoice.setDiscountPct(0);
+        invoice.setTotal(total);
+        invoice.setDeliveryDate(deliveryDate);
+
+        List<InvoiceItem> items = new java.util.ArrayList<>(viewModel.getInvoiceItems());
+
+        try {
+            salesService.createOrder(invoice, items, depositAmount);
+            String msg = "Đã tạo đơn đặt hàng " + invoice.getCode();
+            if (selectedDate != null) {
+                msg += "\nNgày hẹn giao: " + selectedDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            }
+            if (depositAmount > 0) {
+                msg += "\nTiền cọc: " + CURRENCY_FORMAT.format(depositAmount) + " đ";
+            }
+            showAlert("Thành công", msg);
+            viewModel.clearCart();
+            txtDiscount.setText("0");
+            txtCustomerPaid.setText("0");
+            customerComboBox.setValue(null);
+            refreshProductList();
+        } catch (IllegalStateException e) {
+            showAlert("Không đủ hàng", e.getMessage());
+        } catch (SQLException e) {
+            log.error("Lỗi khi tạo đơn đặt hàng", e);
+            showAlert("Lỗi hệ thống", "Không thể tạo đơn: " + e.getMessage());
+        }
+    }
+
     private void setupKeyShortcuts() {
         Platform.runLater(() -> {
             if (cartTable.getScene() != null) {
@@ -545,6 +686,9 @@ public class PosController {
                         event.consume();
                     } else if (event.getCode() == KeyCode.F3) {
                         customerComboBox.requestFocus();
+                        event.consume();
+                    } else if (event.getCode() == KeyCode.F8) {
+                        handlePlaceOrder();
                         event.consume();
                     } else if (event.getCode() == KeyCode.F9) {
                         handleCheckout();

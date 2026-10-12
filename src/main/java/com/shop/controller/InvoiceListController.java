@@ -2,22 +2,28 @@ package com.shop.controller;
 
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Invoice;
+import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class InvoiceListController {
     private static final Logger log = LoggerFactory.getLogger(InvoiceListController.class);
+    private static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("#,###");
 
+    @FXML private TextField searchField;
+    @FXML private DatePicker dateFilter;
     @FXML private ComboBox<String> statusFilter;
     @FXML private TableView<Invoice> invoiceTable;
     @FXML private TableColumn<Invoice, String> colCode;
@@ -28,28 +34,40 @@ public class InvoiceListController {
     @FXML private TableColumn<Invoice, Number> colDebt;
     @FXML private TableColumn<Invoice, String> colStatus;
 
-    private InvoiceDao invoiceDao = new InvoiceDao();
+    private final InvoiceDao invoiceDao = new InvoiceDao();
 
     @FXML
     public void initialize() {
         statusFilter.setItems(FXCollections.observableArrayList("Tất cả", "Đã thanh toán", "Còn nợ"));
         statusFilter.getSelectionModel().selectFirst();
-        
+
+        setupDatePickerConverter();
+
         colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
+        colDate.setCellValueFactory(data -> new SimpleStringProperty(
+                FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
+
         colCustomer.setCellValueFactory(data -> {
             String name = data.getValue().getCustomerName();
             if (name != null && !name.trim().isEmpty()) {
                 return new SimpleStringProperty(name);
             }
-            return new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId()));
+            return new SimpleStringProperty("KH #" + data.getValue().getCustomerId());
         });
+
         colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
         colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
         colDebt.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getDebt()));
-        colStatus.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatInvoiceStatus(data.getValue())));
-        colStatus.setCellFactory(column -> new javafx.scene.control.TableCell<Invoice, String>() {
-            private final javafx.scene.control.Label badge = new javafx.scene.control.Label();
+
+        // Format tiền tệ chia đơn vị và kết thúc bằng đ
+        colTotal.setCellFactory(col -> createCurrencyCell());
+        colPaid.setCellFactory(col -> createCurrencyCell());
+        colDebt.setCellFactory(col -> createCurrencyCell());
+
+        colStatus.setCellValueFactory(data -> new SimpleStringProperty(
+                FormatterUtil.formatInvoiceStatus(data.getValue())));
+        colStatus.setCellFactory(column -> new TableCell<Invoice, String>() {
+            private final Label badge = new Label();
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -78,7 +96,7 @@ public class InvoiceListController {
 
         // Double-click mở dialog lịch sử thanh toán
         invoiceTable.setRowFactory(tv -> {
-            javafx.scene.control.TableRow<Invoice> row = new javafx.scene.control.TableRow<>();
+            TableRow<Invoice> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     openPaymentHistoryDialog(row.getItem());
@@ -87,16 +105,57 @@ public class InvoiceListController {
             return row;
         });
 
+        searchField.textProperty().addListener((obs, old, val) -> loadInvoices());
         statusFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
-        
+        dateFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
+
         loadInvoices();
+    }
+
+    private void setupDatePickerConverter() {
+        dateFilter.setConverter(new StringConverter<LocalDate>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                if (string == null || string.trim().isEmpty()) return null;
+                try {
+                    return LocalDate.parse(string.trim(), formatter);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
+    }
+
+    private TableCell<Invoice, Number> createCurrencyCell() {
+        return new TableCell<>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(CURRENCY_FORMAT.format(item.longValue()) + " đ");
+                }
+                setStyle("-fx-alignment: CENTER_RIGHT;");
+            }
+        };
+    }
+
+    @FXML
+    private void handleClearDate() {
+        dateFilter.setValue(null);
     }
 
     @FXML
     private void handleOpenPaymentHistory() {
         Invoice selected = invoiceTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Chưa chọn hóa đơn");
             alert.setHeaderText(null);
             alert.setContentText("Vui lòng chọn một hóa đơn từ bảng để xem lịch sử thanh toán hoặc thu nợ.");
@@ -135,20 +194,14 @@ public class InvoiceListController {
     @FXML
     private void loadInvoices() {
         try {
+            String keyword = searchField.getText();
             String filterUI = statusFilter.getValue();
-            String dbFilter = "ALL";
-            if ("Đã thanh toán".equals(filterUI)) {
-                dbFilter = "PAID";
-            } else if ("Còn nợ".equals(filterUI)) {
-                dbFilter = "DEBT";
+            String dateParam = null;
+            if (dateFilter.getValue() != null) {
+                dateParam = dateFilter.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
             }
-            
-            List<Invoice> invoices;
-            if ("ALL".equals(dbFilter)) {
-                invoices = invoiceDao.findAll();
-            } else {
-                invoices = invoiceDao.findByStatus(dbFilter);
-            }
+
+            List<Invoice> invoices = invoiceDao.searchInvoices(keyword, filterUI, dateParam);
             invoiceTable.setItems(FXCollections.observableArrayList(invoices));
         } catch (SQLException e) {
             log.error("Failed to load invoices", e);

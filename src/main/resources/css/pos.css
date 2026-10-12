@@ -359,3 +359,33 @@
 .btn-icon-square:hover {
     -fx-background-color: #E2E8F0;
 }
+
+/* Order Placement Button */
+.btn-outline-primary {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2563EB;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #2563EB;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: none;
+}
+
+.btn-outline-primary:hover {
+    -fx-background-color: #EFF6FF;
+    -fx-border-color: #1D4ED8;
+    -fx-text-fill: #1D4ED8;
+}
+
+.btn-outline-primary:pressed {
+    -fx-background-color: #DBEAFE;
+    -fx-border-color: #1E40AF;
+}
+
+.btn-outline-primary .ikonli-font-icon {
+    -fx-icon-color: #2563EB;
+}
+

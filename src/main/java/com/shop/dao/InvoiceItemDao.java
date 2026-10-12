@@ -22,11 +22,10 @@ public class InvoiceItemDao {
             pstmt.executeBatch();
         }
     }
-    public List<InvoiceItem> findByInvoiceId(int invoiceId) throws SQLException {
+    public List<InvoiceItem> findByInvoiceId(Connection conn, int invoiceId) throws SQLException {
         List<InvoiceItem> items = new java.util.ArrayList<>();
         String query = "SELECT * FROM invoice_items WHERE invoice_id = ?";
-        try (Connection conn = com.shop.util.DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, invoiceId);
             try (java.sql.ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -43,5 +42,11 @@ public class InvoiceItemDao {
             }
         }
         return items;
+    }
+
+    public List<InvoiceItem> findByInvoiceId(int invoiceId) throws SQLException {
+        try (Connection conn = com.shop.util.DBConnection.getConnection()) {
+            return findByInvoiceId(conn, invoiceId);
+        }
     }
 }
