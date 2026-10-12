@@ -263,4 +263,65 @@ public class SalesService {
             }
         }
     }
+
+    public void cancelReturnInvoice(int returnInvoiceId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            ReturnInvoice returnInvoice = returnInvoiceDao.findById(returnInvoiceId);
+            if (returnInvoice == null) {
+                throw new IllegalArgumentException("Không tìm thấy phiếu trả hàng ID = " + returnInvoiceId);
+            }
+            if ("CANCELED".equalsIgnoreCase(returnInvoice.getStatus()) || "CANCELLED".equalsIgnoreCase(returnInvoice.getStatus())) {
+                throw new IllegalArgumentException("Phiếu trả hàng này đã bị hủy trước đó.");
+            }
+
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+            // 1. Cập nhật trạng thái phiếu trả thành CANCELED và lưu thời gian hủy
+            returnInvoiceDao.updateStatus(conn, returnInvoiceId, "CANCELED", currentTime);
+
+            // 2. Thu hồi tồn kho đã cộng khi trả hàng
+            List<ReturnInvoiceItem> items = returnInvoiceItemDao.findByReturnInvoiceId(conn, returnInvoiceId);
+            for (ReturnInvoiceItem item : items) {
+                productDao.decreaseStock(conn, item.getProductId(), item.getReturnQty());
+
+                // Ghi nhận biến động kho hủy trả hàng
+                StockMovement movement = new StockMovement();
+                movement.setProductId(item.getProductId());
+                movement.setType("RETURN_CANCEL");
+                movement.setQtyChange(-item.getReturnQty());
+                movement.setStockAfter(0);
+                movement.setRefType("RETURN_CANCEL");
+                movement.setRefId(returnInvoiceId);
+                movement.setCreatedAt(currentTime);
+                movement.setNote("Hủy phiếu trả hàng " + returnInvoice.getCode());
+                stockMovementDao.insert(conn, movement);
+            }
+
+            // 3. Khôi phục lại công nợ hóa đơn gốc (cộng lại nợ tương ứng với số tiền hoàn)
+            long refundAmount = returnInvoice.getTotalRefund() - returnInvoice.getReturnFee();
+            if (refundAmount > 0) {
+                String query = "UPDATE invoices SET debt = debt + ? WHERE id = ?";
+                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(query)) {
+                    pstmt.setLong(1, refundAmount);
+                    pstmt.setInt(2, returnInvoice.getInvoiceId());
+                    pstmt.executeUpdate();
+                }
+            }
+
+            conn.commit();
+        } catch (SQLException | IllegalArgumentException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
 }
+
