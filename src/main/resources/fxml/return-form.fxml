@@ -1,70 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox spacing="10" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnFormController" styleClass="pos-root">
-    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
-    
-    <Label text="Tạo Phiếu Trả Hàng" styleClass="title-3"/>
-    
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Mã Hóa Đơn (ID):" />
-        <TextField fx:id="txtInvoiceId" promptText="Nhập ID hóa đơn..." styleClass="flat-input"/>
-        <Button text="Tải Dữ Liệu" onAction="#loadInvoiceData" styleClass="btn-outline-primary"/>
+<VBox spacing="16" prefWidth="950" prefHeight="650" style="-fx-background-color: #FBFBFA;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnFormController">
+    <padding>
+        <Insets top="20" right="24" bottom="20" left="24"/>
+    </padding>
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Button text="← Đóng" onAction="#handleClose" styleClass="btn-secondary"/>
+        <Label text="TẠO PHIẾU TRẢ HÀNG" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
     </HBox>
-    
-    <GridPane hgap="10" vgap="5">
+
+    <!-- Thông tin phiếu trả & hóa đơn gốc -->
+    <GridPane hgap="20" vgap="14" styleClass="bento-card">
         <columnConstraints>
-            <ColumnConstraints minWidth="100"/>
-            <ColumnConstraints minWidth="200"/>
+            <ColumnConstraints minWidth="100" prefWidth="110"/>
+            <ColumnConstraints percentWidth="38" hgrow="ALWAYS"/>
+            <ColumnConstraints minWidth="100" prefWidth="110"/>
+            <ColumnConstraints percentWidth="38" hgrow="ALWAYS"/>
         </columnConstraints>
-        <Label text="Khách hàng:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="text-muted"/>
-        <Label fx:id="lblCustomer" text="-" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
-        
-        <Label text="Tổng tiền gốc:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="text-muted"/>
-        <Label fx:id="lblOriginalTotal" text="0" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <!-- Hàng 1: Mã phiếu trả & Ngày trả -->
+        <Label text="Mã phiếu trả:" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-text-fill: #6b7280; -fx-font-weight: bold;" />
+        <TextField fx:id="txtCode" disable="true" styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Ngày trả:" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-text-fill: #6b7280;" />
+        <TextField fx:id="txtReturnDate" disable="true" styleClass="flat-input" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+        <!-- Hàng 2: Tìm kiếm Hóa đơn gốc với autocomplete / gợi ý trực tiếp -->
+        <Label text="Hóa đơn gốc (*):" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-text-fill: #6b7280; -fx-font-weight: bold;" />
+        <ComboBox fx:id="comboInvoiceSearch" editable="true" maxWidth="Infinity" promptText="Gõ mã HĐ hoặc tên khách hàng..." styleClass="flat-input" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Khách hàng:" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-text-fill: #6b7280;" />
+        <Label fx:id="lblCustomer" text="—" style="-fx-font-weight: bold; -fx-text-fill: #111111;" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+        <!-- Hàng 3: Chi tiết hóa đơn gốc -->
+        <Label text="Ngày mua đơn:" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-text-fill: #6b7280;" />
+        <Label fx:id="lblInvoiceDate" text="—" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Tổng tiền gốc:" GridPane.columnIndex="2" GridPane.rowIndex="2" style="-fx-text-fill: #6b7280;" />
+        <HBox spacing="16" alignment="CENTER_LEFT" GridPane.columnIndex="3" GridPane.rowIndex="2">
+            <Label fx:id="lblOriginalTotal" text="0 đ" style="-fx-font-weight: bold; -fx-text-fill: #111111;" />
+            <Label text="Trạng thái:" style="-fx-text-fill: #6b7280;" />
+            <Label fx:id="lblInvoiceStatus" text="—" style="-fx-font-weight: bold; -fx-text-fill: #047857;" />
+        </HBox>
     </GridPane>
-    
-    <Label text="Chi tiết sản phẩm:" styleClass="title-4"/>
-    <TableView fx:id="itemTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
-        <placeholder>
-            <Label text="Không có dữ liệu"/>
-        </placeholder>
-        <columns>
-            <TableColumn fx:id="colProductId" text="ID Sản Phẩm" prefWidth="120" />
-            <TableColumn fx:id="colQty" text="SL Đã Mua" prefWidth="100" />
-            <TableColumn fx:id="colPrice" text="Đơn giá" prefWidth="120" />
-        </columns>
+
+    <!-- Danh sách sản phẩm mua & số lượng trả -->
+    <VBox spacing="10" styleClass="bento-card" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="DANH SÁCH SẢN PHẨM HOÀN TRẢ" style="-fx-font-weight: bold; -fx-text-fill: #111111;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="💡 Nhấp đúp vào cột 'SL Trả' để nhập số lượng hàng muốn hoàn trả" style="-fx-text-fill: #6b7280; -fx-font-size: 12px;"/>
+        </HBox>
+
+        <TableView fx:id="itemTable" VBox.vgrow="ALWAYS" styleClass="table-view">
+            <placeholder>
+                <Label text="Chưa có dữ liệu hóa đơn. Vui lòng chọn hoặc tìm kiếm hóa đơn gốc ở trên." style="-fx-text-fill: #787774;"/>
+            </placeholder>
+            <columns>
+                <TableColumn fx:id="colProductId" text="Mã SP" prefWidth="120" style="-fx-alignment: CENTER_LEFT;"/>
+                <TableColumn fx:id="colProductName" text="Tên hàng hóa" prefWidth="280" style="-fx-alignment: CENTER_LEFT;"/>
+                <TableColumn fx:id="colQty" text="Đã mua" prefWidth="90" style="-fx-alignment: CENTER;"/>
+                <TableColumn fx:id="colReturnQty" text="SL Trả ✎" prefWidth="110" style="-fx-alignment: CENTER; -fx-font-weight: bold;"/>
+                <TableColumn fx:id="colPrice" text="Đơn giá bán" prefWidth="140" style="-fx-alignment: CENTER_RIGHT;"/>
+                <TableColumn fx:id="colAmount" text="Thành tiền hoàn" prefWidth="150" style="-fx-alignment: CENTER_RIGHT;"/>
+            </columns>
             <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-        </columnResizePolicy>
-    </TableView>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+    </VBox>
 
-    <!-- UI nhập liệu đơn giản -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Sản phẩm chọn trả:" />
-        <Label fx:id="lblSelectedProduct" text="-" styleClass="text-bold"/>
-        <Label text="SL trả:" />
-        <TextField fx:id="txtReturnQty" prefWidth="80" styleClass="flat-input"/>
-        <Button text="Xác nhận số lượng" onAction="#confirmReturnQty" styleClass="btn-outline-primary"/>
-    </HBox>
-
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Label text="Phí trả hàng:" />
-        <TextField fx:id="txtReturnFee" text="0" alignment="CENTER_RIGHT" prefWidth="150" styleClass="flat-input"/>
-        <Label text="Tổng Hoàn Trả:" styleClass="title-4"/>
-        <Label fx:id="lblTotalRefund" text="0" styleClass="title-3, text-primary"/>
-    </HBox>
-    
-    <HBox alignment="CENTER_RIGHT" spacing="10">
-        <Button text="HỦY" onAction="#cancel" styleClass="btn-outline-danger" prefHeight="40" prefWidth="100"/>
-        <Button text="XÁC NHẬN TRẢ HÀNG" onAction="#submitReturn" styleClass="btn-checkout" prefHeight="40" prefWidth="200">
-            <graphic>
-                <FontIcon iconLiteral="fth-check-circle" />
-            </graphic>
-        </Button>
+    <!-- Tổng kết & Xác nhận -->
+    <HBox alignment="CENTER_RIGHT" spacing="24" styleClass="bento-card">
+        <VBox alignment="CENTER_RIGHT" spacing="10">
+            <HBox spacing="16" alignment="CENTER_RIGHT">
+                <Label text="Tổng tiền hàng trả:" style="-fx-text-fill: #6b7280; -fx-font-weight: bold;"/>
+                <Label fx:id="lblGrossRefund" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #111111;"/>
+            </HBox>
+            <HBox spacing="16" alignment="CENTER_RIGHT">
+                <Label text="Phí trả hàng:" style="-fx-text-fill: #6b7280;"/>
+                <TextField fx:id="txtReturnFee" text="0" prefWidth="160" alignment="CENTER_RIGHT" styleClass="flat-input"/>
+            </HBox>
+            <HBox spacing="16" alignment="CENTER_RIGHT">
+                <Label text="TIỀN THỰC HOÀN KHÁCH:" style="-fx-text-fill: #111111; -fx-font-weight: bold;"/>
+                <Label fx:id="lblTotalRefund" text="0 đ" style="-fx-font-weight: bold; -fx-font-size: 20px; -fx-text-fill: #DC2626;"/>
+            </HBox>
+            <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                <Button text="Hủy bỏ" onAction="#handleClose" styleClass="btn-secondary" style="-fx-padding: 8 20;" />
+                <Button text="Xác nhận trả hàng" onAction="#submitReturn" styleClass="btn-primary" style="-fx-padding: 8 24;">
+                    <graphic>
+                        <FontIcon iconLiteral="fth-check-circle" iconColor="white"/>
+                    </graphic>
+                </Button>
+            </HBox>
+        </VBox>
     </HBox>
 </VBox>
