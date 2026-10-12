@@ -17,6 +17,7 @@ public class SalesService {
     private StockMovementDao stockMovementDao = new StockMovementDao();
     private ReturnInvoiceDao returnInvoiceDao = new ReturnInvoiceDao();
     private ReturnInvoiceItemDao returnInvoiceItemDao = new ReturnInvoiceItemDao();
+    private PaymentDao paymentDao = new PaymentDao();
 
     public void createInvoice(Invoice invoice, List<InvoiceItem> items) throws SQLException {
         Connection conn = null;
@@ -75,23 +76,130 @@ public class SalesService {
     }
 
     public void createOrder(Invoice invoice, List<InvoiceItem> items) throws SQLException {
+        createOrder(invoice, items, 0L);
+    }
+
+    public void createOrder(Invoice invoice, List<InvoiceItem> items, long depositAmount) throws SQLException {
         Connection conn = null;
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
-            
+
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            if (invoice.getCode() == null || invoice.getCode().trim().isEmpty()) {
+                invoice.setCode("DH" + new SimpleDateFormat("yyMMddHHmmss").format(new Date()) + String.format("%03d", (int)(System.currentTimeMillis() % 1000)));
+            }
+            if (invoice.getInvoiceDate() == null || invoice.getInvoiceDate().trim().isEmpty()) {
+                invoice.setInvoiceDate(currentTime);
+            }
+
+            long paid = Math.max(0, depositAmount);
+            invoice.setPaid(paid);
+            invoice.setDebt(invoice.getTotal() - paid);
             invoice.setStatus("PENDING");
+
+            // Kiểm tra tồn kho khả dụng TRƯỚC khi lưu
+            for (InvoiceItem item : items) {
+                double available = productDao.getAvailableQty(conn, item.getProductId());
+                if (item.getQty() > available) {
+                    Product p = productDao.getById(conn, item.getProductId());
+                    String name = p != null ? p.getName() : "Sản phẩm #" + item.getProductId();
+                    throw new IllegalStateException("Sản phẩm \"" + name + "\" không đủ tồn kho khả dụng. " +
+                            "Cần: " + item.getQty() + ", Có thể đặt: " + (int) available);
+                }
+            }
+
             invoiceDao.insert(conn, invoice);
 
             for (InvoiceItem item : items) {
                 item.setInvoiceId(invoice.getId());
                 item.setCostPrice(0);
+                productDao.increaseReservedQty(conn, item.getProductId(), item.getQty());
             }
             invoiceItemDao.insertAll(conn, items);
-            
-            // Do not decrease stock or log movement for PENDING orders in this MVP
+
+            if (depositAmount > 0) {
+                Payment deposit = new Payment();
+                deposit.setInvoiceId(invoice.getId());
+                deposit.setAmount(depositAmount);
+                deposit.setPaymentDate(currentTime);
+                deposit.setNote("Tiền cọc đặt hàng " + invoice.getCode());
+                deposit.setPaymentType("DEPOSIT");
+                paymentDao.insert(conn, deposit);
+            }
+
             conn.commit();
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalStateException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
+    public void completeOrder(int invoiceId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            Invoice invoice = invoiceDao.findById(conn, invoiceId);
+            if (invoice == null) throw new IllegalArgumentException("Đơn hàng #" + invoiceId + " không tồn tại.");
+            if (!"PENDING".equals(invoice.getStatus()))
+                throw new IllegalArgumentException("Chỉ hoàn thành đơn PENDING. Trạng thái hiện tại: " + invoice.getStatus());
+
+            List<InvoiceItem> items = invoiceItemDao.findByInvoiceId(conn, invoiceId);
+            String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+            for (InvoiceItem item : items) {
+                productDao.decreaseStock(conn, item.getProductId(), item.getQty());
+                productDao.decreaseReservedQty(conn, item.getProductId(), item.getQty());
+                StockMovement movement = new StockMovement();
+                movement.setProductId(item.getProductId());
+                movement.setType("OUT");
+                movement.setQtyChange(-item.getQty());
+                movement.setStockAfter(0);
+                movement.setRefType("ORDER");
+                movement.setRefId(invoiceId);
+                movement.setCreatedAt(currentTime);
+                stockMovementDao.insert(conn, movement);
+            }
+
+            invoiceDao.updatePaymentStatus(conn, invoiceId, invoice.getPaid(), invoice.getDebt(), "COMPLETED");
+            conn.commit();
+        } catch (SQLException | IllegalArgumentException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+                conn.close();
+            }
+        }
+    }
+
+    public void cancelOrder(int invoiceId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            Invoice invoice = invoiceDao.findById(conn, invoiceId);
+            if (invoice == null) throw new IllegalArgumentException("Đơn hàng #" + invoiceId + " không tồn tại.");
+            if (!"PENDING".equals(invoice.getStatus()))
+                throw new IllegalArgumentException("Chỉ hủy đơn PENDING. Trạng thái hiện tại: " + invoice.getStatus());
+
+            List<InvoiceItem> items = invoiceItemDao.findByInvoiceId(conn, invoiceId);
+            for (InvoiceItem item : items) {
+                productDao.decreaseReservedQty(conn, item.getProductId(), item.getQty());
+            }
+
+            invoiceDao.updatePaymentStatus(conn, invoiceId, invoice.getPaid(), invoice.getDebt(), "CANCELLED");
+            conn.commit();
+        } catch (SQLException | IllegalArgumentException e) {
             if (conn != null) conn.rollback();
             throw e;
         } finally {

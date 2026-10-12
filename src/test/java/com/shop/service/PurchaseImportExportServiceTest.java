@@ -39,6 +39,13 @@ class PurchaseImportExportServiceTest {
         purchaseService = new PurchaseService();
 
         try (Connection conn = DBConnection.getConnection()) {
+            try (java.sql.Statement s = conn.createStatement()) {
+                s.execute("DELETE FROM purchase_items");
+                s.execute("DELETE FROM purchases");
+                s.execute("DELETE FROM products");
+                s.execute("DELETE FROM suppliers");
+            }
+
             // Tạo NCC001 và NCC002
             String insertSupplier = "INSERT INTO suppliers (code, name, phone, is_active, created_at) VALUES (?, ?, '0901234567', 1, datetime('now'))";
             try (PreparedStatement stmt = conn.prepareStatement(insertSupplier)) {
