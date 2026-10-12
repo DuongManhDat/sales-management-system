@@ -13,6 +13,7 @@ public class Invoice {
     private long debt;
     private String status;
     private String customerName;
+    private String deliveryDate;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -49,4 +50,7 @@ public class Invoice {
 
     public String getCustomerName() { return customerName; }
     public void setCustomerName(String customerName) { this.customerName = customerName; }
+
+    public String getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(String deliveryDate) { this.deliveryDate = deliveryDate; }
 }

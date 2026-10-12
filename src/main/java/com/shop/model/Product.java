@@ -11,6 +11,7 @@ public class Product {
 
     private long salePrice;
     private double stockQty;
+    private int reservedQty;
     
     private String note;
     private String deletedAt; // null = active
@@ -55,4 +56,7 @@ public class Product {
     
     public String getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
+
+    public int getReservedQty() { return reservedQty; }
+    public void setReservedQty(int reservedQty) { this.reservedQty = reservedQty; }
 }

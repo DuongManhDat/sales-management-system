@@ -9,8 +9,8 @@ import java.util.List;
 
 public class InvoiceDao {
     public void insert(Connection conn, Invoice invoice) throws SQLException {
-        String query = "INSERT INTO invoices (code, customer_id, invoice_date, subtotal, discount_pct, discount_amt, total, paid, debt, status) " +
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO invoices (code, customer_id, invoice_date, subtotal, discount_pct, discount_amt, total, paid, debt, status, delivery_date) " +
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, invoice.getCode());
             pstmt.setInt(2, invoice.getCustomerId());
@@ -22,6 +22,7 @@ public class InvoiceDao {
             pstmt.setLong(8, invoice.getPaid());
             pstmt.setLong(9, invoice.getDebt());
             pstmt.setString(10, invoice.getStatus());
+            pstmt.setString(11, invoice.getDeliveryDate());
             pstmt.executeUpdate();
             
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
@@ -140,6 +141,10 @@ public class InvoiceDao {
         invoice.setPaid(rs.getLong("paid"));
         invoice.setDebt(rs.getLong("debt"));
         invoice.setStatus(rs.getString("status"));
+        try {
+            invoice.setDeliveryDate(rs.getString("delivery_date"));
+        } catch (SQLException ignored) {
+        }
         try {
             invoice.setCustomerName(rs.getString("customer_name"));
         } catch (SQLException ignored) {

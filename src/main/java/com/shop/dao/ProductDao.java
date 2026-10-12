@@ -110,6 +110,35 @@ public class ProductDao {
         }
     }
 
+    public void increaseReservedQty(Connection conn, int productId, int qty) throws SQLException {
+        String query = "UPDATE products SET reserved_qty = reserved_qty + ? WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, qty);
+            pstmt.setInt(2, productId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void decreaseReservedQty(Connection conn, int productId, int qty) throws SQLException {
+        String query = "UPDATE products SET reserved_qty = MAX(0, reserved_qty - ?) WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, qty);
+            pstmt.setInt(2, productId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public double getAvailableQty(Connection conn, int productId) throws SQLException {
+        String query = "SELECT stock_qty - reserved_qty AS available_qty FROM products WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, productId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getDouble("available_qty");
+            }
+        }
+        return 0;
+    }
+
     public Product getById(Connection conn, int productId) throws SQLException {
         String query = "SELECT p.*, u.name as unit_name, c.name as category_name " +
                        "FROM products p " +
@@ -198,6 +227,11 @@ public class ProductDao {
 
         p.setSalePrice(rs.getLong("sale_price"));
         p.setStockQty(rs.getDouble("stock_qty"));
+        try {
+            p.setReservedQty(rs.getInt("reserved_qty"));
+        } catch (SQLException ignored) {
+            p.setReservedQty(0);
+        }
         p.setNote(rs.getString("note"));
         p.setDeletedAt(rs.getString("deleted_at"));
         p.setCreatedAt(rs.getString("created_at"));
