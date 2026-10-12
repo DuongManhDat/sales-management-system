@@ -11,7 +11,12 @@
     <Label text="Danh sách Đơn Đặt Hàng" styleClass="title-3"/>
     
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <ComboBox fx:id="statusFilter" promptText="Trạng thái" styleClass="flat-combo" />
+        <TextField fx:id="searchField" promptText="Tìm theo Mã đơn / Khách hàng..." prefWidth="250" styleClass="flat-input" />
+        <DatePicker fx:id="dateFilter" promptText="Lọc theo ngày (dd/MM/yyyy)" prefWidth="190" styleClass="flat-input" />
+        <Button text="✕" onAction="#handleClearDate" styleClass="btn-icon-square" tooltip="$clearDateTip">
+            <tooltip><Tooltip fx:id="clearDateTip" text="Bỏ chọn lọc ngày"/></tooltip>
+        </Button>
+        <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="150" styleClass="flat-combo" />
         <Button text="Tải lại" onAction="#loadOrders" styleClass="btn-checkout">
             <graphic>
                 <FontIcon iconLiteral="fth-refresh-cw" />

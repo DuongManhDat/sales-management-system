@@ -50,6 +50,96 @@ public class InvoiceDao {
         return invoices;
     }
 
+    public List<Invoice> searchInvoices(String keyword, String status, String dateFilter) throws SQLException {
+        List<Invoice> invoices = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT i.*, c.name AS customer_name FROM invoices i " +
+            "LEFT JOIN customers c ON i.customer_id = c.id " +
+            "WHERE 1=1"
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String pattern = "%" + keyword.trim() + "%";
+            sql.append(" AND (i.code LIKE ? OR c.name LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status) && !"Tất cả".equalsIgnoreCase(status)) {
+            if ("PAID".equalsIgnoreCase(status) || "Đã thanh toán".equalsIgnoreCase(status)) {
+                sql.append(" AND (i.status = 'PAID' OR i.status = 'Đã thanh toán' OR (i.debt = 0 AND i.status != 'CANCELLED'))");
+            } else if ("DEBT".equalsIgnoreCase(status) || "Còn nợ".equalsIgnoreCase(status)) {
+                sql.append(" AND (i.status = 'PARTIAL' OR i.status = 'Còn nợ' OR (i.debt > 0 AND i.status != 'CANCELLED'))");
+            } else {
+                sql.append(" AND i.status = ?");
+                params.add(status);
+            }
+        }
+
+        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
+            sql.append(" AND date(i.invoice_date) = date(?)");
+            params.add(dateFilter.trim());
+        }
+
+        sql.append(" ORDER BY i.id DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            for (int idx = 0; idx < params.size(); idx++) {
+                pstmt.setObject(idx + 1, params.get(idx));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    invoices.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+        return invoices;
+    }
+
+    public List<Invoice> searchOrders(String keyword, String status, String dateFilter) throws SQLException {
+        List<Invoice> orders = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT i.*, c.name AS customer_name FROM invoices i " +
+            "LEFT JOIN customers c ON i.customer_id = c.id " +
+            "WHERE 1=1"
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String pattern = "%" + keyword.trim() + "%";
+            sql.append(" AND (i.code LIKE ? OR c.name LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND i.status = ?");
+            params.add(status);
+        }
+
+        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
+            sql.append(" AND date(i.invoice_date) = date(?)");
+            params.add(dateFilter.trim());
+        }
+
+        sql.append(" ORDER BY i.id DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            for (int idx = 0; idx < params.size(); idx++) {
+                pstmt.setObject(idx + 1, params.get(idx));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+        return orders;
+    }
+
     public List<Invoice> findAll() throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
         String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +

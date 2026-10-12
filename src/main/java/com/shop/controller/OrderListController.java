@@ -9,15 +9,22 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class OrderListController {
     private static final Logger log = LoggerFactory.getLogger(OrderListController.class);
+    private static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("#,###");
 
+    @FXML private TextField searchField;
+    @FXML private DatePicker dateFilter;
     @FXML private ComboBox<String> statusFilter;
     @FXML private TableView<Invoice> orderTable;
     @FXML private TableColumn<Invoice, String> colCode;
@@ -36,6 +43,8 @@ public class OrderListController {
         statusFilter.setItems(FXCollections.observableArrayList("Đang xử lý", "Đã hoàn thành", "Đã hủy"));
         statusFilter.getSelectionModel().selectFirst();
 
+        setupDatePickerConverter();
+
         colCode.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getCode()));
         colDate.setCellValueFactory(d -> new SimpleStringProperty(
                 FormatterUtil.formatDateToDdMmYyyy(d.getValue().getInvoiceDate())));
@@ -51,16 +60,63 @@ public class OrderListController {
         });
         colTotal.setCellValueFactory(d -> new SimpleLongProperty(d.getValue().getTotal()));
         colPaid.setCellValueFactory(d -> new SimpleLongProperty(d.getValue().getPaid()));
+
+        // Format tiền tệ chia đơn vị và kết thúc bằng đ
+        colTotal.setCellFactory(col -> createCurrencyCell());
+        colPaid.setCellFactory(col -> createCurrencyCell());
+
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(
                 FormatterUtil.formatInvoiceStatus(d.getValue().getStatus())));
 
+        searchField.textProperty().addListener((obs, old, val) -> loadOrders());
+        dateFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
         statusFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
         loadOrders();
+    }
+
+    private void setupDatePickerConverter() {
+        dateFilter.setConverter(new StringConverter<LocalDate>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                if (string == null || string.trim().isEmpty()) return null;
+                try {
+                    return LocalDate.parse(string.trim(), formatter);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
+    }
+
+    private TableCell<Invoice, Number> createCurrencyCell() {
+        return new TableCell<>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(CURRENCY_FORMAT.format(item.longValue()) + " đ");
+                }
+                setStyle("-fx-alignment: CENTER_RIGHT;");
+            }
+        };
+    }
+
+    @FXML
+    private void handleClearDate() {
+        dateFilter.setValue(null);
     }
 
     @FXML
     private void loadOrders() {
         try {
+            String keyword = searchField.getText();
             String filter = statusFilter.getValue();
             String dbStatus;
             switch (filter) {
@@ -68,7 +124,11 @@ public class OrderListController {
                 case "Đã hủy":       dbStatus = "CANCELLED"; break;
                 default:             dbStatus = "PENDING";    break;
             }
-            List<Invoice> orders = invoiceDao.findByStatus(dbStatus);
+            String dateParam = null;
+            if (dateFilter.getValue() != null) {
+                dateParam = dateFilter.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            }
+            List<Invoice> orders = invoiceDao.searchOrders(keyword, dbStatus, dateParam);
             orderTable.setItems(FXCollections.observableArrayList(orders));
         } catch (SQLException e) {
             log.error("Lỗi khi tải danh sách đơn đặt hàng", e);
