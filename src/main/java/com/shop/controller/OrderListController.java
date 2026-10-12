@@ -2,22 +2,18 @@ package com.shop.controller;
 
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Invoice;
-import com.shop.util.DBConnection;
+import com.shop.service.SalesService;
+import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OrderListController {
     private static final Logger log = LoggerFactory.getLogger(OrderListController.class);
@@ -26,33 +22,39 @@ public class OrderListController {
     @FXML private TableView<Invoice> orderTable;
     @FXML private TableColumn<Invoice, String> colCode;
     @FXML private TableColumn<Invoice, String> colDate;
+    @FXML private TableColumn<Invoice, String> colDelivery;
     @FXML private TableColumn<Invoice, String> colCustomer;
     @FXML private TableColumn<Invoice, Number> colTotal;
     @FXML private TableColumn<Invoice, Number> colPaid;
     @FXML private TableColumn<Invoice, String> colStatus;
 
-    private InvoiceDao invoiceDao = new InvoiceDao();
+    private final InvoiceDao invoiceDao = new InvoiceDao();
+    private final SalesService salesService = new SalesService();
 
     @FXML
     public void initialize() {
-        statusFilter.setItems(FXCollections.observableArrayList("Đang xử lý", "Đã hủy"));
+        statusFilter.setItems(FXCollections.observableArrayList("Đang xử lý", "Đã hoàn thành", "Đã hủy"));
         statusFilter.getSelectionModel().selectFirst();
-        
-        colCode.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCode()));
-        colDate.setCellValueFactory(data -> new SimpleStringProperty(com.shop.util.FormatterUtil.formatDateToDdMmYyyy(data.getValue().getInvoiceDate())));
-        colCustomer.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getCustomerId())));
-        colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
-        colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
-        colStatus.setCellValueFactory(data -> {
-            String st = data.getValue().getStatus();
-            if ("PENDING".equals(st)) return new SimpleStringProperty("Đang xử lý");
-            if ("CANCELLED".equals(st)) return new SimpleStringProperty("Đã hủy");
-            if ("COMPLETED".equals(st)) return new SimpleStringProperty("Đã hoàn thành");
-            return new SimpleStringProperty(st);
+
+        colCode.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getCode()));
+        colDate.setCellValueFactory(d -> new SimpleStringProperty(
+                FormatterUtil.formatDateToDdMmYyyy(d.getValue().getInvoiceDate())));
+        colDelivery.setCellValueFactory(d -> {
+            String date = d.getValue().getDeliveryDate();
+            return new SimpleStringProperty(date != null && !date.isEmpty()
+                    ? FormatterUtil.formatDateToDdMmYyyy(date) : "—");
         });
+        colCustomer.setCellValueFactory(d -> {
+            String name = d.getValue().getCustomerName();
+            return new SimpleStringProperty(name != null && !name.isEmpty()
+                    ? name : "KH#" + d.getValue().getCustomerId());
+        });
+        colTotal.setCellValueFactory(d -> new SimpleLongProperty(d.getValue().getTotal()));
+        colPaid.setCellValueFactory(d -> new SimpleLongProperty(d.getValue().getPaid()));
+        colStatus.setCellValueFactory(d -> new SimpleStringProperty(
+                FormatterUtil.formatInvoiceStatus(d.getValue().getStatus())));
 
         statusFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
-        
         loadOrders();
     }
 
@@ -60,51 +62,72 @@ public class OrderListController {
     private void loadOrders() {
         try {
             String filter = statusFilter.getValue();
-            String dbStatus = "PENDING";
-            if ("Đã hủy".equals(filter)) {
-                dbStatus = "CANCELLED";
+            String dbStatus;
+            switch (filter) {
+                case "Đã hoàn thành": dbStatus = "COMPLETED"; break;
+                case "Đã hủy":       dbStatus = "CANCELLED"; break;
+                default:             dbStatus = "PENDING";    break;
             }
             List<Invoice> orders = invoiceDao.findByStatus(dbStatus);
             orderTable.setItems(FXCollections.observableArrayList(orders));
         } catch (SQLException e) {
-            log.error("Failed to load orders", e);
+            log.error("Lỗi khi tải danh sách đơn đặt hàng", e);
         }
     }
 
     @FXML
     private void completeOrder() {
         Invoice selected = orderTable.getSelectionModel().getSelectedItem();
-        if (selected == null || !"PENDING".equals(selected.getStatus())) {
-            showAlert("Lỗi", "Vui lòng chọn 1 đơn PENDING");
+        if (selected == null) {
+            showAlert("Chưa chọn đơn", "Vui lòng chọn 1 đơn để hoàn thành.");
             return;
         }
-        
-        try (Connection conn = DBConnection.getConnection()) {
-            // Update status to COMPLETED
-            invoiceDao.updatePaymentStatus(conn, selected.getId(), selected.getPaid(), selected.getDebt(), "COMPLETED");
-            // NOTE: In a full system, we should also decrease stock here! For MVP, we'll just update status.
-            showAlert("Thành công", "Đã hoàn thành đơn hàng " + selected.getCode());
+        if (!"PENDING".equals(selected.getStatus())) {
+            showAlert("Không hợp lệ", "Chỉ hoàn thành đơn đang ở trạng thái 'Đang xử lý'.");
+            return;
+        }
+        try {
+            salesService.completeOrder(selected.getId());
+            showAlert("Thành công", "Đã hoàn thành đơn " + selected.getCode() + ". Hàng đã xuất kho.");
             loadOrders();
-        } catch (Exception e) {
-            log.error("Lỗi khi hoàn thành đơn", e);
+        } catch (IllegalArgumentException e) {
+            showAlert("Không hợp lệ", e.getMessage());
+        } catch (SQLException e) {
+            log.error("Lỗi hoàn thành đơn #{}", selected.getId(), e);
+            showAlert("Lỗi hệ thống", "Không thể hoàn thành đơn: " + e.getMessage());
         }
     }
 
     @FXML
     private void cancelOrder() {
         Invoice selected = orderTable.getSelectionModel().getSelectedItem();
-        if (selected == null || !"PENDING".equals(selected.getStatus())) {
-            showAlert("Lỗi", "Vui lòng chọn 1 đơn PENDING");
+        if (selected == null) {
+            showAlert("Chưa chọn đơn", "Vui lòng chọn 1 đơn để hủy.");
             return;
         }
-        
-        try (Connection conn = DBConnection.getConnection()) {
-            invoiceDao.updatePaymentStatus(conn, selected.getId(), selected.getPaid(), selected.getDebt(), "CANCELLED");
-            showAlert("Thành công", "Đã hủy đơn hàng " + selected.getCode());
-            loadOrders();
-        } catch (Exception e) {
-            log.error("Lỗi khi hủy đơn", e);
+        if (!"PENDING".equals(selected.getStatus())) {
+            showAlert("Không hợp lệ", "Chỉ hủy đơn đang ở trạng thái 'Đang xử lý'.");
+            return;
         }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận hủy đơn");
+        confirm.setHeaderText("Hủy đơn " + selected.getCode() + "?");
+        confirm.setContentText("Tồn kho giữ chỗ sẽ được giải phóng. Thao tác này không thể hoàn tác.");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.OK) {
+                try {
+                    salesService.cancelOrder(selected.getId());
+                    showAlert("Đã hủy", "Đã hủy đơn " + selected.getCode() + ".");
+                    loadOrders();
+                } catch (IllegalArgumentException e) {
+                    showAlert("Không hợp lệ", e.getMessage());
+                } catch (SQLException e) {
+                    log.error("Lỗi hủy đơn #{}", selected.getId(), e);
+                    showAlert("Lỗi hệ thống", "Không thể hủy đơn: " + e.getMessage());
+                }
+            }
+        });
     }
 
     private void showAlert(String title, String content) {

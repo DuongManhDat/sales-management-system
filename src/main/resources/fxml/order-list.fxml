@@ -28,11 +28,12 @@
         </placeholder>
         <columns>
             <TableColumn fx:id="colCode" text="Mã Đơn" prefWidth="120" />
-            <TableColumn fx:id="colDate" text="Ngày" prefWidth="150" />
-            <TableColumn fx:id="colCustomer" text="Khách hàng (ID)" prefWidth="150" />
+            <TableColumn fx:id="colDate" text="Ngày đặt" prefWidth="120" />
+            <TableColumn fx:id="colDelivery" text="Ngày giao" prefWidth="120" />
+            <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="160" />
             <TableColumn fx:id="colTotal" text="Tổng tiền" prefWidth="120" />
-            <TableColumn fx:id="colPaid" text="Đã trả" prefWidth="120" />
-            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="100" />
+            <TableColumn fx:id="colPaid" text="Đã cọc" prefWidth="100" />
+            <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="110" />
         </columns>
             <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
