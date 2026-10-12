@@ -25,14 +25,27 @@ public class DashboardController {
     @FXML private BarChart<String, Number> chartRevenueByHour;
     @FXML private BarChart<String, Number> chartRevenueByDay;
     @FXML private TableView<TopProductRow> tblTopProducts;
+    @FXML private TableColumn<TopProductRow, String> colTopName;
+    @FXML private TableColumn<TopProductRow, String> colTopUnit;
+    @FXML private TableColumn<TopProductRow, Number> colTopQty;
+    @FXML private TableColumn<TopProductRow, String> colTopRevenue;
+
     @FXML private ComboBox<Integer> cboLowStockThreshold;
     @FXML private TableView<LowStockRow> tblLowStock;
+    @FXML private TableColumn<LowStockRow, String> colLowCode;
+    @FXML private TableColumn<LowStockRow, String> colLowName;
+    @FXML private TableColumn<LowStockRow, String> colLowUnit;
+    @FXML private TableColumn<LowStockRow, Number> colLowQty;
+
     @FXML private ProgressIndicator progressIndicator;
 
     private final DashboardViewModel viewModel = new DashboardViewModel();
 
     @FXML
     public void initialize() {
+        // Setup Columns type-safe (tránh lỗi Reflection PropertyValueFactory với Java record)
+        setupTableColumns();
+
         // Init threshold combo box
         cboLowStockThreshold.getItems().addAll(5, 10, 20);
         
@@ -106,6 +119,38 @@ public class DashboardController {
 
         // Tải dữ liệu lần đầu
         viewModel.loadData();
+    }
+
+    private void setupTableColumns() {
+        // Table Top Products
+        if (colTopName != null) {
+            colTopName.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().productName()));
+        }
+        if (colTopUnit != null) {
+            colTopUnit.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().unit()));
+        }
+        if (colTopQty != null) {
+            colTopQty.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().qty()));
+        }
+        if (colTopRevenue != null) {
+            colTopRevenue.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(
+                    FormatterUtil.formatCurrency(BigDecimal.valueOf(d.getValue().revenue()))
+            ));
+        }
+
+        // Table Low Stock
+        if (colLowCode != null) {
+            colLowCode.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().code()));
+        }
+        if (colLowName != null) {
+            colLowName.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().productName()));
+        }
+        if (colLowUnit != null) {
+            colLowUnit.setCellValueFactory(d -> new javafx.beans.property.SimpleStringProperty(d.getValue().unit()));
+        }
+        if (colLowQty != null) {
+            colLowQty.setCellValueFactory(d -> new javafx.beans.property.SimpleDoubleProperty(d.getValue().stockQty()));
+        }
     }
 
     @FXML
