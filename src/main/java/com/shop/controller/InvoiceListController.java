@@ -66,33 +66,7 @@ public class InvoiceListController {
 
         colStatus.setCellValueFactory(data -> new SimpleStringProperty(
                 FormatterUtil.formatInvoiceStatus(data.getValue())));
-        colStatus.setCellFactory(column -> new TableCell<Invoice, String>() {
-            private final Label badge = new Label();
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null || item.trim().isEmpty()) {
-                    setGraphic(null);
-                    setText(null);
-                } else {
-                    badge.setText(item);
-                    if ("Đã thanh toán".equalsIgnoreCase(item) || "Đã hoàn thành".equalsIgnoreCase(item)) {
-                        badge.setStyle("-fx-background-color: #ECFDF5; -fx-text-fill: #047857; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    } else if ("Còn nợ".equalsIgnoreCase(item)) {
-                        badge.setStyle("-fx-background-color: #FEF2F2; -fx-text-fill: #B91C1C; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    } else if ("Đang xử lý".equalsIgnoreCase(item)) {
-                        badge.setStyle("-fx-background-color: #EFF6FF; -fx-text-fill: #1D4ED8; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    } else if ("Đã hủy".equalsIgnoreCase(item)) {
-                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #4B5563; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    } else {
-                        badge.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #374151; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    }
-                    setGraphic(badge);
-                    setText(null);
-                    setStyle("-fx-alignment: CENTER;");
-                }
-            }
-        });
+        colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         // Double-click mở dialog lịch sử thanh toán
         invoiceTable.setRowFactory(tv -> {
@@ -141,7 +115,7 @@ public class InvoiceListController {
                 } else {
                     setText(CURRENCY_FORMAT.format(item.longValue()) + " đ");
                 }
-                setStyle("-fx-alignment: CENTER_RIGHT;");
+                setStyle("-fx-alignment: CENTER;");
             }
         };
     }

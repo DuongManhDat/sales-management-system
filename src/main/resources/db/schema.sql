@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     product_id INTEGER NOT NULL,
     qty INTEGER NOT NULL,
     sale_price INTEGER NOT NULL,
-    cost_price INTEGER NOT NULL DEFAULT 0,
     amount INTEGER NOT NULL,
     FOREIGN KEY(invoice_id) REFERENCES invoices(id),
     FOREIGN KEY(product_id) REFERENCES products(id)
@@ -83,10 +82,7 @@ CREATE TABLE IF NOT EXISTS payments (
     invoice_id    INTEGER NOT NULL REFERENCES invoices(id),
     amount        INTEGER NOT NULL,
     payment_date  TEXT    NOT NULL,
-    note          TEXT,
-    status        TEXT    NOT NULL DEFAULT 'ACTIVE',
-    cancelled_at  TEXT,
-    cancel_reason TEXT
+    note          TEXT
 );
 
 CREATE TABLE IF NOT EXISTS app_user (

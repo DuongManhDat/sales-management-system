@@ -14,6 +14,8 @@ import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.shop.util.FormatterUtil;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -45,18 +47,15 @@ public class ProductFormController {
         txtName.textProperty().bindBidirectional(viewModel.nameProperty());
         txtNote.textProperty().bindBidirectional(viewModel.noteProperty());
         
-        // Custom binding for numbers
-        txtPrice.textProperty().addListener((obs, oldV, newV) -> {
-            if (!newV.matches("\\d*")) {
-                txtPrice.setText(newV.replaceAll("[^\\d]", ""));
-            } else if (!newV.isEmpty()) {
-                viewModel.salePriceProperty().set(Long.parseLong(newV));
-            }
-        });
-        
-        viewModel.salePriceProperty().addListener((obs, oldV, newV) -> {
-            if (!txtPrice.getText().equals(newV.toString())) {
-                txtPrice.setText(newV.toString());
+        // Format tiền tệ khi nhập giá bán (ví dụ: 150000 -> 150.000)
+        FormatterUtil.attachCurrencyFormatter(txtPrice, () -> {
+            String clean = txtPrice.getText() != null ? txtPrice.getText().replaceAll("[^0-9]", "") : "";
+            if (clean.isEmpty()) {
+                viewModel.salePriceProperty().set(0);
+            } else {
+                try {
+                    viewModel.salePriceProperty().set(Long.parseLong(clean));
+                } catch (NumberFormatException ignored) {}
             }
         });
     }
@@ -94,13 +93,30 @@ public class ProductFormController {
         if (product != null) {
             lblTitle.setText("Sửa Hàng Hóa");
             viewModel.loadFromProduct(product);
+            txtPrice.setText(FormatterUtil.formatNumberWithDots(product.getSalePrice()));
             
-            // Set combo selection
-            comboUnit.getItems().stream().filter(u -> u.getId() == product.getUnitId()).findFirst().ifPresent(comboUnit::setValue);
-            comboCategory.getItems().stream().filter(c -> c.getId() == product.getCategoryId()).findFirst().ifPresent(comboCategory::setValue);
+            // Set combo selection an toàn khi unitId hoặc categoryId có thể null
+            if (product.getUnitId() != null) {
+                comboUnit.getItems().stream()
+                        .filter(u -> product.getUnitId().equals(u.getId()))
+                        .findFirst()
+                        .ifPresentOrElse(comboUnit::setValue, () -> comboUnit.setValue(null));
+            } else {
+                comboUnit.setValue(null);
+            }
+
+            if (product.getCategoryId() != null) {
+                comboCategory.getItems().stream()
+                        .filter(c -> product.getCategoryId().equals(c.getId()))
+                        .findFirst()
+                        .ifPresentOrElse(comboCategory::setValue, () -> comboCategory.setValue(null));
+            } else {
+                comboCategory.setValue(null);
+            }
         } else {
             lblTitle.setText("Thêm Hàng Hóa");
             viewModel.reset();
+            txtPrice.setText("");
         }
     }
 

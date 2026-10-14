@@ -9,23 +9,29 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class StockAdjustmentListController {
     private static final Logger log = LoggerFactory.getLogger(StockAdjustmentListController.class);
 
-    @FXML private Label lblTotal;
+    @FXML private TextField searchCodeField;
+    @FXML private DatePicker dateFilter;
     @FXML private TableView<StockAdjustment> tableAdjustments;
     @FXML private TableColumn<StockAdjustment, String> colCode;
     @FXML private TableColumn<StockAdjustment, String> colDate;
@@ -36,8 +42,34 @@ public class StockAdjustmentListController {
 
     @FXML
     public void initialize() {
+        setupDatePickerConverter();
         setupTable();
+        setupListeners();
         loadData();
+    }
+
+    private void setupDatePickerConverter() {
+        dateFilter.setConverter(new StringConverter<LocalDate>() {
+            private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? formatter.format(date) : "";
+            }
+            @Override
+            public LocalDate fromString(String string) {
+                if (string == null || string.trim().isEmpty()) return null;
+                try {
+                    return LocalDate.parse(string.trim(), formatter);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        });
+    }
+
+    private void setupListeners() {
+        searchCodeField.textProperty().addListener((obs, oldVal, newVal) -> loadData());
+        dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> loadData());
     }
 
     private void setupTable() {
@@ -61,17 +93,23 @@ public class StockAdjustmentListController {
 
     private void loadData() {
         try {
-            List<StockAdjustment> list = adjustmentService.getAllAdjustments();
+            String code = searchCodeField != null ? searchCodeField.getText() : null;
+            String dateStr = null;
+            if (dateFilter != null && dateFilter.getValue() != null) {
+                dateStr = dateFilter.getValue().toString(); // YYYY-MM-DD
+            }
+            List<StockAdjustment> list = adjustmentService.filterAdjustments(code, dateStr);
             adjustmentList.setAll(list);
-            lblTotal.setText("Tổng số: " + list.size() + " phiếu");
         } catch (SQLException e) {
             log.error("Error loading stock adjustments", e);
         }
     }
 
     @FXML
-    private void handleRefresh() {
-        loadData();
+    private void handleClearDate() {
+        if (dateFilter != null) {
+            dateFilter.setValue(null);
+        }
     }
 
     @FXML

@@ -73,6 +73,10 @@ public class AdjustmentService {
     public List<StockAdjustment> getAllAdjustments() throws SQLException {
         return adjustmentDao.findAll();
     }
+
+    public List<StockAdjustment> filterAdjustments(String code, String date) throws SQLException {
+        return adjustmentDao.filterAdjustments(code, date);
+    }
     
     public List<StockAdjustmentItem> getAdjustmentItems(int adjustmentId) throws SQLException {
         return adjustmentDao.findItemsByAdjustmentId(adjustmentId);

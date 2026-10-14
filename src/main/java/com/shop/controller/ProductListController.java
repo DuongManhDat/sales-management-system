@@ -16,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,26 +87,32 @@ public class ProductListController {
         
         colStatus.setCellValueFactory(data -> {
             boolean isDeleted = data.getValue().getDeletedAt() != null;
-            return new SimpleStringProperty(isDeleted ? "Đã xóa" : "Hoạt động");
+            return new SimpleStringProperty(isDeleted ? "Tạm ngưng" : "Hoạt động");
         });
+        colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEdit = new Button("Sửa");
-            private final Button btnDelete = new Button("Xóa");
-            private final HBox pane = new HBox(8, btnEdit, btnDelete);
+            private final Button btnEdit = new Button();
+            private final Button btnToggleStatus = new Button();
+            private final FontIcon editIcon = new FontIcon("fth-edit-2");
+            private final FontIcon pauseIcon = new FontIcon("fth-pause-circle");
+            private final FontIcon playIcon = new FontIcon("fth-play-circle");
+            private final Tooltip editTooltip = new Tooltip("Sửa hàng hóa");
+            private final Tooltip pauseTooltip = new Tooltip("Tạm ngưng kinh doanh");
+            private final Tooltip playTooltip = new Tooltip("Kích hoạt lại kinh doanh");
+            private final HBox pane = new HBox(6, btnEdit, btnToggleStatus);
 
             {
-                btnEdit.getStyleClass().addAll("btn-secondary", "small");
-                btnDelete.getStyleClass().addAll("btn-secondary", "small");
+                pane.setAlignment(javafx.geometry.Pos.CENTER);
+                btnEdit.setGraphic(editIcon);
+                btnEdit.setTooltip(editTooltip);
+                btnEdit.getStyleClass().addAll("btn-icon-action", "btn-icon-edit");
+
+                btnToggleStatus.getStyleClass().add("btn-icon-action");
 
                 btnEdit.setOnAction(event -> {
                     Product product = getTableView().getItems().get(getIndex());
                     showProductForm(product);
-                });
-
-                btnDelete.setOnAction(event -> {
-                    Product product = getTableView().getItems().get(getIndex());
-                    handleDelete(product);
                 });
             }
 
@@ -116,16 +123,32 @@ public class ProductListController {
                     setGraphic(null);
                 } else {
                     Product p = getTableView().getItems().get(getIndex());
+                    btnToggleStatus.getStyleClass().removeAll("btn-icon-pause", "btn-icon-play", "btn-icon-delete", "btn-icon-restore");
                     if (p.getDeletedAt() != null) {
-                        btnDelete.setText("Khôi phục");
-                        btnDelete.setOnAction(e -> handleRestore(p));
+                        btnToggleStatus.setGraphic(playIcon);
+                        btnToggleStatus.setTooltip(playTooltip);
+                        btnToggleStatus.getStyleClass().add("btn-icon-play");
+                        btnToggleStatus.setOnAction(e -> handleRestore(p));
                     } else {
-                        btnDelete.setText("Xóa");
-                        btnDelete.setOnAction(e -> handleDelete(p));
+                        btnToggleStatus.setGraphic(pauseIcon);
+                        btnToggleStatus.setTooltip(pauseTooltip);
+                        btnToggleStatus.getStyleClass().add("btn-icon-pause");
+                        btnToggleStatus.setOnAction(e -> handleDelete(p));
                     }
                     setGraphic(pane);
                 }
             }
+        });
+
+        // Double click vào hàng để sửa/xem hàng hóa
+        productTable.setRowFactory(tv -> {
+            TableRow<Product> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    showProductForm(row.getItem());
+                }
+            });
+            return row;
         });
     }
 
@@ -166,17 +189,17 @@ public class ProductListController {
 
     private void handleDelete(Product product) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác nhận");
+        alert.setTitle("Xác nhận tạm ngưng");
         alert.setHeaderText(null);
-        alert.setContentText("Bạn có chắc chắn muốn xóa (ẩn) hàng hóa này không?");
+        alert.setContentText("Bạn có chắc chắn muốn tạm ngưng kinh doanh hàng hóa \"" + product.getName() + "\" không?");
         alert.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
                     productService.softDelete(product.getId());
                     loadData();
                 } catch (Exception e) {
-                    log.error("Lỗi khi xóa hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
-                    showAlert("Lỗi", "Không thể xóa: " + e.getMessage());
+                    log.error("Lỗi khi tạm ngưng hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
+                    showAlert("Lỗi", "Không thể tạm ngưng: " + e.getMessage());
                 }
             }
         });
@@ -187,8 +210,8 @@ public class ProductListController {
             productService.restore(product.getId());
             loadData();
         } catch (Exception e) {
-            log.error("Lỗi khi khôi phục hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
-            showAlert("Lỗi", "Không thể khôi phục: " + e.getMessage());
+            log.error("Lỗi khi kích hoạt lại hàng hóa ID={}: {}", product.getId(), e.getMessage(), e);
+            showAlert("Lỗi", "Không thể kích hoạt lại: " + e.getMessage());
         }
     }
 

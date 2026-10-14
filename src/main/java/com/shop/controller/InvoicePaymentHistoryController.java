@@ -117,9 +117,14 @@ public class InvoicePaymentHistoryController {
         });
 
         colAction.setCellFactory(col -> new TableCell<Payment, Void>() {
-            private final Button btnCancel = new Button("🗑 Hủy");
+            private final Button btnCancel = new Button();
+            private final org.kordamp.ikonli.javafx.FontIcon deleteIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-trash-2");
+            private final Tooltip cancelTooltip = new Tooltip("Hủy đợt thanh toán");
             {
-                btnCancel.setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #DC2626; -fx-background-radius: 4; -fx-padding: 3 8; -fx-font-weight: bold; -fx-font-size: 11px; -fx-cursor: hand;");
+                setAlignment(javafx.geometry.Pos.CENTER);
+                btnCancel.setGraphic(deleteIcon);
+                btnCancel.setTooltip(cancelTooltip);
+                btnCancel.getStyleClass().addAll("btn-icon-action", "btn-icon-delete");
                 btnCancel.setOnAction(e -> {
                     Payment payment = getTableView().getItems().get(getIndex());
                     handleCancelPayment(payment);

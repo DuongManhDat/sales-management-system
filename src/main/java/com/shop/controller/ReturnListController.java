@@ -73,23 +73,7 @@ public class ReturnListController {
             }
             return new SimpleStringProperty("Hoàn tất");
         });
-        colStatus.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle(null);
-                } else {
-                    setText(item);
-                    if ("Đã hủy".equalsIgnoreCase(item)) {
-                        setStyle("-fx-alignment: CENTER; -fx-text-fill: #dc2626; -fx-font-weight: bold;");
-                    } else {
-                        setStyle("-fx-alignment: CENTER; -fx-text-fill: #047857; -fx-font-weight: bold;");
-                    }
-                }
-            }
-        });
+        colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         // Double click vào hàng để mở chi tiết
         returnTable.setRowFactory(tv -> {

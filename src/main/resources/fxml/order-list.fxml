@@ -5,24 +5,18 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox spacing="10" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.OrderListController" styleClass="pos-root">
-    <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+<VBox styleClass="view-container" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.OrderListController">
     
-    <Label text="Danh sách Đơn Đặt Hàng" styleClass="title-3"/>
+    <Label text="Đặt hàng" styleClass="view-title"/>
     
-    <HBox spacing="10" alignment="CENTER_LEFT">
+    <HBox styleClass="view-toolbar">
         <TextField fx:id="searchField" promptText="Tìm theo Mã đơn / Khách hàng..." prefWidth="250" styleClass="flat-input" />
         <DatePicker fx:id="dateFilter" promptText="Lọc theo ngày (dd/MM/yyyy)" prefWidth="190" styleClass="flat-input" />
         <Button text="✕" onAction="#handleClearDate" styleClass="btn-icon-square" tooltip="$clearDateTip">
             <tooltip><Tooltip fx:id="clearDateTip" text="Bỏ chọn lọc ngày"/></tooltip>
         </Button>
-        <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="150" styleClass="flat-combo" />
-        <Button text="Tải lại" onAction="#loadOrders" styleClass="btn-checkout">
-            <graphic>
-                <FontIcon iconLiteral="fth-refresh-cw" />
-            </graphic>
-        </Button>
-        <Pane HBox.hgrow="ALWAYS"/>
+        <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="150" styleClass="flat-input" />
+        <Region HBox.hgrow="ALWAYS"/>
         <Button text="Hoàn Thành" onAction="#completeOrder" styleClass="btn-outline-primary"/>
         <Button text="Hủy Đơn" onAction="#cancelOrder" styleClass="btn-outline-danger"/>
     </HBox>

@@ -182,9 +182,14 @@ public class StockAdjustmentController {
 
         // Cột Thao tác - Nút Xóa
         colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button btnRemove = new Button("Xóa");
+            private final Button btnRemove = new Button();
+            private final org.kordamp.ikonli.javafx.FontIcon deleteIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-trash-2");
+            private final Tooltip deleteTooltip = new Tooltip("Xóa sản phẩm");
             {
-                btnRemove.getStyleClass().addAll("btn-secondary", "small");
+                setAlignment(javafx.geometry.Pos.CENTER);
+                btnRemove.setGraphic(deleteIcon);
+                btnRemove.setTooltip(deleteTooltip);
+                btnRemove.getStyleClass().addAll("btn-icon-action", "btn-icon-delete");
                 btnRemove.setOnAction(event -> {
                     StockAdjustmentItem item = getTableView().getItems().get(getIndex());
                     viewModel.removeItem(item);

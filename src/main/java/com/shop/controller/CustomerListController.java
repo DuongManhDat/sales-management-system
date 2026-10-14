@@ -48,6 +48,10 @@ public class CustomerListController {
         
         colStatus.setCellValueFactory(new PropertyValueFactory<>("active"));
         colStatus.setCellFactory(column -> new TableCell<Customer, Boolean>() {
+            private final com.shop.util.StatusBadge badge = new com.shop.util.StatusBadge();
+            {
+                setAlignment(javafx.geometry.Pos.CENTER);
+            }
             @Override
             protected void updateItem(Boolean isActive, boolean empty) {
                 super.updateItem(isActive, empty);
@@ -55,28 +59,31 @@ public class CustomerListController {
                     setText(null);
                     setGraphic(null);
                 } else {
-                    Label label = new Label(isActive ? "Hoạt động" : "Ngừng HĐ");
-                    label.setStyle("-fx-background-color: " + (isActive ? "#DCFCE7" : "#FEE2E2") + 
-                                   "; -fx-text-fill: " + (isActive ? "#166534" : "#991B1B") + 
-                                   "; -fx-padding: 4 8; -fx-background-radius: 4; -fx-font-weight: bold;");
-                    setGraphic(label);
+                    badge.setStatus(isActive ? "Hoạt động" : "Ngừng HĐ", isActive ? "success" : "danger");
+                    setGraphic(badge);
+                    setText(null);
                 }
             }
         });
 
         colAction.setCellFactory(param -> new TableCell<Customer, Void>() {
-            private final Button btnDetail = new Button("Chi tiết");
-            private final Button btnEdit = new Button("Sửa");
-            private final HBox pane = new HBox(8, btnDetail, btnEdit);
+            private final Button btnEdit = new Button();
+            private final Button btnToggleStatus = new Button();
+            private final org.kordamp.ikonli.javafx.FontIcon editIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-edit-2");
+            private final org.kordamp.ikonli.javafx.FontIcon pauseIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-pause-circle");
+            private final org.kordamp.ikonli.javafx.FontIcon playIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-play-circle");
+            private final Tooltip editTooltip = new Tooltip("Sửa khách hàng");
+            private final Tooltip pauseTooltip = new Tooltip("Ngừng hoạt động");
+            private final Tooltip playTooltip = new Tooltip("Kích hoạt lại");
+            private final HBox pane = new HBox(6, btnEdit, btnToggleStatus);
 
             {
-                btnDetail.getStyleClass().add("btn-secondary");
-                btnEdit.getStyleClass().add("btn-secondary");
+                pane.setAlignment(javafx.geometry.Pos.CENTER);
+                btnEdit.setGraphic(editIcon);
+                btnEdit.setTooltip(editTooltip);
+                btnEdit.getStyleClass().addAll("btn-icon-action", "btn-icon-edit");
 
-                btnDetail.setOnAction(event -> {
-                    Customer customer = getTableView().getItems().get(getIndex());
-                    handleDetail(customer);
-                });
+                btnToggleStatus.getStyleClass().add("btn-icon-action");
 
                 btnEdit.setOnAction(event -> {
                     Customer customer = getTableView().getItems().get(getIndex());
@@ -87,8 +94,36 @@ public class CustomerListController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : pane);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    Customer c = getTableView().getItems().get(getIndex());
+                    btnToggleStatus.getStyleClass().removeAll("btn-icon-pause", "btn-icon-play");
+                    if (c.isActive()) {
+                        btnToggleStatus.setGraphic(pauseIcon);
+                        btnToggleStatus.setTooltip(pauseTooltip);
+                        btnToggleStatus.getStyleClass().add("btn-icon-pause");
+                        btnToggleStatus.setOnAction(e -> handleToggleCustomerStatus(c, false));
+                    } else {
+                        btnToggleStatus.setGraphic(playIcon);
+                        btnToggleStatus.setTooltip(playTooltip);
+                        btnToggleStatus.getStyleClass().add("btn-icon-play");
+                        btnToggleStatus.setOnAction(e -> handleToggleCustomerStatus(c, true));
+                    }
+                    setGraphic(pane);
+                }
             }
+        });
+
+        // Double click vào dòng để xem chi tiết khách hàng
+        customerTable.setRowFactory(tv -> {
+            TableRow<Customer> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    handleDetail(row.getItem());
+                }
+            });
+            return row;
         });
 
         customerTable.setItems(viewModel.getFilteredCustomers());
@@ -272,4 +307,35 @@ public class CustomerListController {
             e.printStackTrace();
         }
     }
+
+    private void handleToggleCustomerStatus(Customer customer, boolean activate) {
+        if (customer == null) return;
+        String actionName = activate ? "kích hoạt lại" : "ngừng hoạt động";
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận trạng thái khách hàng");
+        confirm.setHeaderText("Bạn có chắc muốn " + actionName + " khách hàng: " + customer.getName() + "?");
+        confirm.setContentText("Mã khách hàng: " + customer.getCode());
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                Task<Void> task;
+                if (activate) {
+                    customer.setActive(true);
+                    task = customerService.saveCustomerTask(customer);
+                } else {
+                    task = customerService.deleteCustomerTask(customer.getId());
+                }
+                task.setOnSucceeded(e -> {
+                    showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã cập nhật trạng thái khách hàng!");
+                    loadData();
+                });
+                task.setOnFailed(e -> {
+                    Throwable ex = task.getException();
+                    log.error("Lỗi khi thay đổi trạng thái khách hàng: {}", ex.getMessage(), ex);
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", ex != null ? ex.getMessage() : "Thao tác thất bại.");
+                });
+                new Thread(task).start();
+            }
+        });
+    }
 }
+

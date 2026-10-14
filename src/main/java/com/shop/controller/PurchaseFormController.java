@@ -281,9 +281,14 @@ public class PurchaseFormController {
         });
 
         colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button deleteBtn = new Button("Xóa");
+            private final Button deleteBtn = new Button();
+            private final org.kordamp.ikonli.javafx.FontIcon deleteIcon = new org.kordamp.ikonli.javafx.FontIcon("fth-trash-2");
+            private final Tooltip deleteTooltip = new Tooltip("Xóa sản phẩm");
             {
-                deleteBtn.getStyleClass().add("btn-danger");
+                setAlignment(javafx.geometry.Pos.CENTER);
+                deleteBtn.setGraphic(deleteIcon);
+                deleteBtn.setTooltip(deleteTooltip);
+                deleteBtn.getStyleClass().addAll("btn-icon-action", "btn-icon-delete");
                 deleteBtn.setOnAction(event -> {
                     itemsList.remove(getIndex());
                     calculateTotals();
