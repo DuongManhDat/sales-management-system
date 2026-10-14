@@ -6,11 +6,11 @@
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
 
-<VBox spacing="24" style="-fx-background-color: #FFFFFF; -fx-padding: 32;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerListController">
+<VBox styleClass="view-container" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerListController">
     
-    <Label text="Khách hàng" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
+    <Label text="Khách hàng" styleClass="view-title"/>
 
-    <HBox spacing="16" alignment="CENTER_LEFT">
+    <HBox styleClass="view-toolbar">
         <TextField fx:id="searchField" promptText="Tìm theo tên, SĐT, mã..." prefWidth="300" styleClass="flat-input"/>
         
         <ComboBox fx:id="statusFilterCombo" prefWidth="150" styleClass="flat-input">
@@ -31,7 +31,7 @@
         <Button text="Tải file mẫu" styleClass="btn-secondary" onAction="#handleDownloadTemplate"/>
         <Button text="Xuất Excel" styleClass="btn-secondary" onAction="#handleExport"/>
         <Button text="Nhập Excel" styleClass="btn-secondary" onAction="#handleImport"/>
-        <Button text="+ Thêm mới" styleClass="btn-primary" onAction="#handleAdd"/>
+        <Button text="+ Thêm mới" styleClass="btn-outline-primary" onAction="#handleAdd"/>
     </HBox>
 
     <TableView fx:id="customerTable" VBox.vgrow="ALWAYS" styleClass="flat-table">
@@ -45,7 +45,7 @@
             <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
             <TableColumn fx:id="colDebt" text="Công nợ" prefWidth="150"/>
             <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120"/>
-            <TableColumn fx:id="colAction" text="Thao tác" prefWidth="200" sortable="false"/>
+            <TableColumn fx:id="colAction" text="Thao tác" prefWidth="100" sortable="false"/>
         </columns>
             <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

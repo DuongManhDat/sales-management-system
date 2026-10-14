@@ -17,11 +17,6 @@
             <tooltip><Tooltip fx:id="clearDateTip" text="Bỏ chọn lọc ngày"/></tooltip>
         </Button>
         <ComboBox fx:id="statusFilter" promptText="Trạng thái" prefWidth="150" styleClass="flat-combo" />
-        <Button text="Tải lại" onAction="#loadInvoices" styleClass="btn-checkout">
-            <graphic>
-                <FontIcon iconLiteral="fth-refresh-cw" />
-            </graphic>
-        </Button>
         <Pane HBox.hgrow="ALWAYS"/>
         <Button fx:id="btnPaymentHistory" text="Lịch sử &amp; Thu nợ" onAction="#handleOpenPaymentHistory" styleClass="btn-primary" style="-fx-background-color: #047857; -fx-text-fill: white; -fx-padding: 8 16; -fx-font-weight: bold;">
             <graphic>

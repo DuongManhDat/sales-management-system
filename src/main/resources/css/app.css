@@ -36,6 +36,24 @@
     -fx-text-fill: #111111;
 }
 
+/* Common Page Layout - Chuẩn theo màn Hàng Hóa */
+.view-container {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 32px;
+    -fx-spacing: 24px;
+}
+
+.view-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111111;
+}
+
+.view-toolbar {
+    -fx-spacing: 16px;
+    -fx-alignment: CENTER_LEFT;
+}
+
 /* Styling the main header area (HBox replacing ToolBar) */
 .app-header {
     -fx-background-color: #FFFFFF;
@@ -90,6 +108,105 @@
     -fx-effect: none;
 }
 
+/* Outline Buttons - Minimalist & Brutalist Style */
+.btn-outline-dark {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #111111;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #111111;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: none;
+    -fx-padding: 7 14 7 14;
+}
+
+.btn-outline-dark:hover {
+    -fx-background-color: #F7F6F3;
+    -fx-border-color: #000000;
+}
+
+.btn-outline-dark:pressed {
+    -fx-background-color: #EAEAEA;
+}
+
+.btn-outline-primary {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2563EB;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #2563EB;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: none;
+    -fx-padding: 7 14 7 14;
+}
+
+.btn-outline-primary:hover {
+    -fx-background-color: #EFF6FF;
+    -fx-border-color: #1D4ED8;
+    -fx-text-fill: #1D4ED8;
+}
+
+.btn-outline-primary:pressed {
+    -fx-background-color: #DBEAFE;
+    -fx-border-color: #1E40AF;
+}
+
+.btn-outline-success {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #16A34A;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #16A34A;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: none;
+    -fx-padding: 7 14 7 14;
+}
+
+.btn-outline-success:hover {
+    -fx-background-color: #F0FDF4;
+    -fx-border-color: #15803D;
+    -fx-text-fill: #15803D;
+}
+
+.btn-outline-success:pressed {
+    -fx-background-color: #DCFCE7;
+    -fx-border-color: #166534;
+}
+
+.btn-outline-danger {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DC2626;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-text-fill: #DC2626;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: none;
+    -fx-padding: 7 14 7 14;
+}
+
+.btn-outline-danger:hover {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #B91C1C;
+    -fx-text-fill: #B91C1C;
+}
+
+.btn-outline-danger:pressed {
+    -fx-background-color: #FEE2E2;
+    -fx-border-color: #991B1B;
+}
+
 /* Minimalist Text Field */
 .flat-input {
     -fx-background-color: #FFFFFF;
@@ -105,24 +222,7 @@
     -fx-border-color: #111111;
 }
 
-/* Minimalist TableView */
-.flat-table {
-    -fx-background-color: transparent;
-    -fx-border-color: #EAEAEA;
-    -fx-border-width: 1;
-    -fx-effect: none;
-}
-
-.flat-table .column-header-background {
-    -fx-background-color: #F7F6F3;
-    -fx-border-color: transparent transparent #EAEAEA transparent;
-    -fx-border-width: 1;
-}
-
-.flat-table .table-cell {
-    -fx-border-color: transparent transparent #F7F6F3 transparent;
-    -fx-border-width: 1;
-}
+/* (TableView styles consolidated below in .table-view, .flat-table) */
 
 /* --- Added from Mua Hang UI Plan --- */
 .root {
@@ -154,18 +254,23 @@
     -fx-border-color: #111111;
 }
 
-.table-view {
+.table-view, .flat-table {
     -fx-background-color: transparent;
-    -fx-border-color: transparent;
+    -fx-border-color: #EAEAEA;
+    -fx-border-width: 1;
+    -fx-fixed-cell-size: 44px;
 }
-.table-view .column-header-background {
+.table-view .column-header-background, .flat-table .column-header-background {
     -fx-background-color: #F7F6F3;
     -fx-border-width: 0 0 1 0;
     -fx-border-color: #EAEAEA;
 }
-.table-view .column-header {
+.table-view .column-header, .flat-table .column-header {
     -fx-background-color: transparent;
-    -fx-padding: 12px;
+    -fx-padding: 10px 12px;
+}
+.table-view .column-header .label, .flat-table .column-header .label {
+    -fx-alignment: CENTER;
 }
 .table-row-cell {
     -fx-border-width: 0 0 1 0;
@@ -176,6 +281,10 @@
     -fx-background-color: #F7F6F3;
     -fx-text-fill: #111111;
 }
+.table-view .table-cell, .flat-table .table-cell {
+    -fx-alignment: CENTER;
+    -fx-padding: 0 12px 0 12px;
+}
 
 .bento-card {
     -fx-background-color: #FFFFFF;
@@ -184,3 +293,143 @@
     -fx-background-radius: 8px;
     -fx-padding: 24px;
 }
+
+/* Action Icon Buttons for Tables */
+.btn-icon-action {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 5px 8px;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+    -fx-effect: none;
+}
+
+.btn-icon-edit {
+    -fx-text-fill: #2563EB;
+}
+.btn-icon-edit .ikonli-font-icon {
+    -fx-icon-color: #2563EB;
+    -fx-icon-size: 14px;
+}
+.btn-icon-edit:hover {
+    -fx-background-color: #EFF6FF;
+    -fx-border-color: #BFDBFE;
+}
+.btn-icon-edit:pressed {
+    -fx-background-color: #DBEAFE;
+}
+
+.btn-icon-delete {
+    -fx-text-fill: #DC2626;
+}
+.btn-icon-delete .ikonli-font-icon {
+    -fx-icon-color: #DC2626;
+    -fx-icon-size: 14px;
+}
+.btn-icon-delete:hover {
+    -fx-background-color: #FEF2F2;
+    -fx-border-color: #FECACA;
+}
+.btn-icon-delete:pressed {
+    -fx-background-color: #FEE2E2;
+}
+
+.btn-icon-restore {
+    -fx-text-fill: #059669;
+}
+.btn-icon-restore .ikonli-font-icon {
+    -fx-icon-color: #059669;
+    -fx-icon-size: 14px;
+}
+.btn-icon-restore:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #A7F3D0;
+}
+.btn-icon-restore:pressed {
+    -fx-background-color: #D1FAE5;
+}
+
+/* Badge trạng thái phong cách Flat Dashboard (chuẩn màn Hàng hóa) */
+.badge-status {
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
+
+.badge-status-active, .badge-status-success {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #15803D;
+    -fx-border-color: #BBF7D0;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.badge-status-inactive, .badge-status-warning {
+    -fx-background-color: #FEF3C7;
+    -fx-text-fill: #B45309;
+    -fx-border-color: #FDE68A;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.badge-status-danger, .badge-status-error {
+    -fx-background-color: #FEE2E2;
+    -fx-text-fill: #B91C1C;
+    -fx-border-color: #FECACA;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.badge-status-info {
+    -fx-background-color: #EFF6FF;
+    -fx-text-fill: #1D4ED8;
+    -fx-border-color: #BFDBFE;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+.badge-status-neutral {
+    -fx-background-color: #F3F4F6;
+    -fx-text-fill: #4B5563;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+}
+
+/* Nút Tạm ngưng (màu cam hổ phách cảnh báo nhẹ nhàng) */
+.btn-icon-pause {
+    -fx-text-fill: #D97706;
+}
+.btn-icon-pause .ikonli-font-icon {
+    -fx-icon-color: #D97706;
+    -fx-icon-size: 14px;
+}
+.btn-icon-pause:hover {
+    -fx-background-color: #FFFBEB;
+    -fx-border-color: #FDE68A;
+}
+.btn-icon-pause:pressed {
+    -fx-background-color: #FEF3C7;
+}
+
+/* Nút Kích hoạt lại (màu xanh lá) */
+.btn-icon-play {
+    -fx-text-fill: #059669;
+}
+.btn-icon-play .ikonli-font-icon {
+    -fx-icon-color: #059669;
+    -fx-icon-size: 14px;
+}
+.btn-icon-play:hover {
+    -fx-background-color: #ECFDF5;
+    -fx-border-color: #A7F3D0;
+}
+.btn-icon-play:pressed {
+    -fx-background-color: #D1FAE5;
+}
+

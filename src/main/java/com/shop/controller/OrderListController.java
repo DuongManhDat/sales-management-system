@@ -67,6 +67,7 @@ public class OrderListController {
 
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(
                 FormatterUtil.formatInvoiceStatus(d.getValue().getStatus())));
+        colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         searchField.textProperty().addListener((obs, old, val) -> loadOrders());
         dateFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
@@ -103,7 +104,7 @@ public class OrderListController {
                 } else {
                     setText(CURRENCY_FORMAT.format(item.longValue()) + " đ");
                 }
-                setStyle("-fx-alignment: CENTER_RIGHT;");
+                setStyle("-fx-alignment: CENTER;");
             }
         };
     }

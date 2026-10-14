@@ -16,7 +16,7 @@
 
     <HBox spacing="10" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="Tìm nhóm hàng..." HBox.hgrow="ALWAYS" />
-        <Button text="+ Thêm nhóm hàng" onAction="#handleAddCategory" styleClass="accent" />
+        <Button text="+ Thêm mới" onAction="#handleAddCategory" styleClass="btn-outline-primary" />
     </HBox>
 
     <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS">
@@ -26,7 +26,7 @@
         <columns>
             <TableColumn fx:id="nameColumn" text="Tên nhóm hàng" prefWidth="200" />
             <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100" />
-            <TableColumn fx:id="actionColumn" text="Thao tác" prefWidth="150" />
+            <TableColumn fx:id="actionColumn" text="Thao tác" prefWidth="100" />
         </columns>
             <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

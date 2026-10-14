@@ -39,7 +39,6 @@ public class PurchaseListController {
     @FXML private TableColumn<Purchase, Long> colTotal;
     @FXML private TableColumn<Purchase, Long> colDebt;
     @FXML private TableColumn<Purchase, String> colStatus;
-    @FXML private TableColumn<Purchase, Void> colAction;
 
     private final PurchaseService purchaseService = new PurchaseService();
     private final PurchaseImportExportService purchaseImportExportService = new PurchaseImportExportService();
@@ -94,47 +93,17 @@ public class PurchaseListController {
         colDebt.setCellFactory(currencyCellFactory);
 
         colStatus.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(com.shop.util.FormatterUtil.formatPurchaseStatus(data.getValue().getStatus())));
-        colStatus.setCellFactory(column -> new TableCell<>() {
-            private final Label badge = new Label();
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null || item.trim().isEmpty()) {
-                    setGraphic(null);
-                    setText(null);
-                } else {
-                    badge.setText(item);
-                    if ("Đã thanh toán".equalsIgnoreCase(item)) {
-                        badge.setStyle("-fx-background-color: #ECFDF5; -fx-text-fill: #047857; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    } else {
-                        badge.setStyle("-fx-background-color: #FEF2F2; -fx-text-fill: #B91C1C; -fx-padding: 3 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;");
-                    }
-                    setGraphic(badge);
-                    setText(null);
-                    setStyle("-fx-alignment: CENTER;");
-                }
-            }
-        });
+        colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
-        // Cột thao tác
-        colAction.setCellFactory(param -> new TableCell<>() {
-            private final Button viewBtn = new Button("Xem");
-            {
-                viewBtn.getStyleClass().add("btn-secondary");
-                viewBtn.setOnAction(event -> {
-                    Purchase purchase = getTableView().getItems().get(getIndex());
-                    showDetailDialog(purchase);
-                });
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(viewBtn);
+        // Double click vào dòng để xem chi tiết phiếu nhập
+        purchaseTable.setRowFactory(tv -> {
+            TableRow<Purchase> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    showDetailDialog(row.getItem());
                 }
-            }
+            });
+            return row;
         });
     }
 

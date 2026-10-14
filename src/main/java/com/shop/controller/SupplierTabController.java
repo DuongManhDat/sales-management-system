@@ -64,13 +64,23 @@ public class SupplierTabController {
 
     private void setupActionColumn() {
         actionColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button editBtn = new Button(" Sửa", new FontIcon("fth-edit-2"));
-            private final Button deleteBtn = new Button(" Xóa", new FontIcon("fth-trash-2"));
-            private final HBox pane = new HBox(5, editBtn, deleteBtn);
+            private final Button editBtn = new Button();
+            private final Button deleteBtn = new Button();
+            private final FontIcon editIcon = new FontIcon("fth-edit-2");
+            private final FontIcon deleteIcon = new FontIcon("fth-trash-2");
+            private final Tooltip editTooltip = new Tooltip("Sửa nhà cung cấp");
+            private final Tooltip deleteTooltip = new Tooltip("Xóa nhà cung cấp");
+            private final HBox pane = new HBox(6, editBtn, deleteBtn);
 
             {
-                editBtn.getStyleClass().addAll("button", "flat", "accent");
-                deleteBtn.getStyleClass().addAll("button", "flat", "danger");
+                pane.setAlignment(javafx.geometry.Pos.CENTER);
+                editBtn.setGraphic(editIcon);
+                editBtn.setTooltip(editTooltip);
+                editBtn.getStyleClass().addAll("btn-icon-action", "btn-icon-edit");
+
+                deleteBtn.setGraphic(deleteIcon);
+                deleteBtn.setTooltip(deleteTooltip);
+                deleteBtn.getStyleClass().addAll("btn-icon-action", "btn-icon-delete");
 
                 editBtn.setOnAction(event -> {
                     Supplier supplier = getTableView().getItems().get(getIndex());
@@ -87,6 +97,17 @@ public class SupplierTabController {
                 super.updateItem(item, empty);
                 setGraphic(empty ? null : pane);
             }
+        });
+
+        // Double click vào hàng để sửa nhà cung cấp
+        supplierTable.setRowFactory(tv -> {
+            TableRow<Supplier> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    openSupplierDialog(row.getItem());
+                }
+            });
+            return row;
         });
     }
 

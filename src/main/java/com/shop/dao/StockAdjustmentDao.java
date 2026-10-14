@@ -90,6 +90,45 @@ public class StockAdjustmentDao {
         }
         return list;
     }
+
+    public List<StockAdjustment> filterAdjustments(String code, String date) throws SQLException {
+        List<StockAdjustment> list = new ArrayList<>();
+        StringBuilder query = new StringBuilder("SELECT * FROM stock_adjustments WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (code != null && !code.trim().isEmpty()) {
+            query.append(" AND code LIKE ?");
+            params.add("%" + code.trim() + "%");
+        }
+
+        if (date != null && !date.trim().isEmpty()) {
+            query.append(" AND (adjustment_date = ? OR date(created_at) = ?)");
+            params.add(date.trim());
+            params.add(date.trim());
+        }
+
+        query.append(" ORDER BY created_at DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    StockAdjustment adj = new StockAdjustment();
+                    adj.setId(rs.getInt("id"));
+                    adj.setCode(rs.getString("code"));
+                    adj.setAdjustmentDate(rs.getString("adjustment_date"));
+                    adj.setNote(rs.getString("note"));
+                    adj.setCreatedAt(rs.getString("created_at"));
+                    list.add(adj);
+                }
+            }
+        }
+        return list;
+    }
+
     
     public int countItems(Connection conn, int adjustmentId) throws SQLException {
         String query = "SELECT COUNT(*) FROM stock_adjustment_items WHERE adjustment_id = ?";

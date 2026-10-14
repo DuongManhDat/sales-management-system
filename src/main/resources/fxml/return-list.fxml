@@ -5,41 +5,25 @@
 <?import javafx.geometry.Insets?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox spacing="16" styleClass="bento-card" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnListController">
-    <padding>
-        <Insets top="24" right="32" bottom="24" left="32"/>
-    </padding>
+<VBox styleClass="view-container" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnListController">
 
-    <!-- Toolbar -->
-    <HBox spacing="12" alignment="CENTER_LEFT">
-        <Label text="TRẢ HÀNG" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111111;"/>
-        <Region HBox.hgrow="ALWAYS" />
-        <Button text="Tải lại" onAction="#loadReturns" styleClass="btn-secondary">
-            <graphic>
-                <FontIcon iconLiteral="fth-refresh-cw" />
-            </graphic>
-        </Button>
-        <Button text="+ Thêm phiếu trả" onAction="#openReturnForm" styleClass="btn-primary">
-            <graphic>
-                <FontIcon iconLiteral="fth-plus" iconColor="white"/>
-            </graphic>
-        </Button>
-    </HBox>
+    <!-- Header Title -->
+    <Label text="Trả hàng" styleClass="view-title"/>
 
-    <!-- Filter Bar: mã phiếu, hóa đơn gốc, khách hàng, ngày trả và trạng thái -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <TextField fx:id="txtFilterReturnCode" promptText="Lọc mã phiếu trả..." prefWidth="180" styleClass="flat-input"/>
-        <TextField fx:id="txtFilterInvoiceCode" promptText="Lọc mã HĐ gốc..." prefWidth="180" styleClass="flat-input"/>
-        <TextField fx:id="txtFilterCustomer" promptText="Lọc khách hàng..." prefWidth="200" styleClass="flat-input"/>
-        <DatePicker fx:id="dpFilterReturnDate" promptText="Lọc ngày trả (dd/MM/yyyy)" prefWidth="190" styleClass="flat-input"/>
+    <!-- Filter Bar / Toolbar -->
+    <HBox styleClass="view-toolbar">
+        <TextField fx:id="txtFilterReturnCode" promptText="Lọc mã phiếu..." prefWidth="150" styleClass="flat-input"/>
+        <TextField fx:id="txtFilterInvoiceCode" promptText="Lọc mã HĐ gốc..." prefWidth="150" styleClass="flat-input"/>
+        <TextField fx:id="txtFilterCustomer" promptText="Lọc khách hàng..." prefWidth="180" styleClass="flat-input"/>
+        <DatePicker fx:id="dpFilterReturnDate" promptText="Lọc ngày trả (dd/MM/yyyy)" prefWidth="180" styleClass="flat-input"/>
         <Button text="✕" onAction="#handleClearDate" styleClass="btn-icon-square" tooltip="$clearDateTip">
             <tooltip><Tooltip fx:id="clearDateTip" text="Bỏ chọn lọc ngày"/></tooltip>
         </Button>
-        <ComboBox fx:id="cbFilterStatus" prefWidth="140" promptText="Trạng thái" styleClass="flat-combo"/>
+        <ComboBox fx:id="cbFilterStatus" prefWidth="130" promptText="Trạng thái" styleClass="flat-input"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Xem chi tiết" onAction="#handleViewDetail" styleClass="btn-secondary" style="-fx-font-weight: bold;">
+        <Button text="+ Thêm mới" onAction="#openReturnForm" styleClass="btn-outline-primary">
             <graphic>
-                <FontIcon iconLiteral="fth-eye" />
+                <FontIcon iconLiteral="fth-plus" iconColor="#2563EB"/>
             </graphic>
         </Button>
     </HBox>
@@ -50,9 +34,9 @@
             <Label text="Chưa có dữ liệu phiếu trả hàng nào." style="-fx-text-fill: #787774;"/>
         </placeholder>
         <columns>
-            <TableColumn fx:id="colCode" text="Mã Phiếu" prefWidth="180" style="-fx-alignment: CENTER_LEFT; -fx-font-weight: bold;" />
-            <TableColumn fx:id="colInvoiceCode" text="Hóa đơn gốc" prefWidth="180" style="-fx-alignment: CENTER_LEFT;" />
-            <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="240" style="-fx-alignment: CENTER_LEFT;" />
+            <TableColumn fx:id="colCode" text="Mã Phiếu" prefWidth="180" style="-fx-alignment: CENTER; -fx-font-weight: bold;" />
+            <TableColumn fx:id="colInvoiceCode" text="Hóa đơn gốc" prefWidth="180" style="-fx-alignment: CENTER;" />
+            <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="240" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="colDate" text="Ngày trả" prefWidth="170" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="140" style="-fx-alignment: CENTER;" />
         </columns>

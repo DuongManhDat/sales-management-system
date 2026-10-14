@@ -53,7 +53,7 @@ public class ProductListViewModel {
             // Status Filter
             boolean isDeleted = product.getDeletedAt() != null;
             if ("Hoạt động".equals(status) && isDeleted) return false;
-            if ("Đã xóa".equals(status) && !isDeleted) return false;
+            if (("Tạm ngưng".equals(status) || "Đã xóa".equals(status)) && !isDeleted) return false;
 
             // Category Filter
             if (!"Tất cả".equals(cat)) {
