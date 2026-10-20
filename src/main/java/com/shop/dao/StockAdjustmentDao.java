@@ -15,8 +15,8 @@ import java.util.List;
 public class StockAdjustmentDao {
 
     public int insertAdjustment(Connection conn, StockAdjustment adj) throws SQLException {
-        String query = "INSERT INTO stock_adjustments (code, adjustment_date, note, created_at) " +
-                       "VALUES (?, date('now', 'localtime'), ?, datetime('now', 'localtime'))";
+        String query = "INSERT INTO stock_adjustments (code, adjustment_date, note, status, created_at) " +
+                       "VALUES (?, date('now', 'localtime'), ?, 'COMPLETED', datetime('now', 'localtime'))";
         
         try (PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, "TEMP"); 
@@ -46,6 +46,44 @@ public class StockAdjustmentDao {
         }
     }
 
+    public void updateStatus(Connection conn, int id, String status, String canceledAt) throws SQLException {
+        String query = "UPDATE stock_adjustments SET status = ?, canceled_at = ? WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, status);
+            pstmt.setString(2, canceledAt);
+            pstmt.setInt(3, id);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public StockAdjustment findById(int id) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            return findById(conn, id);
+        }
+    }
+
+    public StockAdjustment findById(Connection conn, int id) throws SQLException {
+        String query = "SELECT * FROM stock_adjustments WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    StockAdjustment adj = new StockAdjustment();
+                    adj.setId(rs.getInt("id"));
+                    adj.setCode(rs.getString("code"));
+                    adj.setAdjustmentDate(rs.getString("adjustment_date"));
+                    adj.setNote(rs.getString("note"));
+                    adj.setCreatedAt(rs.getString("created_at"));
+                    adj.setStatus(rs.getString("status"));
+                    adj.setCanceledAt(rs.getString("canceled_at"));
+                    return adj;
+                }
+            }
+        }
+        return null;
+    }
+
+
     public int insertItem(Connection conn, StockAdjustmentItem item) throws SQLException {
         String query = "INSERT INTO stock_adjustment_items (adjustment_id, product_id, current_qty, actual_qty, variance, cost_price, reason) " +
                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -60,7 +98,7 @@ public class StockAdjustmentDao {
             } else {
                 pstmt.setNull(6, java.sql.Types.INTEGER);
             }
-            pstmt.setString(7, item.getReason());
+            pstmt.setString(7, item.getReason() != null ? item.getReason() : "");
             pstmt.executeUpdate();
             
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -85,6 +123,8 @@ public class StockAdjustmentDao {
                 adj.setAdjustmentDate(rs.getString("adjustment_date"));
                 adj.setNote(rs.getString("note"));
                 adj.setCreatedAt(rs.getString("created_at"));
+                adj.setStatus(rs.getString("status"));
+                adj.setCanceledAt(rs.getString("canceled_at"));
                 list.add(adj);
             }
         }
@@ -122,6 +162,8 @@ public class StockAdjustmentDao {
                     adj.setAdjustmentDate(rs.getString("adjustment_date"));
                     adj.setNote(rs.getString("note"));
                     adj.setCreatedAt(rs.getString("created_at"));
+                    adj.setStatus(rs.getString("status"));
+                    adj.setCanceledAt(rs.getString("canceled_at"));
                     list.add(adj);
                 }
             }
@@ -142,13 +184,18 @@ public class StockAdjustmentDao {
     }
 
     public List<StockAdjustmentItem> findItemsByAdjustmentId(int adjustmentId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            return findItemsByAdjustmentId(conn, adjustmentId);
+        }
+    }
+
+    public List<StockAdjustmentItem> findItemsByAdjustmentId(Connection conn, int adjustmentId) throws SQLException {
         List<StockAdjustmentItem> list = new ArrayList<>();
         String query = "SELECT i.*, p.code as product_code, p.name as product_name " +
                        "FROM stock_adjustment_items i " +
                        "JOIN products p ON i.product_id = p.id " +
                        "WHERE i.adjustment_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setInt(1, adjustmentId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -174,4 +221,47 @@ public class StockAdjustmentDao {
         }
         return list;
     }
+
+    public List<StockAdjustmentItem> findCompletedItemsByDate(String dateStr) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            return findCompletedItemsByDate(conn, dateStr);
+        }
+    }
+
+    public List<StockAdjustmentItem> findCompletedItemsByDate(Connection conn, String dateStr) throws SQLException {
+        List<StockAdjustmentItem> list = new ArrayList<>();
+        String query = "SELECT i.*, p.code as product_code, p.name as product_name " +
+                       "FROM stock_adjustment_items i " +
+                       "JOIN stock_adjustments a ON i.adjustment_id = a.id " +
+                       "JOIN products p ON i.product_id = p.id " +
+                       "WHERE (a.status IS NULL OR a.status != 'CANCELED') " +
+                       "  AND (a.adjustment_date = ? OR date(a.created_at) = ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, dateStr);
+            pstmt.setString(2, dateStr);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    StockAdjustmentItem item = new StockAdjustmentItem();
+                    item.setId(rs.getInt("id"));
+                    item.setAdjustmentId(rs.getInt("adjustment_id"));
+                    item.setProductId(rs.getInt("product_id"));
+                    item.setProductCode(rs.getString("product_code"));
+                    item.setProductName(rs.getString("product_name"));
+                    item.setCurrentQty(rs.getDouble("current_qty"));
+                    item.setActualQty(rs.getDouble("actual_qty"));
+                    item.setVariance(rs.getDouble("variance"));
+                    long costPrice = rs.getLong("cost_price");
+                    if (rs.wasNull()) {
+                        item.setCostPrice(null);
+                    } else {
+                        item.setCostPrice(costPrice);
+                    }
+                    item.setReason(rs.getString("reason"));
+                    list.add(item);
+                }
+            }
+        }
+        return list;
+    }
 }
+
