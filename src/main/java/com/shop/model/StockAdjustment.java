@@ -6,6 +6,8 @@ public class StockAdjustment {
     private String adjustmentDate;
     private String note;
     private String createdAt;
+    private String status;
+    private String canceledAt;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -21,4 +23,10 @@ public class StockAdjustment {
     
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public String getCanceledAt() { return canceledAt; }
+    public void setCanceledAt(String canceledAt) { this.canceledAt = canceledAt; }
 }

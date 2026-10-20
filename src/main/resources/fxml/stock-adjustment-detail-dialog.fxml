@@ -23,8 +23,14 @@
         <Label style="-fx-text-fill: #6b7280;" text="Ngày tạo:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
         <Label fx:id="lblDate" style="-fx-text-fill: #111111;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-        <Label style="-fx-text-fill: #6b7280;" text="Ghi chú:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-        <Label fx:id="lblNote" style="-fx-text-fill: #111111;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label style="-fx-text-fill: #6b7280;" text="Trạng thái:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label fx:id="lblStatus" text="Hoàn tất" />
+            <Label fx:id="lblCanceledAt" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;" visible="false" managed="false" />
+        </HBox>
+
+        <Label style="-fx-text-fill: #6b7280;" text="Ghi chú:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <Label fx:id="lblNote" style="-fx-text-fill: #111111;" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="3" />
     </GridPane>
 
     <TableView fx:id="tableItems" prefHeight="400.0" prefWidth="800.0" VBox.vgrow="ALWAYS" styleClass="table-view">
@@ -43,6 +49,7 @@
     </TableView>
 
     <HBox alignment="CENTER_RIGHT" spacing="12.0">
+        <Button fx:id="btnCancelAdjustment" onAction="#handleCancelAdjustment" styleClass="btn-outline-danger" text="Hủy phiếu kiểm" />
         <Button onAction="#handleClose" styleClass="btn-secondary" text="Đóng" />
     </HBox>
 </VBox>

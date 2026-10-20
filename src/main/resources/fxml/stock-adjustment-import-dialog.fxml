@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="650.0" prefWidth="980.0" spacing="16.0" style="-fx-background-color: #FFFFFF; -fx-padding: 24;" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.StockAdjustmentImportDialogController">
+
+    <!-- Header bar -->
+    <HBox alignment="CENTER_LEFT" spacing="16.0">
+        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Xem trước dữ liệu Kiểm kho từ Excel" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleDownloadTemplate" styleClass="btn-secondary" text="📥 Tải file mẫu Excel" />
+    </HBox>
+
+    <!-- Status Banner Box -->
+    <VBox fx:id="bannerBox" spacing="6.0" style="-fx-padding: 14; -fx-background-radius: 4; -fx-border-radius: 4; -fx-border-width: 1;">
+        <Label fx:id="lblBannerTitle" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Trạng thái kiểm tra dữ liệu" />
+        <Label fx:id="lblBannerDesc" style="-fx-font-size: 13px;" text="Chi tiết kết quả kiểm tra..." wrapText="true" />
+    </VBox>
+
+    <!-- Table of records -->
+    <TableView fx:id="tableView" styleClass="flat-table" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colRow" prefWidth="60.0" text="Dòng" />
+            <TableColumn fx:id="colCode" prefWidth="110.0" text="Mã hàng" />
+            <TableColumn fx:id="colName" prefWidth="200.0" text="Tên hàng hóa" />
+            <TableColumn fx:id="colCurrentQty" prefWidth="110.0" text="Tồn hệ thống" />
+            <TableColumn fx:id="colActualQty" prefWidth="110.0" text="Tồn thực tế" />
+            <TableColumn fx:id="colVariance" prefWidth="100.0" text="Chênh lệch" />
+            <TableColumn fx:id="colReason" prefWidth="150.0" text="Lý do" />
+            <TableColumn fx:id="colError" minWidth="260.0" prefWidth="320.0" text="Nguyên nhân lỗi" />
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+        </columnResizePolicy>
+    </TableView>
+
+    <!-- Bottom Actions -->
+    <HBox alignment="CENTER_RIGHT" spacing="12.0">
+        <Pane HBox.hgrow="ALWAYS" />
+        <Button onAction="#handleCancel" styleClass="btn-secondary" text="Hủy bỏ" />
+        <Button fx:id="btnConfirm" onAction="#handleConfirmImport" styleClass="btn-primary" text="Xác nhận tạo phiếu kiểm kho" />
+    </HBox>
+
+</VBox>

@@ -11,6 +11,8 @@ import com.shop.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AdjustmentService {
@@ -25,12 +27,15 @@ public class AdjustmentService {
                 // 1. Insert StockAdjustment (header)
                 int adjId = adjustmentDao.insertAdjustment(conn, adj);
                 
-                // 2. Process each item
+                // 2. Process each item (Lưu tất cả sản phẩm kiểm kê vào biên bản kiểm kho)
                 for (StockAdjustmentItem item : items) {
-                    if (Math.abs(item.getVariance()) < 0.0001) continue; // Skip zero variance
-                    
                     item.setAdjustmentId(adjId);
                     int itemId = adjustmentDao.insertItem(conn, item);
+
+                    // Nếu không có chênh lệch tồn kho thì không cần điều chỉnh kho/tạo lô
+                    if (Math.abs(item.getVariance()) < 0.0001) {
+                        continue;
+                    }
                     
                     // Update Product stock_qty
                     productDao.updateStock(conn, item.getProductId(), item.getActualQty());
@@ -69,9 +74,68 @@ public class AdjustmentService {
             }
         }
     }
+
+    public void cancelAdjustment(int adjustmentId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                StockAdjustment adj = adjustmentDao.findById(conn, adjustmentId);
+                if (adj == null) {
+                    throw new IllegalArgumentException("Không tìm thấy phiếu kiểm kho ID = " + adjustmentId);
+                }
+                if ("CANCELED".equalsIgnoreCase(adj.getStatus())) {
+                    throw new IllegalStateException("Phiếu kiểm kho này đã bị hủy trước đó.");
+                }
+
+                String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+                // 1. Đánh dấu trạng thái phiếu thành CANCELED
+                adjustmentDao.updateStatus(conn, adjustmentId, "CANCELED", currentTime);
+
+                // 2. Thu hồi tồn kho và xóa lô tồn kho phát sinh
+                List<StockAdjustmentItem> items = adjustmentDao.findItemsByAdjustmentId(conn, adjustmentId);
+                for (StockAdjustmentItem item : items) {
+                    if (Math.abs(item.getVariance()) < 0.0001) continue;
+
+                    // Hoàn nguyên tồn kho: variance > 0 (đã tăng) -> decrease; variance < 0 (đã giảm) -> bù lại
+                    productDao.decreaseStock(conn, item.getProductId(), item.getVariance());
+
+                    double stockAfter = productDao.getById(conn, item.getProductId()).getStockQty();
+
+                    // Ghi nhận biến động kho
+                    StockMovement movement = new StockMovement();
+                    movement.setProductId(item.getProductId());
+                    movement.setType("ADJUSTMENT_CANCEL");
+                    movement.setQtyChange(-item.getVariance());
+                    movement.setStockAfter(stockAfter);
+                    movement.setRefType("ADJUSTMENT_CANCEL");
+                    movement.setRefId(adjustmentId);
+                    movement.setCreatedAt(currentTime);
+                    movement.setNote("Hủy phiếu kiểm kho " + adj.getCode());
+                    movementDao.insert(conn, movement);
+
+                    // Xóa các lô tồn kho phát sinh từ phiếu dôi dư này
+                    String delBatchSql = "DELETE FROM inventory_batches WHERE stock_adjustment_item_id = ?";
+                    try (PreparedStatement pstmt = conn.prepareStatement(delBatchSql)) {
+                        pstmt.setInt(1, item.getId());
+                        pstmt.executeUpdate();
+                    }
+                }
+
+                conn.commit();
+            } catch (SQLException | RuntimeException e) {
+                conn.rollback();
+                throw e;
+            }
+        }
+    }
     
     public List<StockAdjustment> getAllAdjustments() throws SQLException {
         return adjustmentDao.findAll();
+    }
+
+    public StockAdjustment getAdjustmentById(int id) throws SQLException {
+        return adjustmentDao.findById(id);
     }
 
     public List<StockAdjustment> filterAdjustments(String code, String date) throws SQLException {
