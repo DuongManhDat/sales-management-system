@@ -37,4 +37,12 @@ public class Unit {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    public ActiveStatus getStatusEnum() {
+        return ActiveStatus.fromInt(status);
+    }
+
+    public String getStatusText() {
+        return getStatusEnum().getDisplayName();
+    }
 }

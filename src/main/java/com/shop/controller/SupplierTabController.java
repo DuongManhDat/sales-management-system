@@ -30,6 +30,7 @@ public class SupplierTabController {
     @FXML private TableColumn<Supplier, String> phoneColumn;
     @FXML private TableColumn<Supplier, String> addressColumn;
     @FXML private TableColumn<Supplier, String> noteColumn;
+    @FXML private TableColumn<Supplier, String> statusColumn;
     @FXML private TableColumn<Supplier, Void> actionColumn;
     @FXML private Label totalLabel;
 
@@ -44,6 +45,10 @@ public class SupplierTabController {
         phoneColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
         addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
         noteColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNote()));
+        statusColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(com.shop.model.ActiveStatus.fromBoolean(cellData.getValue().isActive()).getDisplayName())
+        );
+        statusColumn.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         setupActionColumn();
 
