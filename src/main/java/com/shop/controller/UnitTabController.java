@@ -30,10 +30,10 @@ public class UnitTabController {
     @FXML
     public void initialize() {
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
-        statusColumn.setCellValueFactory(cellData -> {
-            int status = cellData.getValue().getStatus();
-            return new SimpleStringProperty(status == 1 ? "ACTIVE" : "INACTIVE");
-        });
+        statusColumn.setCellValueFactory(cellData -> 
+            new SimpleStringProperty(com.shop.model.ActiveStatus.fromInt(cellData.getValue().getStatus()).getDisplayName())
+        );
+        statusColumn.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         setupActionColumn();
 
