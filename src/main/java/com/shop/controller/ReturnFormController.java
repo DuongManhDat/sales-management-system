@@ -49,6 +49,8 @@ public class ReturnFormController {
     @FXML private TableColumn<InvoiceItem, String> colProductId;
     @FXML private TableColumn<InvoiceItem, String> colProductName;
     @FXML private TableColumn<InvoiceItem, Number> colQty;
+    @FXML private TableColumn<InvoiceItem, Number> colReturnedQty;
+    @FXML private TableColumn<InvoiceItem, Number> colRemainingQty;
     @FXML private TableColumn<InvoiceItem, Integer> colReturnQty;
     @FXML private TableColumn<InvoiceItem, Number> colPrice;
     @FXML private TableColumn<InvoiceItem, Number> colAmount;
@@ -59,6 +61,7 @@ public class ReturnFormController {
 
     private final InvoiceDao invoiceDao = new InvoiceDao();
     private final InvoiceItemDao invoiceItemDao = new InvoiceItemDao();
+    private final com.shop.dao.ReturnInvoiceItemDao returnInvoiceItemDao = new com.shop.dao.ReturnInvoiceItemDao();
     private final SalesService salesService = new SalesService();
 
     private Invoice currentInvoice;
@@ -66,6 +69,7 @@ public class ReturnFormController {
     private FilteredList<Invoice> filteredInvoiceList;
     private final ObservableList<InvoiceItem> invoiceItemList = FXCollections.observableArrayList();
     private final Map<Integer, Integer> returnQtyMap = new HashMap<>(); // invoiceItemId -> returnQty
+    private final Map<Integer, Integer> alreadyReturnedMap = new HashMap<>(); // invoiceItemId -> returnedQty
 
     @FXML
     public void initialize() {
@@ -223,6 +227,12 @@ public class ReturnFormController {
             List<InvoiceItem> items = invoiceItemDao.findByInvoiceId(currentInvoice.getId());
             invoiceItemList.setAll(items);
             returnQtyMap.clear();
+
+            // Lấy thông tin số lượng đã trả ở các phiếu trả trước đó
+            alreadyReturnedMap.clear();
+            Map<Integer, Integer> returnedMap = returnInvoiceItemDao.getReturnedQtyMapByInvoiceId(currentInvoice.getId());
+            alreadyReturnedMap.putAll(returnedMap);
+
             calculateRefund();
         } catch (SQLException e) {
             log.error("Failed to load invoice items", e);
@@ -253,6 +263,19 @@ public class ReturnFormController {
         colQty.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getQty()));
         colQty.setCellFactory(col -> createNumberCell(false));
 
+        colReturnedQty.setCellValueFactory(data -> {
+            int returned = alreadyReturnedMap.getOrDefault(data.getValue().getId(), 0);
+            return new SimpleLongProperty(returned);
+        });
+        colReturnedQty.setCellFactory(col -> createNumberCell(false));
+
+        colRemainingQty.setCellValueFactory(data -> {
+            int returned = alreadyReturnedMap.getOrDefault(data.getValue().getId(), 0);
+            int remaining = Math.max(0, data.getValue().getQty() - returned);
+            return new SimpleLongProperty(remaining);
+        });
+        colRemainingQty.setCellFactory(col -> createNumberCell(false));
+
         colPrice.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getSalePrice()));
         colPrice.setCellFactory(col -> createCurrencyCell());
 
@@ -277,10 +300,12 @@ public class ReturnFormController {
             if (newQty == null || newQty < 0) {
                 newQty = 0;
             }
-            if (newQty > item.getQty()) {
+            int returned = alreadyReturnedMap.getOrDefault(item.getId(), 0);
+            int maxAllowed = Math.max(0, item.getQty() - returned);
+            if (newQty > maxAllowed) {
                 showAlert(Alert.AlertType.WARNING, "Cảnh báo",
-                        "Số lượng trả không thể vượt quá số lượng đã mua (" + item.getQty() + ")");
-                newQty = item.getQty();
+                        "Số lượng trả không thể vượt quá số lượng còn lại có thể trả (" + maxAllowed + ")");
+                newQty = maxAllowed;
             }
             returnQtyMap.put(item.getId(), newQty);
             itemTable.refresh();

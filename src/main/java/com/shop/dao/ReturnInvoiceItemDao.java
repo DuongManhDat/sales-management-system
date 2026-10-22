@@ -28,6 +28,30 @@ public class ReturnInvoiceItemDao {
         }
     }
 
+    public java.util.Map<Integer, Integer> getReturnedQtyMapByInvoiceId(int invoiceId) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            return getReturnedQtyMapByInvoiceId(conn, invoiceId);
+        }
+    }
+
+    public java.util.Map<Integer, Integer> getReturnedQtyMapByInvoiceId(Connection conn, int invoiceId) throws SQLException {
+        java.util.Map<Integer, Integer> map = new java.util.HashMap<>();
+        String query = "SELECT rii.invoice_item_id, SUM(rii.return_qty) as total_returned " +
+                       "FROM return_invoice_items rii " +
+                       "JOIN return_invoices ri ON rii.return_invoice_id = ri.id " +
+                       "WHERE ri.invoice_id = ? AND ri.status != 'CANCELED' " +
+                       "GROUP BY rii.invoice_item_id";
+        try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, invoiceId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getInt("invoice_item_id"), rs.getInt("total_returned"));
+                }
+            }
+        }
+        return map;
+    }
+
     public List<ReturnInvoiceItem> findByReturnInvoiceId(Connection conn, int returnInvoiceId) throws SQLException {
         List<ReturnInvoiceItem> list = new ArrayList<>();
         String query = "SELECT rii.*, p.code AS product_code, p.name AS product_name, u.name AS unit_name " +

@@ -33,6 +33,7 @@ public class CustomerDetailController {
     @FXML private Label lblTotalDebt;
 
     @FXML private TableView<Invoice> invoiceTable;
+    @FXML private Button btnPaymentHistory;
     @FXML private TableColumn<Invoice, String> colInvoiceCode;
     @FXML private TableColumn<Invoice, String> colInvoiceDate;
     @FXML private TableColumn<Invoice, Long> colTotal;
@@ -142,16 +143,56 @@ public class CustomerDetailController {
         
         invoiceTable.setItems(invoiceList);
 
-        // Double click vào hóa đơn để xem lịch sử thanh toán & thu nợ
+        // Nút Lịch sử & Thu nợ chỉ enable khi có bản ghi hóa đơn được chọn
+        btnPaymentHistory.disableProperty().bind(
+                invoiceTable.getSelectionModel().selectedItemProperty().isNull()
+        );
+
+        // Double click vào hóa đơn để xem chi tiết hóa đơn
         invoiceTable.setRowFactory(tv -> {
             TableRow<Invoice> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    openPaymentHistoryDialog(row.getItem());
+                    openInvoiceDetailDialog(row.getItem());
                 }
             });
             return row;
         });
+    }
+
+    @FXML
+    private void handleOpenPaymentHistory() {
+        Invoice selected = invoiceTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Chưa chọn hóa đơn");
+            alert.setHeaderText(null);
+            alert.setContentText("Vui lòng chọn một hóa đơn từ bảng để xem lịch sử thanh toán hoặc thu nợ.");
+            alert.showAndWait();
+            return;
+        }
+        openPaymentHistoryDialog(selected);
+    }
+
+    private void openInvoiceDetailDialog(Invoice invoice) {
+        if (invoice == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/invoice-detail-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            InvoiceDetailController controller = loader.getController();
+            controller.setInvoice(invoice);
+
+            Stage stage = new Stage();
+            stage.setTitle("Chi tiết hóa đơn - " + invoice.getCode());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            if (invoiceTable.getScene() != null) {
+                stage.initOwner(invoiceTable.getScene().getWindow());
+            }
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void openPaymentHistoryDialog(Invoice invoice) {

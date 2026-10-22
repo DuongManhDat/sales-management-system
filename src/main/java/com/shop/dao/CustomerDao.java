@@ -128,6 +128,20 @@ public class CustomerDao {
         return customers;
     }
     
+    public Customer findById(int id) throws SQLException {
+        String query = "SELECT * FROM customers WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Customer> getAllActive() throws SQLException {
         List<Customer> customers = new ArrayList<>();
         String query = "SELECT * FROM customers WHERE is_active = 1 ORDER BY created_at DESC";

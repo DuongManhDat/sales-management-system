@@ -3,7 +3,6 @@ package com.shop.controller;
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Invoice;
 import com.shop.util.FormatterUtil;
-import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -13,25 +12,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class InvoiceListController {
     private static final Logger log = LoggerFactory.getLogger(InvoiceListController.class);
-    private static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("#,###");
 
     @FXML private TextField searchField;
     @FXML private DatePicker dateFilter;
     @FXML private ComboBox<String> statusFilter;
+    @FXML private Button btnPaymentHistory;
     @FXML private TableView<Invoice> invoiceTable;
     @FXML private TableColumn<Invoice, String> colCode;
     @FXML private TableColumn<Invoice, String> colDate;
     @FXML private TableColumn<Invoice, String> colCustomer;
-    @FXML private TableColumn<Invoice, Number> colTotal;
-    @FXML private TableColumn<Invoice, Number> colPaid;
-    @FXML private TableColumn<Invoice, Number> colDebt;
     @FXML private TableColumn<Invoice, String> colStatus;
 
     private final InvoiceDao invoiceDao = new InvoiceDao();
@@ -55,25 +50,21 @@ public class InvoiceListController {
             return new SimpleStringProperty("KH #" + data.getValue().getCustomerId());
         });
 
-        colTotal.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getTotal()));
-        colPaid.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getPaid()));
-        colDebt.setCellValueFactory(data -> new SimpleLongProperty(data.getValue().getDebt()));
-
-        // Format tiền tệ chia đơn vị và kết thúc bằng đ
-        colTotal.setCellFactory(col -> createCurrencyCell());
-        colPaid.setCellFactory(col -> createCurrencyCell());
-        colDebt.setCellFactory(col -> createCurrencyCell());
-
         colStatus.setCellValueFactory(data -> new SimpleStringProperty(
                 FormatterUtil.formatInvoiceStatus(data.getValue())));
         colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
-        // Double-click mở dialog lịch sử thanh toán
+        // Nút Lịch sử & Thu nợ chỉ enable khi có bản ghi được chọn
+        btnPaymentHistory.disableProperty().bind(
+                invoiceTable.getSelectionModel().selectedItemProperty().isNull()
+        );
+
+        // Double-click mở dialog chi tiết hóa đơn
         invoiceTable.setRowFactory(tv -> {
             TableRow<Invoice> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    openPaymentHistoryDialog(row.getItem());
+                    openInvoiceDetailDialog(row.getItem());
                 }
             });
             return row;
@@ -105,21 +96,6 @@ public class InvoiceListController {
         });
     }
 
-    private TableCell<Invoice, Number> createCurrencyCell() {
-        return new TableCell<>() {
-            @Override
-            protected void updateItem(Number item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(CURRENCY_FORMAT.format(item.longValue()) + " đ");
-                }
-                setStyle("-fx-alignment: CENTER;");
-            }
-        };
-    }
-
     @FXML
     private void handleClearDate() {
         dateFilter.setValue(null);
@@ -137,6 +113,27 @@ public class InvoiceListController {
             return;
         }
         openPaymentHistoryDialog(selected);
+    }
+
+    private void openInvoiceDetailDialog(Invoice invoice) {
+        if (invoice == null) return;
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/invoice-detail-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+            InvoiceDetailController controller = loader.getController();
+            controller.setInvoice(invoice);
+
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Chi tiết hóa đơn - " + invoice.getCode());
+            stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            if (invoiceTable.getScene() != null) {
+                stage.initOwner(invoiceTable.getScene().getWindow());
+            }
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.showAndWait();
+        } catch (Exception e) {
+            log.error("Lỗi khi mở dialog chi tiết hóa đơn: {}", e.getMessage(), e);
+        }
     }
 
     private void openPaymentHistoryDialog(Invoice invoice) {
