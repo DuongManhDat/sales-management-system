@@ -5,6 +5,7 @@ import com.shop.model.*;
 import com.shop.util.DBConnection;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,6 +19,40 @@ public class SalesService {
     private ReturnInvoiceDao returnInvoiceDao = new ReturnInvoiceDao();
     private ReturnInvoiceItemDao returnInvoiceItemDao = new ReturnInvoiceItemDao();
     private PaymentDao paymentDao = new PaymentDao();
+    private InventoryBatchDao inventoryBatchDao = new InventoryBatchDao();
+
+    private long calculateFifoCostAndDeductBatches(Connection conn, int productId, int qtyToSell) throws SQLException {
+        if (qtyToSell <= 0) return 0;
+
+        List<InventoryBatch> batches = inventoryBatchDao.findAvailableBatchesByProductId(conn, productId);
+        InventoryService inventoryService = new InventoryService(pid -> batches);
+        List<BatchAllocation> allocations = inventoryService.allocateFIFO(productId, qtyToSell, null);
+
+        long totalCost = 0;
+        int totalAllocatedQty = 0;
+
+        for (BatchAllocation alloc : allocations) {
+            totalCost += alloc.getQty() * alloc.getCostPrice();
+            totalAllocatedQty += alloc.getQty();
+
+            // Cập nhật trừ tồn kho của lô
+            for (InventoryBatch b : batches) {
+                if (b.getId() == alloc.getBatchId()) {
+                    int remaining = b.getQtyRemaining() - alloc.getQty();
+                    inventoryBatchDao.updateQtyRemaining(conn, alloc.getBatchId(), remaining);
+                    b.setQtyRemaining(Math.max(0, remaining));
+                    break;
+                }
+            }
+        }
+
+        if (allocations.isEmpty()) {
+            InventoryBatch latest = inventoryBatchDao.findLatestBatchByProductId(conn, productId);
+            return latest != null ? latest.getCostPrice() : 0;
+        }
+
+        return totalAllocatedQty > 0 ? (totalCost / totalAllocatedQty) : 0;
+    }
 
     public void createInvoice(Invoice invoice, List<InvoiceItem> items) throws SQLException {
         Connection conn = null;
@@ -37,13 +72,8 @@ public class SalesService {
             for (InvoiceItem item : items) {
                 item.setInvoiceId(invoice.getId());
                 
-                // Set cost price
-                com.shop.model.Product p = productDao.getById(conn, item.getProductId());
-                if (p != null) {
-                    item.setCostPrice(0); // MVP: cost price removed from products table
-                } else {
-                    item.setCostPrice(0);
-                }
+                long costPrice = calculateFifoCostAndDeductBatches(conn, item.getProductId(), (int) item.getQty());
+                item.setCostPrice(costPrice);
                 
                 // Update stock
                 productDao.decreaseStock(conn, item.getProductId(), item.getQty());
@@ -155,6 +185,15 @@ public class SalesService {
             String currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
             for (InvoiceItem item : items) {
+                long costPrice = calculateFifoCostAndDeductBatches(conn, item.getProductId(), (int) item.getQty());
+                item.setCostPrice(costPrice);
+                String updateItemCostSql = "UPDATE invoice_items SET cost_price = ? WHERE id = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateItemCostSql)) {
+                    updateStmt.setLong(1, costPrice);
+                    updateStmt.setInt(2, item.getId());
+                    updateStmt.executeUpdate();
+                }
+
                 productDao.decreaseStock(conn, item.getProductId(), item.getQty());
                 productDao.decreaseReservedQty(conn, item.getProductId(), item.getQty());
                 StockMovement movement = new StockMovement();
@@ -229,6 +268,12 @@ public class SalesService {
 
                 // Increase stock
                 productDao.increaseStock(conn, item.getProductId(), item.getReturnQty());
+
+                // Return quantity to latest batch if exists
+                InventoryBatch latestBatch = inventoryBatchDao.findLatestBatchByProductId(conn, item.getProductId());
+                if (latestBatch != null) {
+                    inventoryBatchDao.updateQtyRemaining(conn, latestBatch.getId(), latestBatch.getQtyRemaining() + (int) item.getReturnQty());
+                }
 
                 // Log movement
                 StockMovement movement = new StockMovement();
@@ -324,4 +369,3 @@ public class SalesService {
         }
     }
 }
-
