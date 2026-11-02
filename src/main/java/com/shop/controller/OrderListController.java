@@ -2,6 +2,8 @@ package com.shop.controller;
 
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Invoice;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.SalesService;
 import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleLongProperty;
@@ -34,6 +36,9 @@ public class OrderListController {
     @FXML private TableColumn<Invoice, Number> colTotal;
     @FXML private TableColumn<Invoice, Number> colPaid;
     @FXML private TableColumn<Invoice, String> colStatus;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private final InvoiceDao invoiceDao = new InvoiceDao();
     private final SalesService salesService = new SalesService();
@@ -69,9 +74,24 @@ public class OrderListController {
                 FormatterUtil.formatInvoiceStatus(d.getValue().getStatus())));
         colStatus.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
-        searchField.textProperty().addListener((obs, old, val) -> loadOrders());
-        dateFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
-        statusFilter.valueProperty().addListener((obs, old, val) -> loadOrders());
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadOrders();
+        });
+
+        searchField.textProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadOrders();
+        });
+        dateFilter.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadOrders();
+        });
+        statusFilter.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadOrders();
+        });
         loadOrders();
     }
 
@@ -117,20 +137,23 @@ public class OrderListController {
     @FXML
     private void loadOrders() {
         try {
-            String keyword = searchField.getText();
-            String filter = statusFilter.getValue();
-            String dbStatus;
-            switch (filter) {
-                case "Đã hoàn thành": dbStatus = "COMPLETED"; break;
-                case "Đã hủy":       dbStatus = "CANCELLED"; break;
-                default:             dbStatus = "PENDING";    break;
+            String keyword = searchField != null ? searchField.getText() : null;
+            String filter = statusFilter != null ? statusFilter.getValue() : null;
+            String dbStatus = "PENDING";
+            if ("Đã hoàn thành".equals(filter)) {
+                dbStatus = "COMPLETED";
+            } else if ("Đã hủy".equals(filter)) {
+                dbStatus = "CANCELLED";
             }
             String dateParam = null;
-            if (dateFilter.getValue() != null) {
+            if (dateFilter != null && dateFilter.getValue() != null) {
                 dateParam = dateFilter.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
             }
-            List<Invoice> orders = invoiceDao.searchOrders(keyword, dbStatus, dateParam);
-            orderTable.setItems(FXCollections.observableArrayList(orders));
+            PageResult<Invoice> pageResult = invoiceDao.findPagedOrders(keyword, dbStatus, dateParam, currentPage, PAGE_SIZE);
+            orderTable.setItems(FXCollections.observableArrayList(pageResult.getItems()));
+            if (paginationControl != null) {
+                paginationControl.updateState(pageResult.getPageIndex(), pageResult.getPageSize(), pageResult.getTotalItems());
+            }
         } catch (SQLException e) {
             log.error("Lỗi khi tải danh sách đơn đặt hàng", e);
         }

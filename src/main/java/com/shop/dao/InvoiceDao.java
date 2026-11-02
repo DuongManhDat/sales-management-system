@@ -98,6 +98,66 @@ public class InvoiceDao {
         return invoices;
     }
 
+
+    public com.shop.model.common.PageResult<Invoice> findPagedOrders(String keyword, String status, String dateFilter, int page, int pageSize) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+            " FROM invoices i LEFT JOIN customers c ON i.customer_id = c.id WHERE 1=1"
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String pattern = "%" + keyword.trim() + "%";
+            sql.append(" AND (i.code LIKE ? OR c.name LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND i.status = ?");
+            params.add(status);
+        }
+
+        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
+            sql.append(" AND date(i.invoice_date) = date(?)");
+            params.add(dateFilter.trim());
+        }
+
+        String countSql = "SELECT COUNT(*)" + sql.toString();
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int idx = 0; idx < params.size(); idx++) {
+                pstmt.setObject(idx + 1, params.get(idx));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Invoice> orders = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT i.*, c.name AS customer_name" + sql.toString() + " ORDER BY i.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(orders, page, pageSize, totalItems);
+    }
+
     public List<Invoice> searchOrders(String keyword, String status, String dateFilter) throws SQLException {
         List<Invoice> orders = new ArrayList<>();
         StringBuilder sql = new StringBuilder(

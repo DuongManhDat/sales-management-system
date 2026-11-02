@@ -110,6 +110,84 @@ public class ReturnInvoiceDao {
         return list;
     }
 
+
+    public com.shop.model.common.PageResult<ReturnInvoice> findPaged(String returnCode, String invoiceCode, String customer, String returnDate, String status, int page, int pageSize) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+            " FROM return_invoices ri " +
+            "LEFT JOIN invoices i ON ri.invoice_id = i.id " +
+            "LEFT JOIN customers c ON ri.customer_id = c.id " +
+            "WHERE 1=1"
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (returnCode != null && !returnCode.trim().isEmpty()) {
+            sql.append(" AND ri.code LIKE ?");
+            params.add("%" + returnCode.trim() + "%");
+        }
+
+        if (invoiceCode != null && !invoiceCode.trim().isEmpty()) {
+            sql.append(" AND i.code LIKE ?");
+            params.add("%" + invoiceCode.trim() + "%");
+        }
+
+        if (customer != null && !customer.trim().isEmpty()) {
+            sql.append(" AND (c.name LIKE ? OR c.phone LIKE ?)");
+            params.add("%" + customer.trim() + "%");
+            params.add("%" + customer.trim() + "%");
+        }
+
+        if (returnDate != null && !returnDate.trim().isEmpty()) {
+            sql.append(" AND date(ri.return_date) = date(?)");
+            params.add(returnDate.trim());
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"Tất cả".equalsIgnoreCase(status) && !"ALL".equalsIgnoreCase(status)) {
+            if ("COMPLETED".equalsIgnoreCase(status) || "Hoàn tất".equalsIgnoreCase(status)) {
+                sql.append(" AND (ri.status = 'COMPLETED' OR ri.status = 'Hoàn tất')");
+            } else if ("CANCELED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status) || "Đã hủy".equalsIgnoreCase(status)) {
+                sql.append(" AND (ri.status = 'CANCELED' OR ri.status = 'CANCELLED' OR ri.status = 'Đã hủy')");
+            } else {
+                sql.append(" AND ri.status = ?");
+                params.add(status);
+            }
+        }
+
+        String countSql = "SELECT COUNT(*)" + sql.toString();
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<ReturnInvoice> list = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT ri.*, i.code AS invoice_code, c.name AS customer_name" + sql.toString() + " ORDER BY ri.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToReturnInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(list, page, pageSize, totalItems);
+    }
+
     public void updateStatus(Connection conn, int returnInvoiceId, String status, String canceledAt) throws SQLException {
         String query = "UPDATE return_invoices SET status = ?, canceled_at = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
