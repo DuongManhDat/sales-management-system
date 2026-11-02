@@ -361,7 +361,7 @@
 }
 
 /* Order Placement Button */
-.btn-outline-primary {
+.btn-place-order {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #2563EB;
     -fx-border-width: 1.5;
@@ -374,18 +374,18 @@
     -fx-effect: none;
 }
 
-.btn-outline-primary:hover {
+.btn-place-order:hover {
     -fx-background-color: #EFF6FF;
     -fx-border-color: #1D4ED8;
     -fx-text-fill: #1D4ED8;
 }
 
-.btn-outline-primary:pressed {
+.btn-place-order:pressed {
     -fx-background-color: #DBEAFE;
     -fx-border-color: #1E40AF;
 }
 
-.btn-outline-primary .ikonli-font-icon {
+.btn-place-order .ikonli-font-icon {
     -fx-icon-color: #2563EB;
 }
 

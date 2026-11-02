@@ -3,9 +3,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox styleClass="view-container" stylesheets="@../css/app.css, @../css/pos.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnListController">
+<VBox styleClass="view-container" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.ReturnListController">
 
     <!-- Header Title -->
     <Label text="Trả hàng" styleClass="view-title"/>
@@ -21,11 +20,7 @@
         </Button>
         <ComboBox fx:id="cbFilterStatus" prefWidth="130" promptText="Trạng thái" styleClass="flat-input"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="+ Thêm mới" onAction="#openReturnForm" styleClass="btn-outline-primary">
-            <graphic>
-                <FontIcon iconLiteral="fth-plus" iconColor="#2563EB"/>
-            </graphic>
-        </Button>
+        <Button text="+ Thêm mới" onAction="#openReturnForm" styleClass="btn-outline-primary" />
     </HBox>
 
     <!-- Table: Mã Phiếu, Hóa đơn gốc, Khách hàng, Ngày trả và Trạng thái -->
@@ -34,7 +29,7 @@
             <Label text="Chưa có dữ liệu phiếu trả hàng nào." style="-fx-text-fill: #787774;"/>
         </placeholder>
         <columns>
-            <TableColumn fx:id="colCode" text="Mã Phiếu" prefWidth="180" style="-fx-alignment: CENTER; -fx-font-weight: bold;" />
+            <TableColumn fx:id="colCode" text="Mã Phiếu" prefWidth="180" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="colInvoiceCode" text="Hóa đơn gốc" prefWidth="180" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="240" style="-fx-alignment: CENTER;" />
             <TableColumn fx:id="colDate" text="Ngày trả" prefWidth="170" style="-fx-alignment: CENTER;" />
