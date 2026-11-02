@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.Customer;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.CustomerService;
 import com.shop.viewmodel.CustomerListViewModel;
 import javafx.animation.PauseTransition;
@@ -25,6 +27,9 @@ public class CustomerListController {
     @FXML private TableColumn<Customer, Void> colDebt; // Assuming we'll format this later or bind differently
     @FXML private TableColumn<Customer, Boolean> colStatus;
     @FXML private TableColumn<Customer, Void> colAction;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private CustomerListViewModel viewModel;
     private CustomerService customerService;
@@ -37,6 +42,11 @@ public class CustomerListController {
 
         setupTable();
         setupBindings();
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
+        });
         loadData();
     }
 
@@ -130,10 +140,16 @@ public class CustomerListController {
     }
 
     private void setupBindings() {
-        viewModel.filterStatusProperty().bind(statusFilterCombo.valueProperty());
+        statusFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
         
-        debouncePause = new PauseTransition(Duration.millis(200));
-        debouncePause.setOnFinished(event -> viewModel.searchKeywordProperty().set(searchField.getText()));
+        debouncePause = new PauseTransition(Duration.millis(250));
+        debouncePause.setOnFinished(event -> {
+            currentPage = 1;
+            loadData();
+        });
         
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             debouncePause.playFromStart();
@@ -141,8 +157,14 @@ public class CustomerListController {
     }
 
     private void loadData() {
-        Task<List<Customer>> loadTask = customerService.getAllCustomersTask();
-        loadTask.setOnSucceeded(e -> viewModel.setCustomers(loadTask.getValue()));
+        String kw = searchField.getText();
+        String st = statusFilterCombo.getValue();
+        Task<PageResult<Customer>> loadTask = customerService.getPagedCustomersTask(kw, st, currentPage, PAGE_SIZE);
+        loadTask.setOnSucceeded(e -> {
+            PageResult<Customer> result = loadTask.getValue();
+            viewModel.setCustomers(result.getItems());
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
+        });
         loadTask.setOnFailed(e -> {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Lỗi tải dữ liệu khách hàng.");
             alert.show();

@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.String?>
+<?import com.shop.control.PaginationControl?>
 
 <VBox styleClass="view-container" stylesheets="@../css/app.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.shop.controller.CustomerListController">
     
@@ -47,8 +48,10 @@
             <TableColumn fx:id="colStatus" text="Trạng thái" prefWidth="120"/>
             <TableColumn fx:id="colAction" text="Thao tác" prefWidth="100" sortable="false"/>
         </columns>
-            <columnResizePolicy>
+        <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
         </columnResizePolicy>
     </TableView>
+
+    <PaginationControl fx:id="paginationControl"/>
 </VBox>

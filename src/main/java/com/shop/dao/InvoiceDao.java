@@ -172,6 +172,40 @@ public class InvoiceDao {
         return invoices;
     }
 
+
+    public com.shop.model.common.PageResult<Invoice> findPagedByCustomerId(int customerId, int page, int pageSize) throws SQLException {
+        String countSql = "SELECT COUNT(*) FROM invoices WHERE customer_id = ?";
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            pstmt.setInt(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Invoice> items = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                         "LEFT JOIN customers c ON i.customer_id = c.id " +
+                         "WHERE i.customer_id = ? ORDER BY i.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            pstmt.setInt(1, customerId);
+            pstmt.setInt(2, pageSize);
+            pstmt.setInt(3, offset);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(items, page, pageSize, totalItems);
+    }
+
     public void updatePaymentStatus(Connection conn, int invoiceId, long newPaid, long newDebt, String newStatus) throws SQLException {
         String query = "UPDATE invoices SET paid = ?, debt = ?, status = ? WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {

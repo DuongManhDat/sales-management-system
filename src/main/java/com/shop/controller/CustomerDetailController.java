@@ -3,6 +3,8 @@ package com.shop.controller;
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Customer;
 import com.shop.model.Invoice;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -40,6 +42,9 @@ public class CustomerDetailController {
     @FXML private TableColumn<Invoice, Long> colPaid;
     @FXML private TableColumn<Invoice, Long> colDebt;
     @FXML private TableColumn<Invoice, String> colInvoiceStatus;
+    @FXML private PaginationControl paginationControl;
+    private int currentInvoicePage = 1;
+    private static final int INVOICE_PAGE_SIZE = 7;
 
     private Customer currentCustomer;
     private InvoiceDao invoiceDao;
@@ -53,6 +58,11 @@ public class CustomerDetailController {
         invoiceList = FXCollections.observableArrayList();
         
         setupTable();
+        paginationControl.setPageSize(INVOICE_PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentInvoicePage = page;
+            loadInvoices();
+        });
     }
     
     public void initData(Customer customer, Runnable onBack, Runnable onEdit) {
@@ -230,27 +240,32 @@ public class CustomerDetailController {
     }
 
     private void loadInvoices() {
-        Task<List<Invoice>> loadTask = new Task<List<Invoice>>() {
+        Task<PageResult<Invoice>> loadTask = new Task<PageResult<Invoice>>() {
             @Override
-            protected List<Invoice> call() throws Exception {
-                return invoiceDao.findByCustomerId(currentCustomer.getId());
+            protected PageResult<Invoice> call() throws Exception {
+                return invoiceDao.findPagedByCustomerId(currentCustomer.getId(), currentInvoicePage, INVOICE_PAGE_SIZE);
             }
         };
         
         loadTask.setOnSucceeded(e -> {
-            List<Invoice> invoices = loadTask.getValue();
-            invoiceList.setAll(invoices);
+            PageResult<Invoice> result = loadTask.getValue();
+            invoiceList.setAll(result.getItems());
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
             
-            long totalSales = invoices.stream().mapToLong(Invoice::getTotal).sum();
-            long totalDebt = invoices.stream().mapToLong(Invoice::getDebt).sum();
-            
-            lblTotalSales.setText(String.format("%,d đ", totalSales));
-            lblTotalDebt.setText(String.format("%,d đ", totalDebt));
+            // Tính tổng doanh số và nợ từ tất cả hóa đơn của khách
+            try {
+                List<Invoice> allInvoices = invoiceDao.findByCustomerId(currentCustomer.getId());
+                long totalSales = allInvoices.stream().mapToLong(Invoice::getTotal).sum();
+                long totalDebt = allInvoices.stream().mapToLong(Invoice::getDebt).sum();
+                lblTotalSales.setText(String.format("%,d đ", totalSales));
+                lblTotalDebt.setText(String.format("%,d đ", totalDebt));
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         });
         
         loadTask.setOnFailed(e -> {
             e.getSource().getException().printStackTrace();
-            // Handle error silently or show alert
         });
         
         new Thread(loadTask).start();

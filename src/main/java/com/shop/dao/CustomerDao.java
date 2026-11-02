@@ -155,6 +155,61 @@ public class CustomerDao {
         return customers;
     }
 
+
+    public com.shop.model.common.PageResult<Customer> findPaged(String keyword, String status, int page, int pageSize) throws SQLException {
+        StringBuilder whereClause = new StringBuilder(" WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if ("Hoạt động".equals(status)) {
+            whereClause.append(" AND is_active = 1 ");
+        } else if ("Ngưng hoạt động".equals(status)) {
+            whereClause.append(" AND is_active = 0 ");
+        }
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            whereClause.append(" AND (code LIKE ? OR name LIKE ? OR phone LIKE ?) ");
+            String kw = "%" + keyword.trim() + "%";
+            params.add(kw);
+            params.add(kw);
+            params.add(kw);
+        }
+
+        String countSql = "SELECT COUNT(*) FROM customers " + whereClause;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Customer> items = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT * FROM customers " + whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRow(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(items, page, pageSize, totalItems);
+    }
+
     private Customer mapRow(ResultSet rs) throws SQLException {
         Customer c = new Customer();
         c.setId(rs.getInt("id"));
