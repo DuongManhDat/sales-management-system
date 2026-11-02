@@ -17,6 +17,16 @@ public class SupplierService {
         return supplierDao.findAllActive();
     }
 
+
+    public Task<com.shop.model.common.PageResult<Supplier>> getPagedSuppliersTask(String keyword, int page, int pageSize) {
+        return new Task<com.shop.model.common.PageResult<Supplier>>() {
+            @Override
+            protected com.shop.model.common.PageResult<Supplier> call() throws Exception {
+                return supplierDao.findPaged(keyword, page, pageSize);
+            }
+        };
+    }
+
     public Task<List<Supplier>> getAllActiveSuppliersTask() {
         return new Task<List<Supplier>>() {
             @Override

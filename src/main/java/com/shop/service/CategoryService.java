@@ -13,6 +13,11 @@ public class CategoryService {
         this.categoryDao = new CategoryDao();
     }
 
+
+    public com.shop.model.common.PageResult<Category> findPaged(String keyword, int page, int pageSize) {
+        return categoryDao.findPaged(keyword, page, pageSize);
+    }
+
     public List<Category> findAllActive() {
         return categoryDao.findAllActive();
     }

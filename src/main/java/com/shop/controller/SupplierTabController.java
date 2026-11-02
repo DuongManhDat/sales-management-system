@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.Supplier;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.SupplierService;
 import com.shop.util.DialogHelper;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,6 +34,9 @@ public class SupplierTabController {
     @FXML private TableColumn<Supplier, String> noteColumn;
     @FXML private TableColumn<Supplier, String> statusColumn;
     @FXML private TableColumn<Supplier, Void> actionColumn;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
     @FXML private Label totalLabel;
 
     private final SupplierService supplierService = new SupplierService();
@@ -51,19 +56,19 @@ public class SupplierTabController {
         statusColumn.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         setupActionColumn();
+        supplierTable.setItems(allSuppliers);
 
-        filteredSuppliers = new FilteredList<>(allSuppliers, s -> true);
-        searchField.textProperty().addListener((obs, old, text) -> {
-            filteredSuppliers.setPredicate(s -> {
-                if (text == null || text.isBlank()) return true;
-                String lower = text.toLowerCase();
-                return (s.getName() != null && s.getName().toLowerCase().contains(lower)) ||
-                       (s.getCode() != null && s.getCode().toLowerCase().contains(lower)) ||
-                       (s.getPhone() != null && s.getPhone().toLowerCase().contains(lower));
-            });
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
         });
 
-        supplierTable.setItems(filteredSuppliers);
+        searchField.textProperty().addListener((obs, old, text) -> {
+            currentPage = 1;
+            loadData();
+        });
+
         loadData();
     }
 
@@ -117,10 +122,17 @@ public class SupplierTabController {
     }
 
     public void loadData() {
-        Task<List<Supplier>> task = supplierService.getAllActiveSuppliersTask();
+        String keyword = searchField != null ? searchField.getText() : null;
+        Task<PageResult<Supplier>> task = supplierService.getPagedSuppliersTask(keyword, currentPage, PAGE_SIZE);
         task.setOnSucceeded(e -> {
-            allSuppliers.setAll(task.getValue());
-            totalLabel.setText("Tổng: " + allSuppliers.size() + " nhà cung cấp");
+            PageResult<Supplier> result = task.getValue();
+            allSuppliers.setAll(result.getItems());
+            if (totalLabel != null) {
+                totalLabel.setText("Tổng: " + result.getTotalItems() + " nhà cung cấp");
+            }
+            if (paginationControl != null) {
+                paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
+            }
         });
         task.setOnFailed(e -> {
             DialogHelper.showError("Lỗi", "Không thể tải danh sách nhà cung cấp: " + task.getException().getMessage());

@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.Unit;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.UnitService;
 import com.shop.util.DialogHelper;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,6 +23,9 @@ public class UnitTabController {
     @FXML private TableColumn<Unit, String> nameColumn;
     @FXML private TableColumn<Unit, String> statusColumn;
     @FXML private TableColumn<Unit, Void> actionColumn;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
     @FXML private Label totalLabel;
 
     private UnitService unitService = new UnitService();
@@ -36,15 +41,18 @@ public class UnitTabController {
         statusColumn.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         setupActionColumn();
+        unitTable.setItems(allUnits);
 
-        filteredUnits = new FilteredList<>(allUnits, u -> true);
-        searchField.textProperty().addListener((obs, old, text) -> {
-            filteredUnits.setPredicate(u -> 
-                text == null || text.isBlank() || u.getName().toLowerCase().contains(text.toLowerCase())
-            );
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
         });
 
-        unitTable.setItems(filteredUnits);
+        searchField.textProperty().addListener((obs, old, text) -> {
+            currentPage = 1;
+            loadData();
+        });
         
         loadData();
     }
@@ -99,8 +107,15 @@ public class UnitTabController {
     }
 
     private void loadData() {
-        allUnits.setAll(unitService.findAllActive());
-        totalLabel.setText("Tổng: " + allUnits.size() + " đơn vị");
+        String keyword = searchField != null ? searchField.getText() : null;
+        PageResult<Unit> result = unitService.findPaged(keyword, currentPage, PAGE_SIZE);
+        allUnits.setAll(result.getItems());
+        if (totalLabel != null) {
+            totalLabel.setText("Tổng: " + result.getTotalItems() + " đơn vị");
+        }
+        if (paginationControl != null) {
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
+        }
     }
 
     @FXML

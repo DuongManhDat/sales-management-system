@@ -145,6 +145,54 @@ public class SupplierDao {
         return null;
     }
 
+
+    public com.shop.model.common.PageResult<Supplier> findPaged(String keyword, int page, int pageSize) throws SQLException {
+        StringBuilder sqlWhere = new StringBuilder(" WHERE is_active = 1");
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sqlWhere.append(" AND (code LIKE ? OR name LIKE ? OR phone LIKE ?)");
+            String kw = "%" + keyword.trim() + "%";
+            params.add(kw);
+            params.add(kw);
+            params.add(kw);
+        }
+
+        String countSql = "SELECT COUNT(*) FROM suppliers" + sqlWhere;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Supplier> list = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT * FROM suppliers" + sqlWhere + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object p : params) {
+                pstmt.setObject(idx++, p);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(list, page, pageSize, totalItems);
+    }
+
     private Supplier mapRow(ResultSet rs) throws SQLException {
         Supplier s = new Supplier();
         s.setId(rs.getInt("id"));
