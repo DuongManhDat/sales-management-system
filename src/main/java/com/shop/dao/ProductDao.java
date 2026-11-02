@@ -213,6 +213,71 @@ public class ProductDao {
         return null;
     }
 
+
+    public com.shop.model.common.PageResult<Product> findPaged(String keyword, String category, String status, int page, int pageSize) throws SQLException {
+        StringBuilder whereClause = new StringBuilder(" WHERE 1=1 ");
+        List<Object> params = new ArrayList<>();
+
+        if ("Hoạt động".equals(status)) {
+            whereClause.append(" AND p.deleted_at IS NULL ");
+        } else if ("Tạm ngưng".equals(status) || "Đã xóa".equals(status)) {
+            whereClause.append(" AND p.deleted_at IS NOT NULL ");
+        }
+
+        if (category != null && !category.trim().isEmpty() && !"Tất cả".equals(category)) {
+            whereClause.append(" AND c.name = ? ");
+            params.add(category);
+        }
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            whereClause.append(" AND (p.code LIKE ? OR p.name LIKE ?) ");
+            String kw = "%" + keyword.trim() + "%";
+            params.add(kw);
+            params.add(kw);
+        }
+
+        String countSql = "SELECT COUNT(*) FROM products p LEFT JOIN categories c ON p.category_id = c.id " + whereClause;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Product> items = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT p.*, u.name as unit_name, c.name as category_name " +
+                         "FROM products p " +
+                         "LEFT JOIN units u ON p.unit_id = u.id " +
+                         "LEFT JOIN categories c ON p.category_id = c.id " +
+                         whereClause +
+                         " ORDER BY p.code ASC LIMIT ? OFFSET ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapResultSetToProduct(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(items, page, pageSize, totalItems);
+    }
+
     private Product mapResultSetToProduct(ResultSet rs) throws SQLException {
         Product p = new Product();
         p.setId(rs.getInt("id"));
