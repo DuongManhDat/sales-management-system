@@ -66,6 +66,7 @@
 .btn-primary {
     -fx-background-color: #111111;
     -fx-text-fill: #FFFFFF;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 8 16 8 16;
     -fx-background-radius: 4;
@@ -83,6 +84,7 @@
     -fx-text-fill: #111111;
     -fx-border-color: #EAEAEA;
     -fx-border-width: 1;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 8 16 8 16;
     -fx-background-radius: 4;
@@ -100,6 +102,7 @@
     -fx-text-fill: #DC2626;
     -fx-border-color: #DC2626;
     -fx-border-width: 1;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 4 12 4 12;
     -fx-background-radius: 4;
@@ -205,6 +208,22 @@
 .btn-outline-danger:pressed {
     -fx-background-color: #FEE2E2;
     -fx-border-color: #991B1B;
+}
+
+.btn-outline-primary .ikonli-font-icon {
+    -fx-icon-color: #2563EB;
+}
+
+.btn-outline-danger .ikonli-font-icon {
+    -fx-icon-color: #DC2626;
+}
+
+.btn-outline-success .ikonli-font-icon {
+    -fx-icon-color: #16A34A;
+}
+
+.btn-outline-dark .ikonli-font-icon {
+    -fx-icon-color: #111111;
 }
 
 /* Minimalist Text Field */

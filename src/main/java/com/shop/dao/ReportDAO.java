@@ -24,7 +24,7 @@ public class ReportDAO {
                      "  (ii.amount - (ii.qty * ii.cost_price)) as total_profit " +
                      "  FROM invoice_items ii " +
                      "  JOIN invoices i ON i.id = ii.invoice_id " +
-                     "  WHERE date(i.invoice_date) BETWEEN ? AND ? AND i.status = 'PAID' " +
+                     "  WHERE date(i.invoice_date) BETWEEN ? AND ? AND i.status != 'CANCELLED' AND i.status != 'Đã hủy' " +
                      "  UNION ALL " +
                      "  SELECT date(ri.return_date) as report_date, " +
                      "  -rii.amount as total_revenue, " +
@@ -33,7 +33,7 @@ public class ReportDAO {
                      "  FROM return_invoice_items rii " +
                      "  JOIN return_invoices ri ON ri.id = rii.return_invoice_id " +
                      "  JOIN invoice_items ii ON ii.id = rii.invoice_item_id " +
-                     "  WHERE date(ri.return_date) BETWEEN ? AND ? " +
+                     "  WHERE date(ri.return_date) BETWEEN ? AND ? AND ri.status != 'CANCELLED' AND ri.status != 'CANCELED' AND ri.status != 'Đã hủy' " +
                      ") " +
                      "GROUP BY report_date " +
                      "ORDER BY report_date ASC";
@@ -68,14 +68,14 @@ public class ReportDAO {
                      "  (ii.amount - (ii.qty * ii.cost_price)) as total_profit " +
                      "  FROM invoice_items ii " +
                      "  JOIN invoices i ON i.id = ii.invoice_id " +
-                     "  WHERE date(i.invoice_date) BETWEEN ? AND ? AND i.status = 'PAID' " +
+                     "  WHERE date(i.invoice_date) BETWEEN ? AND ? AND i.status != 'CANCELLED' AND i.status != 'Đã hủy' " +
                      "  UNION ALL " +
                      "  SELECT rii.product_id, -rii.return_qty as total_qty, -rii.amount as total_revenue, " +
                      "  -(rii.amount - (rii.return_qty * ii.cost_price)) as total_profit " +
                      "  FROM return_invoice_items rii " +
                      "  JOIN return_invoices ri ON ri.id = rii.return_invoice_id " +
                      "  JOIN invoice_items ii ON ii.id = rii.invoice_item_id " +
-                     "  WHERE date(ri.return_date) BETWEEN ? AND ? " +
+                     "  WHERE date(ri.return_date) BETWEEN ? AND ? AND ri.status != 'CANCELLED' AND ri.status != 'CANCELED' AND ri.status != 'Đã hủy' " +
                      ") ps " +
                      "JOIN products p ON p.id = ps.product_id " +
                      "GROUP BY p.id, p.name " +

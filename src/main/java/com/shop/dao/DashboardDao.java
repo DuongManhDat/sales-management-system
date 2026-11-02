@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DashboardDao {
     public long getTotalRevenue(Connection conn, String dateStr) throws SQLException {
-        String query = "SELECT SUM(total) FROM invoices WHERE date(invoice_date) = ? AND status='PAID'";
+        String query = "SELECT SUM(total) FROM invoices WHERE date(invoice_date) = ? AND status != 'CANCELLED' AND status != 'Đã hủy'";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, dateStr);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -28,7 +28,7 @@ public class DashboardDao {
     public long getGrossProfit(Connection conn, String dateStr) throws SQLException {
         String query = "SELECT SUM((ii.sale_price - ii.cost_price) * ii.qty) " +
                        "FROM invoice_items ii JOIN invoices i ON i.id = ii.invoice_id " +
-                       "WHERE date(i.invoice_date) = ? AND i.status='PAID'";
+                       "WHERE date(i.invoice_date) = ? AND i.status != 'CANCELLED' AND i.status != 'Đã hủy'";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, dateStr);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -41,7 +41,7 @@ public class DashboardDao {
     }
 
     public int getTotalOrders(Connection conn, String dateStr) throws SQLException {
-        String query = "SELECT COUNT(*) FROM invoices WHERE date(invoice_date) = ? AND status='PAID'";
+        String query = "SELECT COUNT(*) FROM invoices WHERE date(invoice_date) = ? AND status != 'CANCELLED' AND status != 'Đã hủy'";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, dateStr);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -60,7 +60,7 @@ public class DashboardDao {
         }
         
         String query = "SELECT strftime('%H', invoice_date) as hour, SUM(total) as revenue " +
-                       "FROM invoices WHERE date(invoice_date) = ? AND status='PAID' " +
+                       "FROM invoices WHERE date(invoice_date) = ? AND status != 'CANCELLED' AND status != 'Đã hủy' " +
                        "GROUP BY hour";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, dateStr);
@@ -85,7 +85,7 @@ public class DashboardDao {
         }
 
         String query = "SELECT strftime('%w', invoice_date) as dow, SUM(total) as revenue " +
-                       "FROM invoices WHERE date(invoice_date) BETWEEN ? AND ? AND status='PAID' " +
+                       "FROM invoices WHERE date(invoice_date) BETWEEN ? AND ? AND status != 'CANCELLED' AND status != 'Đã hủy' " +
                        "GROUP BY dow";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
             pstmt.setString(1, startDateStr);
@@ -110,7 +110,7 @@ public class DashboardDao {
                        "JOIN invoices i ON i.id = ii.invoice_id " +
                        "JOIN products p ON p.id = ii.product_id " +
                        "LEFT JOIN units u ON u.id = p.unit_id " +
-                       "WHERE date(i.invoice_date) = ? AND i.status='PAID' " +
+                       "WHERE date(i.invoice_date) = ? AND i.status != 'CANCELLED' AND i.status != 'Đã hủy' " +
                        "GROUP BY ii.product_id " +
                        "ORDER BY qty DESC LIMIT ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {

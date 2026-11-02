@@ -20,7 +20,7 @@
                 <Label text="HÓA ĐƠN BÁN HÀNG" styleClass="pos-section-title"/>
                 <Label fx:id="lblInvoiceMeta" text="Đơn bán lẻ trực tiếp tại quầy" styleClass="pos-section-subtitle"/>
             </VBox>
-            <Button fx:id="btnClearCart" text="Xóa giỏ hàng" onAction="#handleClearCart" styleClass="btn-secondary">
+            <Button fx:id="btnClearCart" text="Xóa giỏ hàng" onAction="#handleClearCart" styleClass="btn-outline-danger">
                 <graphic>
                     <FontIcon iconLiteral="fth-trash-2"/>
                 </graphic>
@@ -78,7 +78,7 @@
             <HBox alignment="CENTER_LEFT" spacing="6">
                 <Label text="Khách hàng:" styleClass="title-4" HBox.hgrow="ALWAYS"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnQuickAddCustomer" text="Thêm KH" onAction="#handleQuickAddCustomer" styleClass="btn-icon-square">
+                <Button fx:id="btnQuickAddCustomer" text="Thêm KH" onAction="#handleQuickAddCustomer" styleClass="btn-outline-primary">
                     <graphic>
                         <FontIcon iconLiteral="fth-user-plus"/>
                     </graphic>
@@ -134,7 +134,7 @@
         </HBox>
 
         <!-- Place Order Button -->
-        <Button fx:id="btnPlaceOrder" text="ĐẶT HÀNG (F8)" onAction="#handlePlaceOrder" maxWidth="Infinity" prefHeight="44" styleClass="btn-outline-primary">
+        <Button fx:id="btnPlaceOrder" text="ĐẶT HÀNG (F8)" onAction="#handlePlaceOrder" maxWidth="Infinity" prefHeight="44" styleClass="btn-place-order">
             <graphic>
                 <FontIcon iconLiteral="fth-clipboard" iconSize="18"/>
             </graphic>

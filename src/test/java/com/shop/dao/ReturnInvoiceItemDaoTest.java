@@ -35,6 +35,18 @@ class ReturnInvoiceItemDaoTest {
             stmt.executeUpdate("DELETE FROM invoice_items");
             stmt.executeUpdate("DELETE FROM invoices");
             stmt.executeUpdate("DELETE FROM customers");
+            stmt.executeUpdate("DELETE FROM invoice_item_batches");
+            stmt.executeUpdate("DELETE FROM supplier_payments");
+            stmt.executeUpdate("DELETE FROM return_invoice_items");
+            stmt.executeUpdate("DELETE FROM return_invoices");
+            stmt.executeUpdate("DELETE FROM payments");
+            stmt.executeUpdate("DELETE FROM stock_adjustment_items");
+            stmt.executeUpdate("DELETE FROM stock_adjustments");
+            stmt.executeUpdate("DELETE FROM purchase_items");
+            stmt.executeUpdate("DELETE FROM inventory_batches");
+            stmt.executeUpdate("DELETE FROM purchases");
+            stmt.executeUpdate("DELETE FROM stock_movements");
+            stmt.executeUpdate("DELETE FROM price_history");
             stmt.executeUpdate("DELETE FROM products");
             stmt.executeUpdate("DELETE FROM units");
 
@@ -110,6 +122,18 @@ class ReturnInvoiceItemDaoTest {
             stmt.executeUpdate("DELETE FROM invoice_items");
             stmt.executeUpdate("DELETE FROM invoices");
             stmt.executeUpdate("DELETE FROM customers");
+            stmt.executeUpdate("DELETE FROM invoice_item_batches");
+            stmt.executeUpdate("DELETE FROM supplier_payments");
+            stmt.executeUpdate("DELETE FROM return_invoice_items");
+            stmt.executeUpdate("DELETE FROM return_invoices");
+            stmt.executeUpdate("DELETE FROM payments");
+            stmt.executeUpdate("DELETE FROM stock_adjustment_items");
+            stmt.executeUpdate("DELETE FROM stock_adjustments");
+            stmt.executeUpdate("DELETE FROM purchase_items");
+            stmt.executeUpdate("DELETE FROM inventory_batches");
+            stmt.executeUpdate("DELETE FROM purchases");
+            stmt.executeUpdate("DELETE FROM stock_movements");
+            stmt.executeUpdate("DELETE FROM price_history");
             stmt.executeUpdate("DELETE FROM products");
             stmt.executeUpdate("DELETE FROM units");
         }
