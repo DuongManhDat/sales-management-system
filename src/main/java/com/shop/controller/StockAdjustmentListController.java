@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.StockAdjustment;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.AdjustmentService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -40,6 +42,9 @@ public class StockAdjustmentListController {
     @FXML private TableColumn<StockAdjustment, String> colDate;
     @FXML private TableColumn<StockAdjustment, String> colStatus;
     @FXML private TableColumn<StockAdjustment, String> colNote;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private final AdjustmentService adjustmentService = new AdjustmentService();
     private final ObservableList<StockAdjustment> adjustmentList = FXCollections.observableArrayList();
@@ -48,6 +53,11 @@ public class StockAdjustmentListController {
     public void initialize() {
         setupDatePickerConverter();
         setupTable();
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
+        });
         setupListeners();
         loadData();
     }
@@ -72,8 +82,14 @@ public class StockAdjustmentListController {
     }
 
     private void setupListeners() {
-        searchCodeField.textProperty().addListener((obs, oldVal, newVal) -> loadData());
-        dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> loadData());
+        searchCodeField.textProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
+        dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
     }
 
     private void setupTable() {
@@ -110,8 +126,9 @@ public class StockAdjustmentListController {
             if (dateFilter != null && dateFilter.getValue() != null) {
                 dateStr = dateFilter.getValue().toString(); // YYYY-MM-DD
             }
-            List<StockAdjustment> list = adjustmentService.filterAdjustments(code, dateStr);
-            adjustmentList.setAll(list);
+            PageResult<StockAdjustment> result = adjustmentService.getPagedAdjustments(code, dateStr, currentPage, PAGE_SIZE);
+            adjustmentList.setAll(result.getItems());
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
         } catch (SQLException e) {
             log.error("Error loading stock adjustments", e);
         }

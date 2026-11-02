@@ -172,6 +172,66 @@ public class StockAdjustmentDao {
     }
 
     
+
+    public com.shop.model.common.PageResult<StockAdjustment> findPaged(String code, String date, int page, int pageSize) throws SQLException {
+        StringBuilder whereClause = new StringBuilder(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (code != null && !code.trim().isEmpty()) {
+            whereClause.append(" AND code LIKE ?");
+            params.add("%" + code.trim() + "%");
+        }
+
+        if (date != null && !date.trim().isEmpty()) {
+            whereClause.append(" AND (adjustment_date = ? OR date(created_at) = ?)");
+            params.add(date.trim());
+            params.add(date.trim());
+        }
+
+        String countSql = "SELECT COUNT(*) FROM stock_adjustments" + whereClause;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<StockAdjustment> list = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT * FROM stock_adjustments" + whereClause + " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    StockAdjustment adj = new StockAdjustment();
+                    adj.setId(rs.getInt("id"));
+                    adj.setCode(rs.getString("code"));
+                    adj.setAdjustmentDate(rs.getString("adjustment_date"));
+                    adj.setNote(rs.getString("note"));
+                    adj.setCreatedAt(rs.getString("created_at"));
+                    adj.setStatus(rs.getString("status"));
+                    adj.setCanceledAt(rs.getString("canceled_at"));
+                    list.add(adj);
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(list, page, pageSize, totalItems);
+    }
+
     public int countItems(Connection conn, int adjustmentId) throws SQLException {
         String query = "SELECT COUNT(*) FROM stock_adjustment_items WHERE adjustment_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(query)) {
