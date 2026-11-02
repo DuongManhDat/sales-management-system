@@ -2,6 +2,8 @@ package com.shop.controller;
 
 import com.shop.dao.InvoiceDao;
 import com.shop.model.Invoice;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -28,6 +30,9 @@ public class InvoiceListController {
     @FXML private TableColumn<Invoice, String> colDate;
     @FXML private TableColumn<Invoice, String> colCustomer;
     @FXML private TableColumn<Invoice, String> colStatus;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private final InvoiceDao invoiceDao = new InvoiceDao();
 
@@ -70,9 +75,24 @@ public class InvoiceListController {
             return row;
         });
 
-        searchField.textProperty().addListener((obs, old, val) -> loadInvoices());
-        statusFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
-        dateFilter.valueProperty().addListener((obs, old, val) -> loadInvoices());
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadInvoices();
+        });
+
+        searchField.textProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadInvoices();
+        });
+        statusFilter.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadInvoices();
+        });
+        dateFilter.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadInvoices();
+        });
 
         loadInvoices();
     }
@@ -165,15 +185,18 @@ public class InvoiceListController {
     @FXML
     private void loadInvoices() {
         try {
-            String keyword = searchField.getText();
-            String filterUI = statusFilter.getValue();
+            String keyword = searchField != null ? searchField.getText() : null;
+            String filterUI = statusFilter != null ? statusFilter.getValue() : null;
             String dateParam = null;
-            if (dateFilter.getValue() != null) {
+            if (dateFilter != null && dateFilter.getValue() != null) {
                 dateParam = dateFilter.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
             }
 
-            List<Invoice> invoices = invoiceDao.searchInvoices(keyword, filterUI, dateParam);
-            invoiceTable.setItems(FXCollections.observableArrayList(invoices));
+            PageResult<Invoice> pageResult = invoiceDao.findPaged(keyword, filterUI, dateParam, currentPage, PAGE_SIZE);
+            invoiceTable.setItems(FXCollections.observableArrayList(pageResult.getItems()));
+            if (paginationControl != null) {
+                paginationControl.updateState(pageResult.getPageIndex(), pageResult.getPageSize(), pageResult.getTotalItems());
+            }
         } catch (SQLException e) {
             log.error("Failed to load invoices", e);
         }

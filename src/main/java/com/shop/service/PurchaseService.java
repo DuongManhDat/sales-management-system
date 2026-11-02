@@ -13,6 +13,11 @@ public class PurchaseService {
 
     private final PurchaseDao purchaseDao = new PurchaseDao();
 
+
+    public com.shop.model.common.PageResult<Purchase> getPagedPurchases(String search, String status, int page, int pageSize) {
+        return purchaseDao.findPaged(search, status, page, pageSize);
+    }
+
     public List<Purchase> getAllPurchases(String search, String status) {
         return purchaseDao.getAllPurchases(search, status);
     }
