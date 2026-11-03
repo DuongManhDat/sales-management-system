@@ -80,6 +80,16 @@ public class ProductService {
         }
     }
 
+
+    public com.shop.model.common.PageResult<Product> getPagedProducts(String keyword, String category, String status, int page, int pageSize) throws SQLException {
+        try {
+            return productDao.findPaged(keyword, category, status, page, pageSize);
+        } catch (SQLException e) {
+            log.error("Lỗi khi phân trang hàng hóa: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
     public List<Product> getAllProducts() throws SQLException {
         try {
             return productDao.findAll();

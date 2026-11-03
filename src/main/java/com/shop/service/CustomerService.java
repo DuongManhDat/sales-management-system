@@ -25,6 +25,16 @@ public class CustomerService {
         };
     }
     
+
+    public Task<com.shop.model.common.PageResult<Customer>> getPagedCustomersTask(String keyword, String status, int page, int pageSize) {
+        return new Task<com.shop.model.common.PageResult<Customer>>() {
+            @Override
+            protected com.shop.model.common.PageResult<Customer> call() throws Exception {
+                return customerDao.findPaged(keyword, status, page, pageSize);
+            }
+        };
+    }
+
     public Task<List<Customer>> getAllCustomersTask() {
         return new Task<List<Customer>>() {
             @Override

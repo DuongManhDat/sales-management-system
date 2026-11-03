@@ -2,6 +2,8 @@ package com.shop.controller;
 
 import com.shop.dao.ReturnInvoiceDao;
 import com.shop.model.ReturnInvoice;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.util.FormatterUtil;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -37,6 +39,9 @@ public class ReturnListController {
     @FXML private TableColumn<ReturnInvoice, String> colCustomer;
     @FXML private TableColumn<ReturnInvoice, String> colDate;
     @FXML private TableColumn<ReturnInvoice, String> colStatus;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private final ReturnInvoiceDao returnInvoiceDao = new ReturnInvoiceDao();
 
@@ -86,12 +91,33 @@ public class ReturnListController {
             return row;
         });
 
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadReturns();
+        });
+
         // Lắng nghe sự kiện filter
-        txtFilterReturnCode.textProperty().addListener((obs, old, val) -> loadReturns());
-        txtFilterInvoiceCode.textProperty().addListener((obs, old, val) -> loadReturns());
-        txtFilterCustomer.textProperty().addListener((obs, old, val) -> loadReturns());
-        dpFilterReturnDate.valueProperty().addListener((obs, old, val) -> loadReturns());
-        cbFilterStatus.valueProperty().addListener((obs, old, val) -> loadReturns());
+        txtFilterReturnCode.textProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadReturns();
+        });
+        txtFilterInvoiceCode.textProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadReturns();
+        });
+        txtFilterCustomer.textProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadReturns();
+        });
+        dpFilterReturnDate.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadReturns();
+        });
+        cbFilterStatus.valueProperty().addListener((obs, old, val) -> {
+            currentPage = 1;
+            loadReturns();
+        });
 
         loadReturns();
     }
@@ -123,17 +149,20 @@ public class ReturnListController {
     @FXML
     private void loadReturns() {
         try {
-            String returnCode = txtFilterReturnCode.getText();
-            String invoiceCode = txtFilterInvoiceCode.getText();
-            String customer = txtFilterCustomer.getText();
+            String returnCode = txtFilterReturnCode != null ? txtFilterReturnCode.getText() : null;
+            String invoiceCode = txtFilterInvoiceCode != null ? txtFilterInvoiceCode.getText() : null;
+            String customer = txtFilterCustomer != null ? txtFilterCustomer.getText() : null;
             String dateParam = null;
-            if (dpFilterReturnDate.getValue() != null) {
+            if (dpFilterReturnDate != null && dpFilterReturnDate.getValue() != null) {
                 dateParam = dpFilterReturnDate.getValue().format(DateTimeFormatter.ISO_LOCAL_DATE);
             }
-            String status = cbFilterStatus.getValue();
+            String status = cbFilterStatus != null ? cbFilterStatus.getValue() : null;
 
-            List<ReturnInvoice> returns = returnInvoiceDao.searchReturnInvoices(returnCode, invoiceCode, customer, dateParam, status);
-            returnTable.setItems(FXCollections.observableArrayList(returns));
+            PageResult<ReturnInvoice> pageResult = returnInvoiceDao.findPaged(returnCode, invoiceCode, customer, dateParam, status, currentPage, PAGE_SIZE);
+            returnTable.setItems(FXCollections.observableArrayList(pageResult.getItems()));
+            if (paginationControl != null) {
+                paginationControl.updateState(pageResult.getPageIndex(), pageResult.getPageSize(), pageResult.getTotalItems());
+            }
         } catch (SQLException e) {
             log.error("Failed to load returns", e);
         }

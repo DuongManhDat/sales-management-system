@@ -13,6 +13,11 @@ public class UnitService {
         this.unitDao = new UnitDao();
     }
 
+
+    public com.shop.model.common.PageResult<Unit> findPaged(String keyword, int page, int pageSize) {
+        return unitDao.findPaged(keyword, page, pageSize);
+    }
+
     public List<Unit> findAllActive() {
         return unitDao.findAllActive();
     }

@@ -98,6 +98,66 @@ public class InvoiceDao {
         return invoices;
     }
 
+
+    public com.shop.model.common.PageResult<Invoice> findPagedOrders(String keyword, String status, String dateFilter, int page, int pageSize) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+            " FROM invoices i LEFT JOIN customers c ON i.customer_id = c.id WHERE 1=1"
+        );
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String pattern = "%" + keyword.trim() + "%";
+            sql.append(" AND (i.code LIKE ? OR c.name LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND i.status = ?");
+            params.add(status);
+        }
+
+        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
+            sql.append(" AND date(i.invoice_date) = date(?)");
+            params.add(dateFilter.trim());
+        }
+
+        String countSql = "SELECT COUNT(*)" + sql.toString();
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int idx = 0; idx < params.size(); idx++) {
+                pstmt.setObject(idx + 1, params.get(idx));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Invoice> orders = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT i.*, c.name AS customer_name" + sql.toString() + " ORDER BY i.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(orders, page, pageSize, totalItems);
+    }
+
     public List<Invoice> searchOrders(String keyword, String status, String dateFilter) throws SQLException {
         List<Invoice> orders = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
@@ -140,6 +200,66 @@ public class InvoiceDao {
         return orders;
     }
 
+
+    public com.shop.model.common.PageResult<Invoice> findPaged(String keyword, String status, String dateFilter, int page, int pageSize) throws SQLException {
+        StringBuilder sqlWhere = new StringBuilder(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String pattern = "%" + keyword.trim() + "%";
+            sqlWhere.append(" AND (i.code LIKE ? OR c.name LIKE ?)");
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        if (status != null && !status.trim().isEmpty() && !status.equals("Tất cả")) {
+            sqlWhere.append(" AND i.status = ?");
+            params.add(status);
+        }
+
+        if (dateFilter != null && !dateFilter.trim().isEmpty()) {
+            sqlWhere.append(" AND date(i.invoice_date) = date(?)");
+            params.add(dateFilter.trim());
+        }
+
+        String countSql = "SELECT COUNT(*) FROM invoices i LEFT JOIN customers c ON i.customer_id = c.id" + sqlWhere;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Invoice> list = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                         "LEFT JOIN customers c ON i.customer_id = c.id " +
+                         sqlWhere + " ORDER BY i.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object p : params) {
+                pstmt.setObject(idx++, p);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(list, page, pageSize, totalItems);
+    }
+
     public List<Invoice> findAll() throws SQLException {
         List<Invoice> invoices = new ArrayList<>();
         String query = "SELECT i.*, c.name AS customer_name FROM invoices i " +
@@ -170,6 +290,40 @@ public class InvoiceDao {
             }
         }
         return invoices;
+    }
+
+
+    public com.shop.model.common.PageResult<Invoice> findPagedByCustomerId(int customerId, int page, int pageSize) throws SQLException {
+        String countSql = "SELECT COUNT(*) FROM invoices WHERE customer_id = ?";
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            pstmt.setInt(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        }
+
+        List<Invoice> items = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT i.*, c.name AS customer_name FROM invoices i " +
+                         "LEFT JOIN customers c ON i.customer_id = c.id " +
+                         "WHERE i.customer_id = ? ORDER BY i.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            pstmt.setInt(1, customerId);
+            pstmt.setInt(2, pageSize);
+            pstmt.setInt(3, offset);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapResultSetToInvoice(rs));
+                }
+            }
+        }
+
+        return new com.shop.model.common.PageResult<>(items, page, pageSize, totalItems);
     }
 
     public void updatePaymentStatus(Connection conn, int invoiceId, long newPaid, long newDebt, String newStatus) throws SQLException {

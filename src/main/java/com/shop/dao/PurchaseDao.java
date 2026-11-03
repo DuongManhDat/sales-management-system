@@ -76,6 +76,81 @@ public class PurchaseDao {
         return list;
     }
 
+
+    public com.shop.model.common.PageResult<Purchase> findPaged(String search, String status, int page, int pageSize) {
+        StringBuilder where = new StringBuilder(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (search != null && !search.trim().isEmpty()) {
+            where.append(" AND (p.code LIKE ? OR s.name LIKE ?)");
+            String sp = "%" + search.trim() + "%";
+            params.add(sp);
+            params.add(sp);
+        }
+        if (status != null && !status.trim().isEmpty() && !status.equals("Tất cả")) {
+            if ("Đã thanh toán".equalsIgnoreCase(status)) {
+                where.append(" AND (p.status = 'Đã thanh toán' OR p.status = 'PAID' OR p.debt = 0)");
+            } else if ("Còn nợ".equalsIgnoreCase(status)) {
+                where.append(" AND (p.status = 'Còn nợ' OR p.status = 'DEBT' OR p.status = 'UNPAID' OR p.debt > 0)");
+            } else {
+                where.append(" AND p.status = ?");
+                params.add(status);
+            }
+        }
+
+        String countSql = "SELECT COUNT(*) FROM purchases p LEFT JOIN suppliers s ON p.supplier_id = s.id" + where;
+        int totalItems = 0;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(countSql)) {
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    totalItems = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        List<Purchase> list = new ArrayList<>();
+        int offset = (Math.max(1, page) - 1) * pageSize;
+        String dataSql = "SELECT p.*, s.name as supplier_name FROM purchases p LEFT JOIN suppliers s ON p.supplier_id = s.id" +
+                         where + " ORDER BY p.id DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(dataSql)) {
+            int idx = 1;
+            for (Object param : params) {
+                pstmt.setObject(idx++, param);
+            }
+            pstmt.setInt(idx++, pageSize);
+            pstmt.setInt(idx, offset);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Purchase p = new Purchase();
+                    p.setId(rs.getInt("id"));
+                    p.setCode(rs.getString("code"));
+                    p.setSupplierId(rs.getObject("supplier_id") != null ? rs.getInt("supplier_id") : null);
+                    p.setPurchaseDate(rs.getString("purchase_date"));
+                    p.setTotalCost(rs.getLong("total_cost"));
+                    p.setPaid(rs.getLong("paid"));
+                    p.setDebt(rs.getLong("debt"));
+                    p.setStatus(com.shop.util.FormatterUtil.formatPurchaseStatus(rs.getString("status")));
+                    p.setNote(rs.getString("note"));
+                    p.setCreatedAt(rs.getString("created_at"));
+                    p.setSupplierName(rs.getString("supplier_name"));
+                    list.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return new com.shop.model.common.PageResult<>(list, page, pageSize, totalItems);
+    }
+
     public void createPurchaseTransaction(Purchase purchase, List<PurchaseItem> items) throws SQLException {
         Connection conn = DBConnection.getConnection();
         try {

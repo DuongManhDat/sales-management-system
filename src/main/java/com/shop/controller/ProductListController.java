@@ -1,6 +1,9 @@
 package com.shop.controller;
 
 import com.shop.model.Product;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
+
 import com.shop.service.ImportExportService;
 import com.shop.service.ProductService;
 import com.shop.viewmodel.ProductListViewModel;
@@ -44,6 +47,9 @@ public class ProductListController {
     @FXML private TableColumn<Product, String> colStock;
     @FXML private TableColumn<Product, String> colStatus;
     @FXML private TableColumn<Product, Void> colAction;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private ProductListViewModel viewModel;
     private ProductService productService;
@@ -57,14 +63,27 @@ public class ProductListController {
 
         setupBindings();
         setupColumns();
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
+        });
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
+        categoryCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
+        statusFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = 1;
+            loadData();
+        });
         loadData();
     }
 
     private void setupBindings() {
-        viewModel.searchKeywordProperty().bind(searchField.textProperty());
-        viewModel.filterCategoryProperty().bind(categoryCombo.valueProperty());
-        viewModel.filterStatusProperty().bind(statusFilterCombo.valueProperty());
-        
         productTable.setItems(viewModel.getFilteredProducts());
     }
 
@@ -154,7 +173,12 @@ public class ProductListController {
 
     private void loadData() {
         try {
-            viewModel.setProducts(productService.getAllProducts());
+            String kw = searchField.getText();
+            String cat = categoryCombo.getValue();
+            String st = statusFilterCombo.getValue();
+            PageResult<Product> pageResult = productService.getPagedProducts(kw, cat, st, currentPage, PAGE_SIZE);
+            viewModel.setProducts(pageResult.getItems());
+            paginationControl.updateState(pageResult.getPageIndex(), pageResult.getPageSize(), pageResult.getTotalItems());
         } catch (SQLException e) {
             log.error("Lỗi khi tải danh sách hàng hóa: {}", e.getMessage(), e);
             showAlert("Lỗi", "Không thể tải danh sách hàng hóa: " + e.getMessage());

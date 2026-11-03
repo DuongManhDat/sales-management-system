@@ -138,6 +138,11 @@ public class AdjustmentService {
         return adjustmentDao.findById(id);
     }
 
+
+    public com.shop.model.common.PageResult<StockAdjustment> getPagedAdjustments(String code, String date, int page, int pageSize) throws SQLException {
+        return adjustmentDao.findPaged(code, date, page, pageSize);
+    }
+
     public List<StockAdjustment> filterAdjustments(String code, String date) throws SQLException {
         return adjustmentDao.filterAdjustments(code, date);
     }

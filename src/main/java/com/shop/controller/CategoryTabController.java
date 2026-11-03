@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.Category;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.CategoryService;
 import com.shop.util.DialogHelper;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,6 +23,9 @@ public class CategoryTabController {
     @FXML private TableColumn<Category, String> nameColumn;
     @FXML private TableColumn<Category, String> statusColumn;
     @FXML private TableColumn<Category, Void> actionColumn;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
     @FXML private Label totalLabel;
 
     private CategoryService categoryService = new CategoryService();
@@ -36,15 +41,18 @@ public class CategoryTabController {
         statusColumn.setCellFactory(com.shop.util.StatusBadge.createCellFactory());
 
         setupActionColumn();
+        categoryTable.setItems(allCategories);
 
-        filteredCategories = new FilteredList<>(allCategories, c -> true);
-        searchField.textProperty().addListener((obs, old, text) -> {
-            filteredCategories.setPredicate(c -> 
-                text == null || text.isBlank() || c.getName().toLowerCase().contains(text.toLowerCase())
-            );
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
         });
 
-        categoryTable.setItems(filteredCategories);
+        searchField.textProperty().addListener((obs, old, text) -> {
+            currentPage = 1;
+            loadData();
+        });
         
         loadData();
     }
@@ -99,8 +107,15 @@ public class CategoryTabController {
     }
 
     private void loadData() {
-        allCategories.setAll(categoryService.findAllActive());
-        totalLabel.setText("Tổng: " + allCategories.size() + " nhóm hàng");
+        String keyword = searchField != null ? searchField.getText() : null;
+        PageResult<Category> result = categoryService.findPaged(keyword, currentPage, PAGE_SIZE);
+        allCategories.setAll(result.getItems());
+        if (totalLabel != null) {
+            totalLabel.setText("Tổng: " + result.getTotalItems() + " nhóm hàng");
+        }
+        if (paginationControl != null) {
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
+        }
     }
 
     @FXML

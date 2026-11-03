@@ -1,6 +1,8 @@
 package com.shop.controller;
 
 import com.shop.model.Purchase;
+import com.shop.control.PaginationControl;
+import com.shop.model.common.PageResult;
 import com.shop.service.PurchaseImportExportService;
 import com.shop.service.PurchaseService;
 import javafx.application.Platform;
@@ -39,6 +41,9 @@ public class PurchaseListController {
     @FXML private TableColumn<Purchase, Long> colTotal;
     @FXML private TableColumn<Purchase, Long> colDebt;
     @FXML private TableColumn<Purchase, String> colStatus;
+    @FXML private PaginationControl paginationControl;
+    private int currentPage = 1;
+    private static final int PAGE_SIZE = 15;
 
     private final PurchaseService purchaseService = new PurchaseService();
     private final PurchaseImportExportService purchaseImportExportService = new PurchaseImportExportService();
@@ -51,9 +56,20 @@ public class PurchaseListController {
         statusFilter.getSelectionModel().selectFirst();
 
         setupTable();
+        paginationControl.setPageSize(PAGE_SIZE);
+        paginationControl.setOnPageChangeListener(page -> {
+            this.currentPage = page;
+            loadData();
+        });
 
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> loadData());
-        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> loadData());
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            currentPage = 1;
+            loadData();
+        });
+        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> {
+            currentPage = 1;
+            loadData();
+        });
 
         loadData();
     }
@@ -108,10 +124,14 @@ public class PurchaseListController {
     }
 
     public void loadData() {
-        String search = searchField.getText();
-        String status = statusFilter.getValue();
-        masterData.setAll(purchaseService.getAllPurchases(search, status));
+        String search = searchField != null ? searchField.getText() : null;
+        String status = statusFilter != null ? statusFilter.getValue() : null;
+        PageResult<Purchase> result = purchaseService.getPagedPurchases(search, status, currentPage, PAGE_SIZE);
+        masterData.setAll(result.getItems());
         purchaseTable.setItems(masterData);
+        if (paginationControl != null) {
+            paginationControl.updateState(result.getPageIndex(), result.getPageSize(), result.getTotalItems());
+        }
     }
 
     @FXML
